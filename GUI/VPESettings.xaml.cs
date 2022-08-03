@@ -146,6 +146,13 @@ namespace GUI
 		{
 			DataFromGUI.RandCharSpcMin = VPE?.GenerateRandNum().ToString();
 		}
+
+		private void B_GenRNDConsts_Click(object sender, RoutedEventArgs e)
+		{
+			decimal[] consts = VPE?.GenerateRNDConsts();
+			
+		}
+
 		private void B_AllRandom_Click(object sender, RoutedEventArgs e)
 		{
 			

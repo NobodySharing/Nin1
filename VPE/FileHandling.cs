@@ -9,7 +9,8 @@ namespace VPE
 	public static class FileHandling
 	{
 		public const string FileExtSS = ".vpess"; // Very primitive encryption settings storage.
-		public const string FileExtS = ".vpes"; // Very primitive encryption settings storage.
+		public const string FileExtS = ".vpes"; // Very primitive encryption settings.
+		public const string FileExtTXT = ".txt";
 		/// <summary>Uloží třídu úložiště nastavení.</summary>
 		/// <param name="what">Třída úložiště nastavení.</param>
 		/// <param name="where">Kam – složka!</param>
@@ -153,6 +154,16 @@ namespace VPE
 		public static Settings ReadSpecific(string path)
 		{
 			return new Settings(File.ReadAllBytes(path));
+		}
+
+		public static string ReadText(string path)
+		{
+			return File.ReadAllText (path, Encoding.UTF8);
+		}
+
+		public static void SaveText(string path, string text)
+		{
+			File.WriteAllText (path, text);
 		}
 
 		private static void WriteAll(SettingsStorage storage, string path)

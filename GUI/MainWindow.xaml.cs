@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,14 +20,14 @@ namespace GUI
 	/// <summary>Interaction logic for MainWindow.xaml</summary>
 	public partial class MainWindow : Window
 	{
-		private string InText { get; set; }
-		private string OutText { get; set; }
-		private VPE_VM VPE = new VPE_VM();
 		public MainWindow ()
 		{
 			InitializeComponent ();
 		}
-
+		#region VPE
+		private string InText { get; set; }
+		private string OutText { get; set; }
+		private VPE_VM VPE = new VPE_VM();
 		private void B_VPE_Encrypt_Click (object sender, RoutedEventArgs e)
 		{
 			OutText = VPE.Encrypt(InText);
@@ -43,9 +44,35 @@ namespace GUI
 			VPESettWin.Show();
 		}
 
-		private void B_VPE_OpenMsgFile_Click(object sender, RoutedEventArgs e)
+		private void B_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e)
 		{
-
+			InText = VPE.OpenMsgFile();
 		}
+
+		private void B_VPE_OpenEncMsgFile_Click(object sender, RoutedEventArgs e)
+		{
+			OutText = VPE.OpenMsgFile();
+		}
+
+		private void B_VPE_SaveEncMsgFile_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.SaveMsgFile(OutText);
+		}
+
+		private void B_VPE_QuickSettGen_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.QuickSettGen();
+		}
+
+		private void B_VPE_QuickSettSave_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.QuickSettSave();
+		}
+
+		private void B_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.QuickSettOpen();
+		}
+		#endregion
 	}
 }

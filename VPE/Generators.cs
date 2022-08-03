@@ -18,6 +18,13 @@ namespace VPE
 			UpdateSeed(Seed);
 		}
 
+		public Settings GenerateSetts()
+		{
+			Settings settings = new();
+
+			return settings;
+		}
+
 		public void UpdateSeed(long NewSeed)
 		{
 			DateTime Now;

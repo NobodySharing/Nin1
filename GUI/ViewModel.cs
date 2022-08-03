@@ -17,8 +17,10 @@ namespace GUI
 		public SettingsStorage SS = new();
 		public Settings S;
 		public Crypto C;
+		private const string Invalid_File = "N/A";
 		private const string VPESS_filter = "VPE Settings Storage files (*.vpess)|*.vpess";
 		private const string VPES_filter = "VPE Settings files (*.vpes)|*.vpes";
+		private const string TXT_filter = "Text files (*.txt)|*.txt";
 		public ushort RotorCNTR = 0, ReflCNTR = 0, SwapCNTR = 0;
 		public List<uint> Rotors = new();
 		public List<ushort> Refls = new();
@@ -101,6 +103,11 @@ namespace GUI
 			return Generator.GenerateNum();
 		}
 
+		public decimal[] GenerateRNDConsts()
+		{
+			return Generator.GenerateABM();
+		}
+
 		public string Encrypt(string inText)
 		{
 			C = new(S);
@@ -113,25 +120,53 @@ namespace GUI
 			return C?.Decypt(inText);
 		}
 
+		public string OpenMsgFile()
+		{
+			return FileHandling.ReadText(OpenFile(TXT_filter));
+		}
+
+		public void SaveMsgFile(string text)
+		{
+			FileHandling.SaveText(SaveFile(TXT_filter), text);
+		}
+
+		public void QuickSettGen()
+		{
+
+		}
+
+		public void QuickSettSave()
+		{
+			FileHandling.Save(S, SaveFile(VPES_filter));
+		}
+
+		public void QuickSettOpen()
+		{
+			S = FileHandling.ReadSpecific(OpenFile(VPES_filter));
+		}
+		#region Obslužné metody
+		/// <summary>Zobrazí dialog otevření souboru a vrátí cestu k němu.</summary>
+		/// <param name="ext">Extensiona.</param>
+		/// <returns>Cesta k souboru.</returns>
 		private string OpenFile(string ext)
 		{
-			string path = "N/A";
-			OpenFileDialog OFD = new();
-			OFD.Filter = ext;
+			OpenFileDialog OFD = new()
+			{
+				Filter = ext
+			};
 			bool? dia = OFD.ShowDialog();
 			if (dia is not null)
 			{
 				if (dia.Value)
 				{
-					path = OFD.FileName;
+					return OFD.FileName;
 				}
 			}
-			return path;
+			return Invalid_File;
 		}
 
 		private string SaveFile(string ext)
 		{
-			string path = "N/A";
 			SaveFileDialog SFD = new()
 			{
 				Filter = ext
@@ -141,21 +176,22 @@ namespace GUI
 			{
 				if (dia.Value)
 				{
-					path = SFD.FileName;
+					return SFD.FileName;
 				}
 			}
-			return path;
+			return Invalid_File;
 		}
 
 		private string GetFolder(string path)
 		{
-			if (path != "N/A")
+			if (path != Invalid_File)
 			{
 				int idx = path.LastIndexOf('\\');
 				return path[..(idx + 1)];
 			}
 			return path;
 		}
+		#endregion
 	}
 
 	public class NDT_VM
