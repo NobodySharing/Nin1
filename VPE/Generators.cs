@@ -17,11 +17,35 @@ namespace VPE
 			Limit = Lim;
 			UpdateSeed(Seed);
 		}
-
+		/// <summary>Vygeneruje celou třídu nastavení.</summary>
+		/// <returns>Nastavení.</returns>
 		public Settings GenerateSetts()
 		{
-			Settings settings = new();
-
+			decimal[] ABM = GenerateABM();
+			Settings settings = new()
+			{
+				Reflector = GeneratePairs(0),
+				RandCharConstA = ABM[0],
+				RandCharConstB = ABM[1],
+				RandCharConstM = ABM[2],
+			};
+			int count = R.Next(12, 28);
+			for (int i = 0; i < count; i++)
+			{
+				Table t = GenerateTable((uint)i);
+				t.Pozition = GenerateNum();
+				settings.Rotors.Add(t);
+			}
+			count = R.Next(6, 14);
+			for (int i = 0; i < count; i++)
+			{
+				Table t = GeneratePairsWithSkips((ushort)i);
+				settings.Swaps.Add(t);
+			}
+			settings.RandCharSpcMin = (ushort)R.Next(4, 10);
+			settings.RandCharSpcMax = (ushort)(settings.RandCharSpcMin + R.Next(10, 20));
+			settings.ConstShift = GenerateNum();
+			settings.VarShift = GenerateNum();
 			return settings;
 		}
 
@@ -40,7 +64,7 @@ namespace VPE
 			int remainder = (int)(ms % int.MaxValue);
 			R = new Random(remainder);
 		}
-		/// <summary>Vygeneruje tabulku.</summary>
+		/// <summary>Vygeneruje tabulku. Pro rotory.</summary>
 		/// <param name="index">Index tabulky, použit jako pseudonázev.</param>
 		/// <returns>Výsledná tabulka.</returns>
 		public Table GenerateTable(uint index)
@@ -48,6 +72,7 @@ namespace VPE
 			Table T = new()
 			{
 				Idx = index,
+				HasPozition = true,
 			};
 			List<ushort> Remains = new();
 			for (ushort u = 0; u < Limit; u++)

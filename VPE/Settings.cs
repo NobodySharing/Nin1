@@ -6,7 +6,7 @@ namespace VPE
 	/// <summary>Základní sdílená funkcionalita pro tabulky.</summary>
 	public class Settings_Base
 	{
-		internal List<byte> Single_TablesToBytes(List<Table> tables)
+		internal static List<byte> Single_TablesToBytes(List<Table> tables)
 		{
 			List<byte> result = new();
 			foreach (Table table in tables)
@@ -16,7 +16,7 @@ namespace VPE
 			return result;
 		}
 
-		internal List<byte> Double_TablesToBytes(List<Table> tables)
+		internal static List<byte> Double_TablesToBytes(List<Table> tables)
 		{
 			List<byte> result = new();
 			foreach (Table table in tables)
@@ -26,11 +26,12 @@ namespace VPE
 			return result;
 		}
 
-		internal List<byte> Single_TableToBytes(Table t)
+		internal static List<byte> Single_TableToBytes(Table t)
 		{
 			List<byte> result = new()
 			{
-				t.IsPaired ? (byte)1 : (byte)0
+				t.GetFlags(),
+				(byte)t.Pozition
 			};
 			result.AddRange(BitConverter.GetBytes(t.Idx));
 			foreach (ushort item in t.MainTable)
@@ -40,12 +41,13 @@ namespace VPE
 			return result;
 		}
 
-		internal List<byte> Double_TableToBytes(Table t)
+		internal static List<byte> Double_TableToBytes(Table t)
 		{
 			List<byte> result = new()
 			{
-				t.IsPaired ? (byte)1 : (byte)0
+				t.GetFlags()
 			};
+			result.AddRange(BitConverter.GetBytes(t.Pozition));
 			result.AddRange(BitConverter.GetBytes(t.Idx));
 			foreach (ushort item in t.MainTable)
 			{
@@ -54,7 +56,7 @@ namespace VPE
 			return result;
 		}
 
-		internal List<Table> Single_TablesFromBytes(byte[] set, ref int pozition, int tableCount, ushort lim)
+		internal static List<Table> Single_TablesFromBytes(byte[] set, ref int pozition, int tableCount, ushort lim)
 		{
 			List<Table> result = new ();
 			for (int i = 0; i < tableCount; i++)
@@ -64,7 +66,7 @@ namespace VPE
 			return result;
 		}
 
-		internal List<Table> Double_TablesFromBytes(byte[] set, ref int pozition, int tableCount, ushort lim)
+		internal static List<Table> Double_TablesFromBytes(byte[] set, ref int pozition, int tableCount, ushort lim)
 		{
 			List<Table> result = new ();
 			for (int i = 0; i < tableCount; i++)
@@ -74,12 +76,12 @@ namespace VPE
 			return result;
 		}
 
-		internal Table Single_TableFromBytes(byte[] set, ref int pozition, ushort lim)
+		internal static Table Single_TableFromBytes(byte[] set, ref int pozition, ushort lim)
 		{
-			Table t = new()
-			{
-				IsPaired = set[pozition] == 1
-			};
+			Table t = new();
+			t.SetFlags(set[pozition]);
+			pozition++;
+			t.Pozition = set[pozition];
 			pozition++;
 			t.Idx = BitConverter.ToUInt16(set, pozition);
 			pozition += 4;
@@ -91,13 +93,13 @@ namespace VPE
 			return t;
 		}
 
-		internal Table Double_TableFromBytes(byte[] set, ref int pozition, ushort lim)
+		internal static Table Double_TableFromBytes(byte[] set, ref int pozition, ushort lim)
 		{
-			Table t = new()
-			{
-				IsPaired = set[pozition] == 1
-			};
+			Table t = new();
+			t.SetFlags(set[pozition]);
 			pozition++;
+			t.Pozition = BitConverter.ToUInt16(set, pozition);
+			pozition += 2;
 			t.Idx = BitConverter.ToUInt16(set, pozition);
 			pozition += 4;
 			for (ushort j = 0; j < lim; j++)
@@ -108,7 +110,7 @@ namespace VPE
 			return t;
 		}
 
-		internal byte[] DecimalToBytes (decimal number)
+		internal static byte[] DecimalToBytes (decimal number)
 		{
 			byte[] result = new byte[16];
 			int[] temp = decimal.GetBits(number);
@@ -124,7 +126,7 @@ namespace VPE
 			return result;
 		}
 
-		internal decimal DecimalFromBytes(byte[] set, ref int pozition)
+		internal static decimal DecimalFromBytes(byte[] set, ref int pozition)
 		{
 			int[] temp = new int[4];
 			for (int i = 0; i < 4; i++)
@@ -138,7 +140,6 @@ namespace VPE
 	public class Settings : Settings_Base
 	{
 		public List<Table> Rotors { get; private set; } = new();
-		public ushort[] Pozitions { get; set; }
 		public List<Table> Swaps { get; private set; } = new();
 		public Table Reflector { get; set; }
 		public ushort ConstShift { get; set; }
@@ -176,6 +177,23 @@ namespace VPE
 				Single_ByteDecode(file);
 			}
 		}
+		/// <summary>Inkrementuje čísla pozic. Nejnižší index značí nejvyšší řád.</summary>
+		public void IncrementPozitions()
+		{
+			int Last = Rotors.Count - 1;
+			Rotors[Last].Pozition++;
+			for (int i = Last; i >= 0; i--)
+			{
+				if (Rotors[i].Pozition >= Codepage.Limit)
+				{
+					Rotors[i].Pozition = 0;
+					if (i > 0)
+					{
+						Rotors[i - 1].Pozition++;
+					}
+				}
+			}
+		}
 		/// <summary>Převede celou instanci třídy na pole bytů.</summary>
 		public byte[] ToBytes ()
 		{
@@ -200,10 +218,6 @@ namespace VPE
 			set.Add((byte)Codepage.Limit);
 			set.AddRange(common[0]);
 			set.AddRange(Single_TablesToBytes(Rotors));
-			foreach (ushort poz in Pozitions)
-			{
-				set.Add((byte)poz);
-			}
 			set.AddRange(Single_TableToBytes(Reflector));
 			set.AddRange(common[1]);
 			set.AddRange(Single_TablesToBytes(Swaps));
@@ -219,10 +233,6 @@ namespace VPE
 			set.AddRange(BitConverter.GetBytes(Codepage.Limit));
 			set.AddRange(common[0]);
 			set.AddRange(Double_TablesToBytes(Rotors));
-			foreach (ushort poz in Pozitions)
-			{
-				set.AddRange(BitConverter.GetBytes(poz));
-			}
 			set.AddRange(Double_TableToBytes(Reflector));
 			set.AddRange(common[1]);
 			set.AddRange(Double_TablesToBytes(Swaps));
@@ -245,6 +255,7 @@ namespace VPE
 			temp.AddRange(DecimalToBytes(RandCharConstA));
 			temp.AddRange(DecimalToBytes(RandCharConstB));
 			temp.AddRange(DecimalToBytes(RandCharConstM));
+			result.Add(temp.ToArray());
 			return result;
 		}
 		/// <summary>Přečte informace z bytového pole a uloží je do současné instance třídy. Počítá s počtem znaků menším než 256.</summary>
@@ -257,12 +268,6 @@ namespace VPE
 			int tableCount = BitConverter.ToInt32(set, pozition);
 			pozition += 4;
 			Rotors.AddRange(Single_TablesFromBytes(set, ref pozition, tableCount, lim));
-			Pozitions = new ushort[tableCount];
-			for (int i = 0; i < tableCount; i++)
-			{
-				Pozitions[i] = set[pozition];
-				pozition++;
-			}
 			Reflector = Single_TableFromBytes(set, ref pozition, lim);
 			tableCount = BitConverter.ToInt32(set, pozition);
 			pozition += 4;
@@ -283,12 +288,6 @@ namespace VPE
 			int tableCount = BitConverter.ToInt32(set, pozition);
 			pozition += 4;
 			Rotors.AddRange(Double_TablesFromBytes(set, ref pozition, tableCount, lim));
-			Pozitions = new ushort[tableCount];
-			for (int i = 0; i < tableCount; i++)
-			{
-				Pozitions[i] = BitConverter.ToUInt16(set, pozition);
-				pozition += 2;
-			}
 			Reflector = Double_TableFromBytes(set, ref pozition, lim);
 			tableCount = BitConverter.ToInt32(set, pozition);
 			pozition += 4;

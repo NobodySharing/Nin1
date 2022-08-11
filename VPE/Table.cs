@@ -7,8 +7,12 @@ namespace VPE
 	{
 		/// <summary>Hlavní tabulka hodnot.</summary>
 		public List<ushort> MainTable { get; set; } = new (256);
-		/// <summary>Jestli je to tabulka párů. Deafultně předpokládám, že ne.</summary>
+		/// <summary>Jestli je to tabulka párů. Deafultně předpokládám že ne.</summary>
 		public bool IsPaired { get; set; } = false;
+		/// <summary>Jestli tabulka má pozice (pro rotory). Deafultně předpokládám že ne.</summary>
+		public bool HasPozition { get; set; } = false;
+		/// <summary>Pokud relevantní, ukazuje na pozici, kde v tabulce začít.</summary>
+		public ushort Pozition { get; set; }
 		private string NameV = "";
 		public string Name
 		{
@@ -30,6 +34,21 @@ namespace VPE
 		}
 
 		public uint Idx { get; set; }
+		/// <summary>Dá dohromady booly do 1 bytu.</summary>
+		/// <returns>Komprimované flagy.</returns>
+		public byte GetFlags()
+		{
+			int b0 = IsPaired ? 1 : 0;
+			int b1 = HasPozition ? 2 : 0;
+			return (byte)(b0 | b1);
+		}
+		/// <summary>Rozbalí flagy z bytu.</summary>
+		/// <param name="flags">Komprimované flagy.</param>
+		public void SetFlags(byte flags)
+		{
+			IsPaired = (flags & 0b00000001) == 1;
+			HasPozition = (flags & 0b00000010) == 2;
+		}
 		/// <summary>Vrátí index hodnoty. Vrací 65535 pokud je tabulka prázdná, 65534 pokud neobsahuje hodnotu.</summary>
 		/// <param name="Value">Hodnota.</param>
 		/// <returns>Index, případně kód chyby.</returns>

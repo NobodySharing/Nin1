@@ -132,7 +132,7 @@ namespace GUI
 
 		public void QuickSettGen()
 		{
-
+			S = Generator.GenerateSetts();
 		}
 
 		public void QuickSettSave()

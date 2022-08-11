@@ -9,56 +9,54 @@ namespace VPE
 	public class Crypto
 	{
 		private Settings Sett;
-		private decimal[] Constants;
-
+		/// <summary>Sada èísel reprezentující zprávu. Promìnná, se kterou v celém procesu pracuji.</summary>
+		private List<ushort> Message;
 		public Crypto(Settings S)
 		{
 			Sett = S;
-			Constants = FindConstants();
 		}
 		/// <summary>Zašifruje text.</summary>
 		/// <param name="Text">Text na zašifrování.</param>
 		/// <returns>Zašifrovaný text.</returns>
 		public string Encypt(string Text)
 		{
-			List<ushort> Working = ConvertToNums(Text); // Pøevod textu na èísla.
-			AddRandomChars(ref Working); // Pøidávám náhodné znaky, co se budou šifrovat.
-			OrderShift(ref Working); // Provede jednoduchý posun celé sady podle poøadí znaku v sadì.
-			Swap(ref Working); // Prohodí znaky podle (èásteènì vyplnìné) tabulky.
-			Scramble(ref Working); // Zamíchá znaky postupnì dle tabulek, odrazí a pak zpìtnì dle tabulek.
-			Swap(ref Working);
-			ConstantShift(ref Working); // Posune každý znak o konstantu.
-			VariableShift(ref Working); // Posune každý znak o promìnné èíslo závislé na seedu a poøadí.
-			AddRandomChars(ref Working); // Pøidávám náhodné znaky, znovu, nešifrované.
-			return ConvertToString(Working); // Pøevede èísla na text.
+			ConvertToNums(Text); // Pøevod textu na èísla.
+			AddRandomChars(); // Pøidávám náhodné znaky, co se budou šifrovat.
+			OrderShift(); // Provede jednoduchý posun celé sady podle poøadí znaku v sadì.
+			Swap(); // Prohodí znaky podle (èásteènì vyplnìné) tabulky.
+			Scramble(); // Zamíchá znaky postupnì dle tabulek, odrazí a pak zpìtnì dle tabulek.
+			Swap();
+			ConstantShift(); // Posune každý znak o konstantu.
+			VariableShift(); // Posune každý znak o promìnné èíslo závislé na seedu a poøadí.
+			AddRandomChars(); // Pøidávám náhodné znaky, znovu, nešifrované.
+			return ConvertToString(); // Pøevede èísla na text.
 		}
 		/// <summary>Dešifruje text.</summary>
 		/// <param name="Text">Zašifrovaný text.</param>
 		/// <returns>Dešifrovaný text.</returns>
 		public string Decypt(string Text)
 		{
-			List<ushort> Working = ConvertToNums(Text);
-			RemoveRandomChars(ref Working);
-			UnOrderShift(ref Working);
-			Unswap(ref Working);
-			Unscramble(ref Working);
-			Unswap(ref Working);
-			UnConstantShift(ref Working);
-			UnVariableShift(ref Working);
-			RemoveRandomChars(ref Working);
-			return ConvertToString(Working);
+			ConvertToNums(Text);
+			RemoveRandomChars();
+			UnOrderShift();
+			Unswap();
+			Unscramble();
+			Unswap();
+			UnConstantShift();
+			UnVariableShift();
+			RemoveRandomChars();
+			return ConvertToString();
 		}
 		/// <summary>Zkonvertuje textovou zprávu na èíselnou reprezentaci podle tabulky znakù.</summary>
 		/// <param name="Text">Textová zpráva.</param>
-		/// <returns>Èíselná reprezentace.</returns>
-		private List<ushort> ConvertToNums(string Text)
-		{
-			List<ushort> Result = new(Text.Length);
+		private void ConvertToNums(string Text)
+		{ // ToDo: Implement better /r/n handling.
+			Message = new(Text.Length);
 			foreach (char C in Text)
 			{
 				if (C == '\r')
 				{ // Beru rovnou \r\n.
-					Result.Add((ushort)Codepage.Letters.IndexOf("\r\n"));
+					Message.Add((ushort)Codepage.Letters.IndexOf("\r\n"));
 					continue;
 				}
 				if (C == '\n')
@@ -69,39 +67,36 @@ namespace VPE
 				int index = Codepage.Letters.IndexOf(Letter);
 				if (index >= 0)
 				{
-					Result.Add((ushort)index);
+					Message.Add((ushort)index);
 				}
 				else
 				{ // Pokud znak neznám, pøeskakuji ho.
 					continue;
 				}
 			}
-			return Result;
 		}
 		/// <summary>Pøevede sadu èísel na text.</summary>
-		/// <param name="Numbers">Sada èísel.</param>
 		/// <returns>Text.</returns>
-		private string ConvertToString(List<ushort> Numbers)
+		private string ConvertToString()
 		{
 			StringBuilder SB = new();
-			foreach (ushort Num in Numbers)
+			foreach (ushort Num in Message)
 			{
 				SB.Append(Codepage.Letters[Num]);
 			}
 			return SB.ToString();
 		}
 		/// <summary>Prohodí èísla postupnì podle všech tabulek.</summary>
-		/// <param name="Numbers">Èísla na prohození.</param>
-		private void Swap(ref List<ushort> Numbers)
+		private void Swap()
 		{
-			for (int i = 0; i < Numbers.Count; i++)
+			for (int i = 0; i < Message.Count; i++)
 			{
 				foreach (Table T in Sett.Swaps)
 				{
-					if (T.FindValueUsingIndex(Numbers[i]) < ushort.MaxValue - 10) // Error kódy.
+					if (T.FindValueUsingIndex(Message[i]) < ushort.MaxValue - 10) // Error kódy.
 					{
-						ushort swapped = T.FindValueUsingIndex(Numbers[i]);
-						Numbers[i] = swapped == (ushort.MaxValue - 1) ? Numbers[i] : swapped; // Pokud tam tahle hodnota není, neprohazuji.
+						ushort swapped = T.FindValueUsingIndex(Message[i]);
+						Message[i] = swapped == (ushort.MaxValue - 1) ? Message[i] : swapped; // Pokud tam tahle hodnota není, neprohazuji.
 					}
 					else
 					{
@@ -111,17 +106,16 @@ namespace VPE
 			}
 		}
 		/// <summary>Zvrátí prohození èísel, zpìtnì.</summary>
-		/// <param name="Numbers">Èísla na odprohození.</param>
-		private void Unswap(ref List<ushort> Numbers)
+		private void Unswap()
 		{
 			for (int j = Sett.Swaps.Count - 1; j >= 0; j--)
 			{
-				for (int i = Numbers.Count - 1; i >= 0; i--)
+				for (int i = Message.Count - 1; i >= 0; i--)
 				{
-					if (Sett.Swaps[j].FindIndexUsingValue(Numbers[i]) != ushort.MaxValue)
+					if (Sett.Swaps[j].FindIndexUsingValue(Message[i]) != ushort.MaxValue)
 					{
-						ushort swapped = Sett.Swaps[j].FindIndexUsingValue(Numbers[i]);
-						Numbers[i] = swapped == (ushort.MaxValue - 1) ? Numbers[i] : swapped;
+						ushort swapped = Sett.Swaps[j].FindIndexUsingValue(Message[i]);
+						Message[i] = swapped == (ushort.MaxValue - 1) ? Message[i] : swapped;
 					}
 					else
 					{
@@ -131,190 +125,150 @@ namespace VPE
 			}
 		}
 		/// <summary>Zamíchá èísla podle tabulek.</summary>
-		/// <param name="Numbers">Èísla na zamíchání.</param>
-		private void Scramble(ref List<ushort> Numbers)
+		private void Scramble()
 		{
-			ushort[] Positions = Sett.Pozitions;
-			for (int i = 0; i < Numbers.Count; i++)
+			for (int i = 0; i < Message.Count; i++)
 			{
-				Numbers[i] = ForwardScramble(Numbers[i], Positions); // Dopøedný prùchod.
-				Numbers[i] = Reflect(Numbers[i], Positions.Last()); // Odraz s prohozením.
-				Numbers[i] = BackwardScramble(Numbers[i], Positions); // Zpìtný prùchod.
-				int Sum = Numbers[i] + Positions[0];
-				Numbers[i] = (ushort)(Sum % Codepage.Limit);
-				Increment(ref Positions);
+				ForwardScramble(i); // Dopøedný prùchod.
+				Reflect(i); // Odraz s prohozením.
+				BackwardScramble(i); // Zpìtný prùchod.
+				int Sum = Message[i] + Sett.Rotors[0].Pozition; // Kvùli debugu v samostatné promìnné.
+				Message[i] = (ushort)(Sum % Codepage.Limit);
+				Sett.IncrementPozitions();
 			}
 		}
 		/// <summary>Odzamíchá èísla podle tabulek.</summary>
-		/// <param name="Numbers">Èísla na odzamíchání.</param>
-		private void Unscramble(ref List<ushort> Numbers)
+		private void Unscramble()
 		{
-			ushort[] Positions = Sett.Pozitions;
-			for (int i = 0; i < Numbers.Count; i++)
+			for (int i = 0; i < Message.Count; i++)
 			{
-				Numbers[i] = BackwardScramble(Numbers[i], Positions);
-				Numbers[i] = ReflectBack(Numbers[i], Positions.Last());
-				Numbers[i] = ForwardScramble(Numbers[i], Positions);
-				int Sum = Numbers[i] + Positions[0];
-				Numbers[i] = (ushort)(Sum % Codepage.Limit);
-				Increment(ref Positions);
+				BackwardScramble(i);
+				ReflectBack(i);
+				ForwardScramble(i);
+				int Sum = Message[i] + Sett.Rotors[0].Pozition;
+				Message[i] = (ushort)(Sum % Codepage.Limit);
+				Sett.IncrementPozitions();
 			}
 		}
 		/// <summary>Posune èísla podle posunového parametru.</summary>
-		/// <param name="Numbers">Èísla na posunutí.</param>
-		private void ConstantShift(ref List<ushort> Numbers)
+		private void ConstantShift()
 		{
-			for (int i = 0; Numbers.Count > 0; i++)
+			for (int i = 0; Message.Count > 0; i++)
 			{
-				Numbers[i] += Sett.ConstShift;
-				Numbers[i] %= Codepage.Limit;
+				Message[i] += Sett.ConstShift;
+				Message[i] %= Codepage.Limit;
 			}
 		}
 		/// <summary>Posune èísla zpìt podle posunového parametru.</summary>
-		/// <param name="Numbers">Èísla na posunutí zpìt.</param>
-		private void UnConstantShift(ref List<ushort> Numbers)
+		private void UnConstantShift()
 		{
-			for (int i = 0; Numbers.Count > 0; i++)
+			for (int i = 0; Message.Count > 0; i++)
 			{
-				Numbers[i] -= Sett.ConstShift;
-				Numbers[i] %= Codepage.Limit;
+				Message[i] -= Sett.ConstShift;
+				Message[i] %= Codepage.Limit;
 			}
 		}
 		/// <summary>Posune èísla podle poøadí.</summary>
-		/// <param name="Numbers">Èísla na posunutí.</param>
-		private void OrderShift(ref List<ushort> Numbers)
+		private void OrderShift()
 		{
-			for (int i = 0; i < Numbers.Count; i++)
+			for (int i = 0; i < Message.Count; i++)
 			{
-				Numbers[i] = (ushort)((Numbers[i] + i) % Codepage.Limit);
+				Message[i] = (ushort)((Message[i] + i) % Codepage.Limit);
 			}
 		}
 		/// <summary>Posune èísla zpìt podle poøadí.</summary>
-		/// <param name="Numbers">Èísla na posunutí zpìt.</param>
-		private void UnOrderShift(ref List<ushort> Numbers)
+		private void UnOrderShift()
 		{
-			for (int i = 0; i < Numbers.Count; i++)
+			for (int i = 0; i < Message.Count; i++)
 			{
-				Numbers[i] = (ushort)((Numbers[i] - i) % Codepage.Limit);
+				Message[i] = (ushort)((Message[i] - i) % Codepage.Limit);
 			}
 		}
 		/// <summary>Provede promìnný posun èísel.</summary>
-		/// <param name="Numbers">Èísla na posunutí.</param>
-		private void VariableShift (ref List<ushort> Numbers)
+		private void VariableShift ()
 		{
 			uint v, c = Sett.ConstShift > (Codepage.Limit / 2) ? Sett.ConstShift : (uint)(Codepage.Limit - Sett.ConstShift);
-			for (int i = 0; i < Numbers.Count; i++)
+			for (int i = 0; i < Message.Count; i++)
 			{
-				v = Numbers[i] + (uint)(Sett.VarShift * (i % c));
-				Numbers[i] = (ushort)(v % Codepage.Limit);
+				v = Message[i] + (uint)(Sett.VarShift * (i % c));
+				Message[i] = (ushort)(v % Codepage.Limit);
 			}
 		}
 		/// <summary>Provede promìnný posun zpìt èísel.</summary>
-		/// <param name="Numbers">Èísla na posunutí zpìt.</param>
-		private void UnVariableShift(ref List<ushort> Numbers)
+		private void UnVariableShift()
 		{
 			uint v, c = Sett.ConstShift > (Codepage.Limit / 2) ? Sett.ConstShift : (uint)(Codepage.Limit - Sett.ConstShift);
-			for (int i = 0; i < Numbers.Count; i++)
+			for (int i = 0; i < Message.Count; i++)
 			{
-				v = Numbers[i] - (uint)(Sett.VarShift * (i % c));
-				Numbers[i] = (ushort)(v % Codepage.Limit);
+				v = Message[i] - (uint)(Sett.VarShift * (i % c));
+				Message[i] = (ushort)(v % Codepage.Limit);
 			}
 		}
 		/// <summary>Dopøedný prùchod 1 znaku všemi tabulkami.</summary>
-		/// <param name="Number">Znak.</param>
-		/// <param name="Positions">Pozice v tabulkách.</param>
-		/// <returns>Znak po prùchodu všemi tabulkami.</returns>
-		private ushort ForwardScramble(ushort Number, ushort[] Positions)
+		/// <param name="i">Index znaku.</param>
+		private void ForwardScramble(int i)
 		{
-			for (int i = 0; i < Sett.Rotors.Count; i++)
+			for (int j = 0; j < Sett.Rotors.Count; j++)
 			{
-				int Sum = i == 0 ? Number + Positions[i] : Number + (Positions[i] - Positions[i - 1]); // Kalkulace pozice po vstupu do tabulky.
+				int Sum = j == 0 ? Message[i] + Sett.Rotors[j].Pozition : Message[i] + (Sett.Rotors[j].Pozition - Sett.Rotors[j - 1].Pozition); // Kalkulace pozice po vstupu do tabulky.
 				ushort Remain = (ushort)(Sum % Codepage.Limit); // Zùstání v rozsahu.
-				Number = Sett.Rotors[i].FindValueUsingIndex(Remain); // Prùchod tabulkou.
+				Message[i] = Sett.Rotors[j].FindValueUsingIndex(Remain); // Prùchod tabulkou.
 			}
-			return Number;
 		}
 		/// <summary>Odrazí znak dle tabulky.</summary>
-		/// <param name="Number">Znak.</param>
-		/// <param name="LastPosition">Pozice v poslední tabulce.</param>
+		/// <param name="i">Index znaku.</param>
 		/// <returns>Odražený znak.</returns>
-		private ushort Reflect(ushort Number, ushort LastPosition)
+		private void Reflect(int i)
 		{
-			int Sum = Number + LastPosition;
+			int Sum = Message[i] + Sett.Rotors.Last().Pozition;
 			ushort Remain = (ushort)(Sum % Codepage.Limit);
-			ushort Counterpart = Sett.Reflector.FindValueUsingIndex(Remain);
-			return Counterpart;
+			Message[i] = Sett.Reflector.FindValueUsingIndex(Remain);
 		}
 		/// <summary>Zpìtnì odrazí znak dle tabulky.</summary>
-		/// <param name="Number">Znak.</param>
-		/// <param name="LastPosition">Pozice v poslední tabulce.</param>
+		/// <param name="i">Index znaku.</param>
 		/// <returns>Odražený znak.</returns>
-		private ushort ReflectBack(ushort Number, ushort LastPosition)
+		private void ReflectBack(int i)
 		{
-			int Sum = Number + LastPosition;
+			int Sum = Message[i] + Sett.Rotors.Last().Pozition;
 			ushort Remain = (ushort)(Sum % Codepage.Limit);
-			ushort Counterpart = Sett.Reflector.FindIndexUsingValue(Remain);
-			return Counterpart;
+			Message[i] = Sett.Reflector.FindIndexUsingValue(Remain);
 		}
 		/// <summary>Zpìtný prùchod 1 znaku všemi tabulkami.</summary>
-		/// <param name="Number">Znak.</param>
-		/// <param name="Positions">Pozice v tabulkách.</param>
-		/// <returns>Znak po prùchodu všemi tabulkami.</returns>
-		private ushort BackwardScramble(ushort Number, ushort[] Positions)
+		/// <param name="i">Index znaku.</param>
+		private void BackwardScramble(int i)
 		{
-			for (int i = Sett.Rotors.Count - 1; i >= 0; i--)
+			for (int j = Sett.Rotors.Count - 1; j >= 0; j--)
 			{
-				int Sum = i == (Sett.Rotors.Count - 1) ? Number + Positions[i] : Number + (Positions[i] - Positions[i + 1]);
+				int Sum = j == (Sett.Rotors.Count - 1) ? Message[i] + Sett.Rotors[j].Pozition : Message[i] + (Sett.Rotors[j].Pozition - Sett.Rotors[j + 1].Pozition);
 				ushort Remain = (ushort)(Sum % Codepage.Limit);
-				Number = Sett.Rotors[i].FindIndexUsingValue(Remain);
-			}
-			return Number;
-		}
-		/// <summary>Inkrementuje èísla v poli. Nejnižší index znaèí nejvyšší øád.</summary>
-		/// <param name="Numbers">Pole èísel.</param>
-		private void Increment(ref ushort[] Numbers)
-		{
-			int Last = Numbers.Length - 1;
-			Numbers[Last]++;
-			for (int i = Last; i >= 0; i--)
-			{
-				if (Numbers[i] >= Codepage.Limit)
-				{
-					Numbers[i] = 0;
-					if (i > 0)
-					{
-						Numbers[i - 1]++;
-					}
-				}
+				Message[i] = Sett.Rotors[j].FindIndexUsingValue(Remain);
 			}
 		}
 		/// <summary>Pøidá náhodné znaky do sady.</summary>
-		/// <param name="Numbers">Sada.</param>
-		private void AddRandomChars(ref List<ushort> Numbers)
+		private void AddRandomChars()
 		{
 			Generators Gen = new (Codepage.Limit, DateTime.Now.Ticks);
 			int index = (Sett.RandCharSpcMin + Sett.RandCharSpcMax) % 2; // Inicializace indexu, kam budu pøidávat náhodný znak.
-			Numbers.Insert(index, Gen.GenerateNum()); // Pøidám náhodný znak, na 0. nebo 1. pozici podle sudosti/lichosti souètu minima a maxima rozsahù mezer.
+			Message.Insert(index, Gen.GenerateNum()); // Pøidám náhodný znak, na 0. nebo 1. pozici podle sudosti/lichosti souètu minima a maxima rozsahù mezer.
 			int gap = Sett.RandCharSpcMax - Sett.RandCharSpcMin; // Velikost rozsahu mezery.
 			decimal space = (Math.Floor(Codepage.Limit / (decimal)gap) % gap) + Sett.RandCharSpcMin; // Inicializace mezery. V jádru „náhodný“ výpoèet, pak dání do rozsahu a posunutí o minimum.
-			while (index <= Numbers.Count)
+			while (index <= Message.Count)
 			{
 				IncrementSpace(ref index, ref space, gap);
-				Numbers.Insert(index, Gen.GenerateNum());
+				Message.Insert(index, Gen.GenerateNum());
 			}
 		}
 		/// <summary>Odebere náhodné znaky ze sady.</summary>
-		/// <param name="Numbers">Sada.</param>
-		private void RemoveRandomChars(ref List<ushort> Numbers)
+		private void RemoveRandomChars()
 		{
 			int index = (Sett.RandCharSpcMin + Sett.RandCharSpcMax) % 2;
-			Numbers.RemoveAt(index);
+			Message.RemoveAt(index);
 			int gap = Sett.RandCharSpcMax - Sett.RandCharSpcMin;
 			decimal space = (Math.Floor(Codepage.Limit / (decimal)gap) % gap) + Sett.RandCharSpcMin;
-			while (index <= Numbers.Count)
+			while (index <= Message.Count)
 			{
 				IncrementSpace(ref index, ref space, gap);
-				Numbers.RemoveAt(index);
+				Message.RemoveAt(index);
 			}
 		}
 		/// <summary>Inkrementuje index o novou pseudonáhodnou mezeru.</summary>
@@ -323,16 +277,8 @@ namespace VPE
 		/// <param name="gap">Rozsah velikosti mezery.</param>
 		private void IncrementSpace (ref int index, ref decimal space, int gap)
 		{
-			space = (Constants[0] * space + Constants[1]) % Constants[2];
+			space = (Sett.RandCharConstA * space + Sett.RandCharConstB) % Sett.RandCharConstM;
 			index += (int)((space % gap) + Sett.RandCharSpcMin);
-		}
-		/// <summary>Vypoèítá konstanty podle indexù prvoèísel.</summary>
-		/// <returns>Pole konstant: 0: A, 1: B, 2: M.</returns>
-		private decimal[] FindConstants()
-		{
-			decimal[] result = new decimal [3];
-			
-			return result;
 		}
 	}
 }
