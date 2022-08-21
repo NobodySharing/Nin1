@@ -48,8 +48,9 @@ namespace VPE
 			settings.VarShift = GenerateNum();
 			return settings;
 		}
-
-		public void UpdateSeed(long NewSeed)
+		/// <summary>Aktualizuje seed generátoru čísel.</summary>
+		/// <param name="NewSeed">Seed, nepovinný. Pokud nezadán, bere se podle současného času.</param>
+		public void UpdateSeed(long NewSeed = 0)
 		{
 			DateTime Now;
 			if (NewSeed == 0)

@@ -13,26 +13,7 @@ namespace VPE
 		public bool HasPozition { get; set; } = false;
 		/// <summary>Pokud relevantní, ukazuje na pozici, kde v tabulce začít.</summary>
 		public ushort Pozition { get; set; }
-		private string NameV = "";
-		public string Name
-		{
-			get
-			{
-				if (NameV == "")
-				{
-					return Idx.ToString();
-				}
-				else
-				{
-					return NameV;
-				}
-			}
-			set
-			{
-				NameV = value;
-			}
-		}
-
+		/// <summary>Index tabulky, používán k rozeznávání.</summary>
 		public uint Idx { get; set; }
 		/// <summary>Dá dohromady booly do 1 bytu.</summary>
 		/// <returns>Komprimované flagy.</returns>

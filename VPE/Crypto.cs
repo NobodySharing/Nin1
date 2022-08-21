@@ -50,21 +50,32 @@ namespace VPE
 		/// <summary>Zkonvertuje textovou zprávu na èíselnou reprezentaci podle tabulky znakù.</summary>
 		/// <param name="Text">Textová zpráva.</param>
 		private void ConvertToNums(string Text)
-		{ // ToDo: Implement better /r/n handling.
+		{
 			Message = new(Text.Length);
-			foreach (char C in Text)
+			for (int i = 0; i < Text.Length; i++)
 			{
+				char C = Text[i]; // Souèasný znak bokem.
+				char N = i == (Text.Length - 1)? '\0' : Text[i + 1]; // Následující znak. Pokud jsem na konci, dávám \0, jako znamení toho stavu.
 				if (C == '\r')
-				{ // Beru rovnou \r\n.
+				{
+					if ((N == '\n') || (N == '\0'))
+					{
+						Message.Add((ushort)Codepage.Letters.IndexOf("\r\n"));
+						i++;
+						continue;
+					}
+					else
+					{
+						Message.Add((ushort)Codepage.Letters.IndexOf("\r\n"));
+						continue;
+					}
+				}
+				else if (C == '\n')
+				{
 					Message.Add((ushort)Codepage.Letters.IndexOf("\r\n"));
 					continue;
 				}
-				if (C == '\n')
-				{ // Ignoruji, \n o samotì nemá význam.
-					continue;
-				}
-				string Letter = Convert.ToString(C);
-				int index = Codepage.Letters.IndexOf(Letter);
+				int index = Codepage.Letters.IndexOf(Convert.ToString(C));
 				if (index >= 0)
 				{
 					Message.Add((ushort)index);
