@@ -28,51 +28,34 @@ namespace GUI
 		private string InText { get; set; }
 		private string OutText { get; set; }
 		private VPE_VM VPE = new VPE_VM();
-		private void B_VPE_Encrypt_Click (object sender, RoutedEventArgs e)
-		{
-			OutText = VPE.Encrypt(InText);
-		}
+		private void MI_VPE_Encrypt_Click(object sender, RoutedEventArgs e) => OutText = VPE.Encrypt(InText);
 
-		private void B_VPE_Decrypt_Click (object sender, RoutedEventArgs e)
-		{
-			OutText = VPE.Decrypt(InText);
-		}
+		private void MI_VPE_Decrypt_Click(object sender, RoutedEventArgs e) => OutText = VPE.Decrypt(InText);
 
-		private void B_VPE_Settings_Click(object sender, RoutedEventArgs e)
+		private void MI_VPE_SettingsComp_Click(object sender, RoutedEventArgs e)
 		{
-			VPESettings VPESettWin = new(ref VPE);
+			VPESettingsComp VPESettWin = new(ref VPE);
 			VPESettWin.Show();
 		}
 
-		private void B_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e)
+		private void MI_VPE_SettingsSel_Click(object sender, RoutedEventArgs e)
 		{
-			InText = VPE.OpenMsgFile();
+			
 		}
 
-		private void B_VPE_OpenEncMsgFile_Click(object sender, RoutedEventArgs e)
-		{
-			OutText = VPE.OpenMsgFile();
-		}
+		private void MI_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e) => InText = VPE.OpenMsgFile();
 
-		private void B_VPE_SaveEncMsgFile_Click(object sender, RoutedEventArgs e)
-		{
-			VPE.SaveMsgFile(OutText);
-		}
+		private void MI_VPE_OpenEncMsgFile_Click(object sender, RoutedEventArgs e) => OutText = VPE.OpenMsgFile();
 
-		private void B_VPE_QuickSettGen_Click(object sender, RoutedEventArgs e)
-		{
-			VPE.QuickSettGen();
-		}
+		private void MI_VPE_SaveEncMsgFile_Click(object sender, RoutedEventArgs e) => VPE.SaveMsgFile(OutText);
 
-		private void B_VPE_QuickSettSave_Click(object sender, RoutedEventArgs e)
-		{
-			VPE.QuickSettSave();
-		}
+		private void MI_VPE_SaveUneMsgFile_Click(object sender, RoutedEventArgs e) => VPE.SaveMsgFile(InText);
 
-		private void B_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e)
-		{
-			VPE.QuickSettOpen();
-		}
+		private void MI_VPE_QuickSettGen_Click(object sender, RoutedEventArgs e) => VPE.QuickSettGen();
+
+		private void MI_VPE_QuickSettSave_Click(object sender, RoutedEventArgs e) => VPE.QuickSettSave();
+
+		private void MI_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e) => VPE.QuickSettOpen();
 		#endregion
 	}
 }

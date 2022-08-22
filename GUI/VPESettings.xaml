@@ -1,11 +1,11 @@
-﻿<Window x:Class="GUI.VPESettings"
+﻿<Window x:Class="GUI.VPESettingsComp"
 		xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:local="clr-namespace:GUI"
 		mc:Ignorable="d"
-		Title="VPE Settings" Height="500" Width="840">
+		Title="VPE Settings composer" Height="500" Width="840">
 	<Window.Resources>
 		<local:C_VPE_Sett x:Key="DataFromGUI"/>
 	</Window.Resources>
@@ -101,7 +101,7 @@
 					</StackPanel>
 				</StackPanel>
 			</GroupBox>
-			<GroupBox Grid.Row="3" Header="Random chars">
+			<GroupBox Grid.Row="3" Header="Inserting random chars">
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="30px"/>

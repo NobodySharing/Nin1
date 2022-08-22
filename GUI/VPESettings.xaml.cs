@@ -16,16 +16,13 @@ using VPE;
 
 namespace GUI
 {
-	/// <summary>
-	/// Interakční logika pro VPESettings.xaml
-	/// </summary>
-	public partial class VPESettings : Window
+	public partial class VPESettingsComp : Window
 	{
 		private readonly VPE_VM VPE;
 		private ushort TablesInGUI = 0, SwapsInGUI = 0;
 		private const ushort TablesMax = 20, SwapsMax = 20; // Kolik tam může být maximálně tabulek a swapů, v GUI.
 		public C_VPE_Sett DataFromGUI = new();
-		public VPESettings (ref VPE_VM VModel)
+		public VPESettingsComp (ref VPE_VM VModel)
 		{
 			InitializeComponent ();
 			VPE = VModel;
