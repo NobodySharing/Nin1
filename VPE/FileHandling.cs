@@ -14,7 +14,7 @@ namespace VPE
 		/// <summary>Uloží třídu úložiště nastavení.</summary>
 		/// <param name="what">Třída úložiště nastavení.</param>
 		/// <param name="where">Kam – složka!</param>
-		public static void Save(SettingsStorage what, string where)
+		public static void Save(TableLibrary what, string where)
 		{
 			IEnumerable<string> myFiles = Directory.EnumerateFiles(where, "*" + FileExtSS);
 			string finalFileName;
@@ -146,9 +146,9 @@ namespace VPE
 			}
 		}
 
-		public static SettingsStorage ReadAll(string path)
+		public static TableLibrary ReadAll(string path)
 		{
-			return new SettingsStorage(File.ReadAllBytes(path));
+			return new TableLibrary(File.ReadAllBytes(path));
 		}
 
 		public static Settings ReadSpecific(string path)
@@ -166,14 +166,19 @@ namespace VPE
 			File.WriteAllText (path, text);
 		}
 
-		private static void WriteAll(SettingsStorage storage, string path)
+		private static void WriteAll(TableLibrary tables, string path)
 		{
-			File.WriteAllBytes(path, storage.ToBytes());
+			File.WriteAllBytes(path, tables.ToBytes());
 		}
 
-		private static void WriteAll(Settings storage, string path)
+		private static void WriteAll(Settings settings, string path)
 		{
-			File.WriteAllBytes(path, storage.ToBytes());
+			File.WriteAllBytes(path, settings.ToBytes());
+		}
+
+		private static void WriteAll(SettingsLibrary library, string path)
+		{
+			File.WriteAllBytes(path, library.ToBytes());
 		}
 	}
 }

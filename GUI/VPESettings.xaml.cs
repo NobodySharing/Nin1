@@ -106,12 +106,12 @@ namespace GUI
 
 		private void B_Save_Click(object sender, RoutedEventArgs e)
 		{
-			VPE?.SaveAll();
+			VPE?.SaveTables();
 		}
 
 		private void B_Load_Click(object sender, RoutedEventArgs e)
 		{
-			VPE.LoadAll();
+			VPE.LoadTables();
 		}
 
 		private void B_LoadMerge_Click(object sender, RoutedEventArgs e)

@@ -14,11 +14,13 @@ namespace GUI
 	public class VPE_VM
 	{
 		private Generators Generator = new(Codepage.Limit, DateTime.Now.Ticks);
-		public SettingsStorage SS = new();
+		public SettingsLibrary SL = new();
+		public TableLibrary TL = new();
 		public Settings S;
 		public Crypto C;
 		private const string Invalid_File = "N/A";
-		private const string VPESS_filter = "VPE Settings Storage files (*.vpess)|*.vpess";
+		private const string VPESL_filter = "VPE Settings Library files (*.vpesl)|*.vpesl";
+		private const string VPETL_filter = "VPE Table Library files (*.vpetl)|*.vpetl";
 		private const string VPES_filter = "VPE Settings files (*.vpes)|*.vpes";
 		private const string TXT_filter = "Text files (*.txt)|*.txt";
 		public ushort RotorCNTR = 0, ReflCNTR = 0, SwapCNTR = 0;
@@ -33,7 +35,7 @@ namespace GUI
 			Generator.UpdateSeed(DateTime.Now.Ticks);
 			for (uint i = 0; i < count; i++)
 			{
-				SS.Rotors.Add(Generator.GenerateTable(RotorCNTR));
+				TL.Rotors.Add(Generator.GenerateTable(RotorCNTR));
 				Rotors.Add(RotorCNTR);
 				RotorCNTR++;
 			}
@@ -44,7 +46,7 @@ namespace GUI
 			for (uint i = 0; i < count; i++)
 			{
 				Generator.UpdateSeed(DateTime.Now.Ticks);
-				SS.Reflectors.Add(Generator.GeneratePairs(ReflCNTR));
+				TL.Reflectors.Add(Generator.GeneratePairs(ReflCNTR));
 				ReflCNTR++;
 			}
 		}
@@ -54,24 +56,24 @@ namespace GUI
 			for (uint i = 0; i < count; i++)
 			{
 				Generator.UpdateSeed(DateTime.Now.Ticks);
-				SS.Swaps.Add(Generator.GeneratePairsWithSkips(SwapCNTR));
+				TL.Swaps.Add(Generator.GeneratePairsWithSkips(SwapCNTR));
 				SwapCNTR++;
 			}
 		}
 
-		public void SelectSettings(List<ushort> tables, List<ushort> swaps, ushort reflector)
+		public void SelectTables(List<ushort> tables, List<ushort> swaps, ushort reflector)
 		{
-			S = SS.Select(tables, swaps, reflector);
+			S = TL.Select(tables, swaps, reflector);
 		}
 
-		public void LoadAll()
+		public void LoadTables()
 		{
-			SS = FileHandling.ReadAll(OpenFile(VPESS_filter));
+			TL = FileHandling.ReadAll(OpenFile(VPETL_filter));
 		}
 
 		public void LoadAndMerge()
 		{
-			SS.Merge(FileHandling.ReadAll(OpenFile(VPESS_filter)));
+			TL.Merge(FileHandling.ReadAll(OpenFile(VPETL_filter)));
 		}
 
 		public void LoadSpecific()
@@ -79,12 +81,12 @@ namespace GUI
 			S = FileHandling.ReadSpecific(OpenFile(VPES_filter));
 		}
 
-		public void SaveAll()
+		public void SaveTables()
 		{
-			string folder = GetFolder(SaveFile(VPESS_filter));
+			string folder = GetFolder(SaveFile(VPETL_filter));
 			if (folder != "N/A")
 			{
-				FileHandling.Save(SS, folder);
+				FileHandling.Save(TL, folder);
 			}
 		}
 
@@ -164,7 +166,9 @@ namespace GUI
 			}
 			return Invalid_File;
 		}
-
+		/// <summary>Zobrazí dialog uložení souboru a vrátí cestu k němu.</summary>
+		/// <param name="ext">Extensiona.</param>
+		/// <returns>Cesta k souboru.</returns>
 		private string SaveFile(string ext)
 		{
 			SaveFileDialog SFD = new()
@@ -181,7 +185,9 @@ namespace GUI
 			}
 			return Invalid_File;
 		}
-
+		/// <summary>Extrahuje cestu ke složce, ve které je soubor.</summary>
+		/// <param name="path">Soubor (cesta k).</param>
+		/// <returns>Složka, ve které je soubor.</returns>
 		private string GetFolder(string path)
 		{
 			if (path != Invalid_File)

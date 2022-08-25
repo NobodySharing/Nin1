@@ -11,8 +11,10 @@ namespace VPE
 		public bool IsPaired { get; set; } = false;
 		/// <summary>Jestli tabulka má pozice (pro rotory). Deafultně předpokládám že ne.</summary>
 		public bool HasPozition { get; set; } = false;
-		/// <summary>Pokud relevantní, ukazuje na pozici, kde v tabulce začít.</summary>
+		/// <summary>Pokud relevantní, ukazuje na pozici, kde v tabulce začít. Toto se mění s průběhem en/dekrypce.</summary>
 		public ushort Pozition { get; set; }
+		/// <summary>Počáteční pozice v tabulce při začátku en/dekrypce.</summary>
+		public ushort StartPozition { get; set; }
 		/// <summary>Index tabulky, používán k rozeznávání.</summary>
 		public uint Idx { get; set; }
 		/// <summary>Dá dohromady booly do 1 bytu.</summary>
@@ -71,6 +73,36 @@ namespace VPE
 			{
 				return ushort.MaxValue;
 			}
+		}
+		/// <summary>Převede současnou tabulku do listu bytů, bere položky jako 1 byt, tzn. méně jak 256.</summary>
+		/// <returns>List bytů reprezentující tuto instanci tabulky.</returns>
+		internal List<byte> Single_ToBytes()
+		{
+			List<byte> result = new();
+			result.AddRange(BitConverter.GetBytes(Idx));
+			result.Add(GetFlags());
+			result.Add((byte)Pozition);
+			result.Add((byte)StartPozition);
+			foreach (ushort item in MainTable)
+			{
+				result.Add((byte)item);
+			}
+			return result;
+		}
+		/// <summary>Převede současnou tabulku do listu bytů, bere položky jako 2 byty, tzn. i více jak 256.</summary>
+		/// <returns>List bytů reprezentující tuto instanci tabulky.</returns>
+		internal List<byte> Double_ToBytes()
+		{
+			List<byte> result = new();
+			result.AddRange(BitConverter.GetBytes(Idx));
+			result.Add(GetFlags());
+			result.AddRange(BitConverter.GetBytes(Pozition));
+			result.AddRange(BitConverter.GetBytes(StartPozition));
+			foreach (ushort item in MainTable)
+			{
+				result.AddRange(BitConverter.GetBytes(item));
+			}
+			return result;
 		}
 	}
 }

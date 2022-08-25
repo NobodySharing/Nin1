@@ -27,7 +27,7 @@ namespace GUI
 		#region VPE
 		private string InText { get; set; }
 		private string OutText { get; set; }
-		private VPE_VM VPE = new VPE_VM();
+		private VPE_VM VPE = new();
 		private void MI_VPE_Encrypt_Click(object sender, RoutedEventArgs e) => OutText = VPE.Encrypt(InText);
 
 		private void MI_VPE_Decrypt_Click(object sender, RoutedEventArgs e) => OutText = VPE.Decrypt(InText);
