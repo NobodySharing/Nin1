@@ -74,24 +74,9 @@ namespace VPE
 				return ushort.MaxValue;
 			}
 		}
-		/// <summary>Převede současnou tabulku do listu bytů, bere položky jako 1 byt, tzn. méně jak 256.</summary>
-		/// <returns>List bytů reprezentující tuto instanci tabulky.</returns>
-		internal List<byte> Single_ToBytes()
-		{
-			List<byte> result = new();
-			result.AddRange(BitConverter.GetBytes(Idx));
-			result.Add(GetFlags());
-			result.Add((byte)Pozition);
-			result.Add((byte)StartPozition);
-			foreach (ushort item in MainTable)
-			{
-				result.Add((byte)item);
-			}
-			return result;
-		}
 		/// <summary>Převede současnou tabulku do listu bytů, bere položky jako 2 byty, tzn. i více jak 256.</summary>
 		/// <returns>List bytů reprezentující tuto instanci tabulky.</returns>
-		internal List<byte> Double_ToBytes()
+		internal List<byte> ToBytes()
 		{
 			List<byte> result = new();
 			result.AddRange(BitConverter.GetBytes(Idx));

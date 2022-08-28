@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Win32;
+
 using VPE;
 using Factorizator;
 using NeueDT;
 using DTcalc;
-using Microsoft.Win32;
 
 namespace GUI
 {
@@ -30,7 +31,7 @@ namespace GUI
 		/// <summary>Vygeneruje rotory.</summary>
 		/// <param name="count">Kolik rotorů?</param>
 		/// <returns>Seznam indexů vygenerovaných.</returns>
-		public void GenerateRotors(uint count = 10)
+		public void GenerateRotors(uint count = 20)
 		{
 			Generator.UpdateSeed(DateTime.Now.Ticks);
 			for (uint i = 0; i < count; i++)
@@ -41,7 +42,7 @@ namespace GUI
 			}
 		}
 
-		public void GenerateReflector(uint count = 2)
+		public void GenerateReflector(uint count = 5)
 		{
 			for (uint i = 0; i < count; i++)
 			{
@@ -51,7 +52,7 @@ namespace GUI
 			}
 		}
 
-		public void GenerateSwaps(uint count = 5)
+		public void GenerateSwaps(uint count = 10)
 		{
 			for (uint i = 0; i < count; i++)
 			{

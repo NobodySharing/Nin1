@@ -14,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using VPE;
+using Common;
 
 namespace GUI
 {
@@ -24,6 +25,9 @@ namespace GUI
 		{
 			InitializeComponent ();
 		}
+		#region Common
+		private PersistentStorage PS = new();
+		#endregion
 		#region VPE
 		private string InText { get; set; }
 		private string OutText { get; set; }

@@ -1,6 +1,6 @@
 using System;
 
-namespace Factorizator
+namespace Common
 {
 	public static class PrimeList
 	{
