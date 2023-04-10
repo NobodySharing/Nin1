@@ -60,22 +60,22 @@ namespace VPE
 				{
 					if ((N == '\n') || (N == '\0'))
 					{
-						Message.Add((ushort)Codepage.Letters.IndexOf("\r\n"));
+						Message.Add((ushort)Codepage.CharSet.IndexOf("\r\n"));
 						i++;
 						continue;
 					}
 					else
 					{
-						Message.Add((ushort)Codepage.Letters.IndexOf("\r\n"));
+						Message.Add((ushort)Codepage.CharSet.IndexOf("\r\n"));
 						continue;
 					}
 				}
 				else if (C == '\n')
 				{
-					Message.Add((ushort)Codepage.Letters.IndexOf("\r\n"));
+					Message.Add((ushort)Codepage.CharSet.IndexOf("\r\n"));
 					continue;
 				}
-				int index = Codepage.Letters.IndexOf(Convert.ToString(C));
+				int index = Codepage.CharSet.IndexOf(Convert.ToString(C));
 				if (index >= 0)
 				{
 					Message.Add((ushort)index);
@@ -93,7 +93,7 @@ namespace VPE
 			StringBuilder SB = new();
 			foreach (ushort Num in Message)
 			{
-				SB.Append(Codepage.Letters[Num]);
+				SB.Append(Codepage.CharSet[Num]);
 			}
 			return SB.ToString();
 		}

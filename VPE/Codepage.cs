@@ -5,8 +5,7 @@ namespace VPE
 {
 	public static class Codepage
 	{
-		/// <summary>Znaková sada.</summary>
-		public static readonly List <string> Letters = new List<string>()
+		public static readonly List <string> CharSet = new List<string>()
 		{
 			" ",
 			"A",
@@ -179,7 +178,7 @@ namespace VPE
 			"\t",
 			"\r\n",
 		};
-		private static ushort LimitV = Convert.ToUInt16(Letters.Count);
+		private static ushort LimitV = Convert.ToUInt16(CharSet.Count);
 		/// <summary>Počet znaků v tabulce.</summary>
 		public static ushort Limit
 		{

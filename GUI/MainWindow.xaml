@@ -77,5 +77,15 @@
 				</Grid.RowDefinitions>
 			</Grid>
 		</TabItem>
+		<TabItem x:Name="TI_PSWDGen" Header="Password generator">
+			<Grid>
+				<Grid.ColumnDefinitions>
+
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+
+				</Grid.RowDefinitions>
+			</Grid>
+		</TabItem>
 	</TabControl>
 </Window>
