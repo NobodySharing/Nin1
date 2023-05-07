@@ -20,7 +20,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DTcalc", "DTcalc\DTcalc.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{E1BF7C51-E2EA-4E5B-B79B-B2C26F7ADFE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PswdGen", "PswdGen\PswdGen.csproj", "{1E7CF3F8-7D0A-40FF-A6E0-638A18425766}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PswdGen", "PswdGen\PswdGen.csproj", "{1E7CF3F8-7D0A-40FF-A6E0-638A18425766}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapyCzDownloader", "MapyCzDownloader\MapyCzDownloader.csproj", "{2853E20A-EF18-401B-9697-0A0F33049549}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +58,10 @@ Global
 		{1E7CF3F8-7D0A-40FF-A6E0-638A18425766}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E7CF3F8-7D0A-40FF-A6E0-638A18425766}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E7CF3F8-7D0A-40FF-A6E0-638A18425766}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2853E20A-EF18-401B-9697-0A0F33049549}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2853E20A-EF18-401B-9697-0A0F33049549}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2853E20A-EF18-401B-9697-0A0F33049549}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2853E20A-EF18-401B-9697-0A0F33049549}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

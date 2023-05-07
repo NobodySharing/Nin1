@@ -118,6 +118,7 @@
 					<TextBlock Grid.Row="1" Grid.Column="0" Text="Max space:" Margin="4"/>
 					<TextBox Grid.Row="1" Grid.Column="1" x:Name="TB_RndCharsSpcMax" Text="{Binding Path=RandCharSpcMax, Mode=TwoWay}" Width="40" Height="20"/>
 					<Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" x:Name="B_RndCharsSpc" Content="Random" Margin="3" Click="B_RandCharSpc_Click"/>
+					
 					<StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
 						<TextBox Margin="3"/>
 						<TextBox Margin="3"/>
@@ -129,8 +130,7 @@
 		</Grid>
 		<Grid Grid.Column="3">
 			<Grid.RowDefinitions>
-				<RowDefinition Height="1*"/>
-				<RowDefinition Height="1*"/>
+				<RowDefinition Height="2*"/>
 				<RowDefinition Height="1*"/>
 				<RowDefinition Height="1*"/>
 			</Grid.RowDefinitions>
@@ -139,15 +139,11 @@
 					<Button x:Name="B_Save" Content="Save all" Margin="2" Click="B_Save_Click"/>
 					<Button x:Name="B_Load" Content="Load all" Margin="2" Click="B_Load_Click"/>
 					<Button x:Name="B_LoadMerge" Content="Load and merge" Margin="2" Click="B_LoadMerge_Click"/>
+					<Button x:Name="B_Export_Current" Content="Export current settings to a file" Click="B_Exp_Click" Margin="2"/>
+					<Button x:Name="B_Import_Current" Content="Import settings from a file" Click="B_Imp_Click" Margin="2"/>
 				</StackPanel>
 			</GroupBox>
-			<GroupBox Grid.Row="1" Header="Current settings">
-				<StackPanel>
-					<Button x:Name="B_Export_Current" Content="Export current settings to a file" Click="B_Exp_Click" Margin="4, 4, 4, 2"/>
-					<Button x:Name="B_Import_Current" Content="Import settings from a file" Click="B_Imp_Click" Margin="4, 2, 4, 4"/>
-				</StackPanel>
-			</GroupBox>
-			<GroupBox Grid.Row="2" Header="Generators">
+			<GroupBox Grid.Row="1" Header="Generators">
 				<StackPanel>
 					<StackPanel Orientation="Horizontal">
 						<Button x:Name="B_GenRotors" Content="Generate tables" Margin="4, 2, 4, 2" MinWidth="112" Click="B_GenRotors_Click"/>
@@ -163,7 +159,7 @@
 					</StackPanel>
 				</StackPanel>
 			</GroupBox>
-			<GroupBox Grid.Row="3" Header="Misc.">
+			<GroupBox Grid.Row="2" Header="Misc.">
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="1*"/>

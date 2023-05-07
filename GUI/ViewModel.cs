@@ -61,6 +61,11 @@ namespace GUI
 				SwapCNTR++;
 			}
 		}
+		/// <summary>Vygeneruje kompletní nastavení.</summary>
+		public void GenerateComplete ()
+		{
+			SL.Library.Add(Generator.GenerateSetts());
+		}
 
 		public void SelectTables(List<ushort> tables, List<ushort> swaps, ushort reflector)
 		{

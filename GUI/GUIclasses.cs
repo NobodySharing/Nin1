@@ -63,6 +63,7 @@ namespace GUI
 		private ushort? RotorGenCountNumV;
 		private string SwapGenCountStrV;
 		private string ReflGenCountStrV;
+
 		public string ConstShiftStr
 		{
 			get

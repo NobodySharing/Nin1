@@ -18,7 +18,6 @@ using Common;
 
 namespace GUI
 {
-	/// <summary>Interaction logic for MainWindow.xaml</summary>
 	public partial class MainWindow : Window
 	{
 		public MainWindow ()
@@ -27,7 +26,9 @@ namespace GUI
 		}
 		#region Common
 		private PersistentStorage PS = new();
+		
 		#endregion
+
 		#region VPE
 		private string InText { get; set; }
 		private string OutText { get; set; }
@@ -60,6 +61,21 @@ namespace GUI
 		private void MI_VPE_QuickSettSave_Click(object sender, RoutedEventArgs e) => VPE.QuickSettSave();
 
 		private void MI_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e) => VPE.QuickSettOpen();
+		#endregion
+
+		#region NeueDT
+		#endregion
+
+		#region DTCalc
+		#endregion
+
+		#region Factorizator
+		#endregion
+
+		#region PswdGen
+		#endregion
+
+		#region MapyCzDownloader
 		#endregion
 	}
 }

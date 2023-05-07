@@ -29,7 +29,7 @@ namespace VPE
 				RandCharConstB = ABM[1],
 				RandCharConstM = ABM[2],
 			};
-			int count = R.Next(12, 28);
+			int count = R.Next(12, 42);
 			for (int i = 0; i < count; i++)
 			{
 				Table t = GenerateTable((uint)i);

@@ -20,7 +20,7 @@ namespace GUI
 	{
 		private readonly VPE_VM VPE;
 		private ushort TablesInGUI = 0, SwapsInGUI = 0;
-		private const ushort TablesMax = 20, SwapsMax = 20; // Kolik tam může být maximálně tabulek a swapů, v GUI.
+		private const ushort TablesMax = 50, SwapsMax = 20; // Kolik tam může být maximálně tabulek a swapů, v GUI.
 		public C_VPE_Sett DataFromGUI = new();
 		public VPESettingsComp (ref VPE_VM VModel)
 		{
