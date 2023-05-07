@@ -33,19 +33,23 @@ namespace GUI
 		private string InText { get; set; }
 		private string OutText { get; set; }
 		private VPE_VM VPE = new();
+		VPESettingsComp VPESettWin;
+		VPESettingsSelector VPESettingsSelector;
+
 		private void MI_VPE_Encrypt_Click(object sender, RoutedEventArgs e) => OutText = VPE.Encrypt(InText);
 
 		private void MI_VPE_Decrypt_Click(object sender, RoutedEventArgs e) => OutText = VPE.Decrypt(InText);
 
 		private void MI_VPE_SettingsComp_Click(object sender, RoutedEventArgs e)
 		{
-			VPESettingsComp VPESettWin = new(ref VPE);
+			VPESettWin = new(ref VPE);
 			VPESettWin.Show();
 		}
 
 		private void MI_VPE_SettingsSel_Click(object sender, RoutedEventArgs e)
 		{
-			
+			VPESettingsSelector = new();
+			VPESettingsSelector.Show();
 		}
 
 		private void MI_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e) => InText = VPE.OpenMsgFile();

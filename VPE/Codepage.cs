@@ -5,7 +5,7 @@ namespace VPE
 {
 	public static class Codepage
 	{
-		public static readonly List <string> CharSet = new List<string>()
+		public static readonly List <string> CharSet = new()
 		{
 			" ",
 			"A",

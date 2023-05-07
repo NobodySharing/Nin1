@@ -83,9 +83,14 @@ namespace VPE
 		/// <param name="where">Kam – složka!</param>
 		public static void Save(Settings what, string where)
 		{
+			if (where.EndsWith(FileExtS))
+			{
+				WriteAll(what, where);
+				return;
+			}
 			IEnumerable<string> myFiles = Directory.EnumerateFiles(where, "*" + FileExtS);
 			string finalFileName;
-			if (myFiles.Count() == 0)
+			if (!myFiles.Any())
 			{
 				finalFileName = where.EndsWith('\\') ? where + "00000" + FileExtS : where + '\\' + "00000" + FileExtS;
 				WriteAll(what, finalFileName);

@@ -266,7 +266,14 @@ namespace VPE
 			while (index <= Message.Count)
 			{
 				IncrementSpace(ref index, ref space, gap);
-				Message.Insert(index, Gen.GenerateNum());
+				if (index <= Message.Count - 1)
+				{
+					Message.Insert(index, Gen.GenerateNum());
+				}
+				else 
+				{
+					break;
+				}
 			}
 		}
 		/// <summary>Odebere náhodné znaky ze sady.</summary>

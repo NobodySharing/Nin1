@@ -62,12 +62,14 @@ namespace GUI
 			}
 		}
 		/// <summary>Vygeneruje kompletní nastavení.</summary>
-		public void GenerateComplete ()
+		public void GenerateComplete()
 		{
-			SL.Library.Add(Generator.GenerateSetts());
+			S = Generator.GenerateSetts();
+			SL.Library.Add(S);
+
 		}
 
-		public void SelectTables(List<ushort> tables, List<ushort> swaps, ushort reflector)
+		public void SelectRotors(List<ushort> tables, List<ushort> swaps, ushort reflector)
 		{
 			S = TL.Select(tables, swaps, reflector);
 		}
@@ -203,6 +205,7 @@ namespace GUI
 			}
 			return path;
 		}
+		
 		#endregion
 	}
 

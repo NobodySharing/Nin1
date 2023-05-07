@@ -19,7 +19,7 @@ namespace GUI
 	public partial class VPESettingsComp : Window
 	{
 		private readonly VPE_VM VPE;
-		private ushort TablesInGUI = 0, SwapsInGUI = 0;
+		private ushort RotorsInGUI = 0, SwapsInGUI = 0;
 		private const ushort TablesMax = 50, SwapsMax = 20; // Kolik tam může být maximálně tabulek a swapů, v GUI.
 		public C_VPE_Sett DataFromGUI = new();
 		public VPESettingsComp (ref VPE_VM VModel)
@@ -50,25 +50,31 @@ namespace GUI
 
 		private void B_GenRefl_Click (object sender, RoutedEventArgs e)
 		{
-			VPE?.GenerateReflector ();
+			if (DataFromGUI.ReflGenCountNum is not null)
+			{
+				VPE?.GenerateReflector(DataFromGUI.ReflGenCountNum.Value);
+			}	
 		}
 
 		private void B_GenSwaps_Click (object sender, RoutedEventArgs e)
 		{
-			VPE?.GenerateSwaps ();
+			if (DataFromGUI.SwapGenCountNum is not null)
+			{
+				VPE?.GenerateSwaps(DataFromGUI.SwapGenCountNum.Value);
+			}
 		}
 
 		private void B_Rotors_Add_Click(object sender, RoutedEventArgs e)
 		{
-			TablesInGUI = Convert.ToUInt16(SP_Rotors.Children.Count);
-			if (TablesInGUI < TablesMax)
+			RotorsInGUI = Convert.ToUInt16(SP_Rotors.Children.Count);
+			if (RotorsInGUI < TablesMax)
 			{
 				UC_Table table = new()
 				{
-					Name = "UCT_" + (TablesInGUI - 1).ToString(),
+					Name = "UCT_" + (RotorsInGUI - 1).ToString(),
 				};
 				SP_Rotors.Children.Add(table);
-				B_Rotors_Add.IsEnabled = TablesInGUI < TablesMax;
+				B_Rotors_Add.IsEnabled = RotorsInGUI < TablesMax;
 			}
 		}
 
@@ -79,6 +85,7 @@ namespace GUI
 				SP_Rotors.Children.RemoveAt(SP_Rotors.Children.Count - 1);
 				B_Rotors_Remove.IsEnabled = SP_Rotors.Children.Count > 0;
 			}
+			B_Rotors_Remove.IsEnabled = RotorsInGUI > 0;
 		}
 
 		private void B_Swaps_Add_Click(object sender, RoutedEventArgs e)
@@ -89,6 +96,7 @@ namespace GUI
 				ComboBox swap = new()
 				{
 					Name = "CB_Swap_" + (SwapsInGUI - 1).ToString(),
+					ItemsSource = VPE.Swaps,
 				};
 				SP_Swaps.Children.Add(swap);
 				B_Swaps_Add.IsEnabled = SwapsInGUI < SwapsMax;
@@ -102,6 +110,7 @@ namespace GUI
 				SP_Swaps.Children.RemoveAt(SP_Swaps.Children.Count - 1);
 				B_Swaps_Remove.IsEnabled = SP_Swaps.Children.Count > 0;
 			}
+			B_Swaps_Add.IsEnabled = SwapsInGUI > 0;
 		}
 
 		private void B_Save_Click(object sender, RoutedEventArgs e)
@@ -141,18 +150,21 @@ namespace GUI
 
 		private void B_RandCharSpc_Click(object sender, RoutedEventArgs e)
 		{
-			DataFromGUI.RandCharSpcMin = VPE?.GenerateRandNum().ToString();
+			DataFromGUI.RandCharSpcMinStr = VPE?.GenerateRandNum().ToString();
 		}
 
 		private void B_GenRNDConsts_Click(object sender, RoutedEventArgs e)
 		{
 			decimal[] consts = VPE?.GenerateRNDConsts();
-			
+			DataFromGUI.RandCharGenAStr = consts[0].ToString();
+			DataFromGUI.RandCharGenBStr = consts[1].ToString();
+			DataFromGUI.RandCharGenMStr = consts[2].ToString();
 		}
 
 		private void B_AllRandom_Click(object sender, RoutedEventArgs e)
 		{
-			
+			VPE.GenerateComplete();
+			DataFromGUI.SetUsingSettings(VPE.S);
 		}
 		#endregion
 	}

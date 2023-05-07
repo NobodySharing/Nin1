@@ -52,7 +52,7 @@ namespace Common
 			MyConfig.Create().Close();
 			File.WriteAllText(MyConfig.FullName, DefaultConfigFileContent);
 		}
-
+		/*
 		internal string ReadConfig()
 		{
 
@@ -61,6 +61,6 @@ namespace Common
 		internal void WriteConfig()
 		{
 
-		}
+		}*/
 	}
 }

@@ -15,7 +15,7 @@
 		</Grid.DataContext>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="5*"/>
-			<ColumnDefinition Width="3*"/>
+			<ColumnDefinition Width="2*"/>
 			<ColumnDefinition Width="4*"/>
 			<ColumnDefinition Width="4*"/>
 		</Grid.ColumnDefinitions>
@@ -114,17 +114,31 @@
 						<ColumnDefinition Width="1*"/>
 					</Grid.ColumnDefinitions>
 					<TextBlock Grid.Row="0" Grid.Column="0" Text="Min space:" Margin="4"/>
-					<TextBox Grid.Row="0" Grid.Column="1" x:Name="TB_RndCharsSpcMin" Text="{Binding Path=RandCharSpcMin, Mode=TwoWay}" Width="40" Height="20"/>
+					<TextBox Grid.Row="0" Grid.Column="1" x:Name="TB_RndCharsSpcMin" Text="{Binding Path=RandCharSpcMinStr, Mode=TwoWay}" Width="40" Height="20"/>
 					<TextBlock Grid.Row="1" Grid.Column="0" Text="Max space:" Margin="4"/>
-					<TextBox Grid.Row="1" Grid.Column="1" x:Name="TB_RndCharsSpcMax" Text="{Binding Path=RandCharSpcMax, Mode=TwoWay}" Width="40" Height="20"/>
+					<TextBox Grid.Row="1" Grid.Column="1" x:Name="TB_RndCharsSpcMax" Text="{Binding Path=RandCharSpcMaxStr, Mode=TwoWay}" Width="40" Height="20"/>
 					<Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" x:Name="B_RndCharsSpc" Content="Random" Margin="3" Click="B_RandCharSpc_Click"/>
-					
-					<StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
-						<TextBox Margin="3"/>
-						<TextBox Margin="3"/>
-						<TextBox Margin="3"/>
-						<Button x:Name="B_GenRNDConsts" Content="Generate random constants" Margin="3" Click="B_GenRNDConsts_Click"/>
-					</StackPanel>
+					<GroupBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Header="Properties of random char generator">
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="1*"/>
+								<ColumnDefinition Width="7*"/>
+							</Grid.ColumnDefinitions>
+							<Grid.RowDefinitions>
+								<RowDefinition Height="28px"/>
+								<RowDefinition Height="28px"/>
+								<RowDefinition Height="28px"/>
+								<RowDefinition Height="1*"/>
+							</Grid.RowDefinitions>
+							<TextBlock Text="A:" Grid.Row="0" Grid.Column="0" Margin="5"/>
+							<TextBox x:Name="TB_RndCharA" Margin="3" Grid.Row="0" Grid.Column="1" Text="{Binding Path=RandCharGenAStr, Mode=TwoWay}"/>
+							<TextBlock Text="B:" Grid.Row="1" Grid.Column="0" Margin="5"/>
+							<TextBox x:Name="TB_RndCharB" Margin="3" Grid.Row="1" Grid.Column="1" Text="{Binding Path=RandCharGenBStr, Mode=TwoWay}"/>
+							<TextBlock Text="M:" Grid.Row="2" Grid.Column="0" Margin="5"/>
+							<TextBox x:Name="TB_RndCharM" Margin="3" Grid.Row="2" Grid.Column="1" Text="{Binding Path=RandCharGenMStr, Mode=TwoWay}"/>
+							<Button x:Name="B_GenRNDConsts" Content="Generate random constants" Margin="10" Click="B_GenRNDConsts_Click" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"/>
+						</Grid>
+					</GroupBox>
 				</Grid>
 			</GroupBox>
 		</Grid>
@@ -135,7 +149,11 @@
 				<RowDefinition Height="1*"/>
 			</Grid.RowDefinitions>
 			<GroupBox Grid.Row="0" Header="Settings storage">
-				<StackPanel>
+				<StackPanel Orientation="Vertical">
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Text="Name:"/>
+						<TextBox x:Name="TB_Name" Margin="5,2,2,2" MinWidth="150" Text="{Binding Path=NameStr, Mode=TwoWay}"/>
+					</StackPanel>
 					<Button x:Name="B_Save" Content="Save all" Margin="2" Click="B_Save_Click"/>
 					<Button x:Name="B_Load" Content="Load all" Margin="2" Click="B_Load_Click"/>
 					<Button x:Name="B_LoadMerge" Content="Load and merge" Margin="2" Click="B_LoadMerge_Click"/>
@@ -146,7 +164,7 @@
 			<GroupBox Grid.Row="1" Header="Generators">
 				<StackPanel>
 					<StackPanel Orientation="Horizontal">
-						<Button x:Name="B_GenRotors" Content="Generate tables" Margin="4, 2, 4, 2" MinWidth="112" Click="B_GenRotors_Click"/>
+						<Button x:Name="B_GenRotors" Content="Generate rotors" Margin="4, 2, 4, 2" MinWidth="112" Click="B_GenRotors_Click"/>
 						<TextBox x:Name="TB_GenRotorsCount" MinWidth="40" Text="{Binding Path=RotorGenCountStr, Mode=OneWayToSource}" Margin="4, 2, 4, 2"/>
 					</StackPanel>
 					<StackPanel Orientation="Horizontal">

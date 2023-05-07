@@ -184,10 +184,9 @@ namespace VPE
 				PrimeList.Primes[R.Next(169, 2653)],
 			};
 			List<uint> Bprimes = new();
-			bool run = true;
 			uint num;
 			byte count = 0;
-			while (run)
+			while (count < 5)
 			{
 				num = PrimeList.Primes[R.Next(0, 9592)];
 				if (!AMprimes.Contains(num))
@@ -195,7 +194,6 @@ namespace VPE
 					Bprimes.Add(num);
 					count++;
 				}
-				run = count > 5;
 			}
 			List<byte> Aexps = new(), Mexps = new();
 			byte exp;
