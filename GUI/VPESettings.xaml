@@ -9,10 +9,10 @@
 	<Window.Resources>
 		<local:C_VPE_Sett x:Key="DataFromGUI"/>
 	</Window.Resources>
+	<Window.DataContext>
+		<Binding Source="{StaticResource DataFromGUI}"/>
+	</Window.DataContext>
 	<Grid>
-		<Grid.DataContext>
-			<Binding Source="{StaticResource DataFromGUI}"/>
-		</Grid.DataContext>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="5*"/>
 			<ColumnDefinition Width="2*"/>

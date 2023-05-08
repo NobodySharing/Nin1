@@ -15,6 +15,6 @@
 			<RowDefinition Height="1*"/>
 		</Grid.RowDefinitions>
 		<ComboBox x:Name="CB_Library" Grid.Row="0" Width="160" Height="25"/>
-		<Button x:Name="B_Seect" Grid.Row="1" Content="Select" Width="80" Height="22"/>
+		<Button x:Name="B_Select" Grid.Row="1" Content="Select" Width="80" Height="22"/>
 	</Grid>
 </Window>

@@ -19,14 +19,16 @@ namespace GUI
 	public partial class VPESettingsComp : Window
 	{
 		private readonly VPE_VM VPE;
-		private ushort RotorsInGUI = 0, SwapsInGUI = 0;
+		private ushort RotorsInGUI = 10, SwapsInGUI = 5;
 		private const ushort TablesMax = 50, SwapsMax = 20; // Kolik tam může být maximálně tabulek a swapů, v GUI.
 		public C_VPE_Sett DataFromGUI = new();
+		private List<C_UC_Table> DataForRotors;
 		public VPESettingsComp (ref VPE_VM VModel)
 		{
 			InitializeComponent ();
 			VPE = VModel;
-			//DataContext = DataFromGUI;
+			DataContext = DataFromGUI;
+			InitialRotorPopulation();
 		}
 		#region GUI eventy
 		private void B_Submit_Click (object sender, RoutedEventArgs e)
@@ -42,7 +44,7 @@ namespace GUI
 				VPE?.GenerateRotors(DataFromGUI.RotorGenCountNum.Value);
 				foreach (UC_Table rotor in SP_Rotors.Children)
 				{
-					rotor.UpdateTableList(VPE.Rotors);
+					rotor.UpdateRotorList(VPE.Rotors);
 				}
 				return;
 			}
@@ -150,7 +152,9 @@ namespace GUI
 
 		private void B_RandCharSpc_Click(object sender, RoutedEventArgs e)
 		{
-			DataFromGUI.RandCharSpcMinStr = VPE?.GenerateRandNum().ToString();
+			ushort[] space = VPE?.GenerateSpaceMinMax();
+			DataFromGUI.RandCharSpcMinStr = space[0].ToString();
+			DataFromGUI.RandCharSpcMaxStr = space[1].ToString();
 		}
 
 		private void B_GenRNDConsts_Click(object sender, RoutedEventArgs e)
@@ -165,6 +169,12 @@ namespace GUI
 		{
 			VPE.GenerateComplete();
 			DataFromGUI.SetUsingSettings(VPE.S);
+		}
+		#endregion
+		#region Private
+		private void InitialRotorPopulation()
+		{
+
 		}
 		#endregion
 	}

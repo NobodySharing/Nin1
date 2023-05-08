@@ -9,56 +9,24 @@ using VPE;
 
 namespace GUI
 {
-	/// <summary>Interakční logika pro UC_Table.xaml</summary>
 	public partial class UC_Table : UserControl
 	{
 		private readonly Generators Generator = new(Codepage.Limit, DateTime.Now.Ticks);
 
-		public ushort Pozition
-		{
-			get
-			{
-				return GetPozition();
-			}
-			set
-			{
-				Representation.Pozition = value.ToString();
-			}
-		}
-		public ushort SelTable { get; private set; }
+		public ushort SelTable { get; set; }
 
-		public C_UC_Table Representation = new();
-		public UC_Table()
+		public C_UC_Table DataFromGUI;
+		public UC_Table(C_UC_Table Binding)
 		{
 			InitializeComponent();
-		}
-
-		private ushort GetPozition()
-		{
-			if (ushort.TryParse (Representation.Pozition, out ushort poz))
-			{
-				return poz;
-			}
-			else
-			{
-				return ushort.MaxValue;
-			}
-		}
-		
-		public ushort GenerateRandNum()
-		{
-			Generator.UpdateSeed(DateTime.Now.Ticks);
-			return Generator.GenerateNum();
-		}
-		public void UpdateTableList (List<uint> tables)
-		{
-			Representation.Rotors.Clear();
-			Representation.Rotors = tables;
+			DataFromGUI = Binding;
+			DataContext = DataFromGUI;
 		}
 
 		private void B_Rand_Shift_Click (object sender, RoutedEventArgs e)
 		{
-			Representation.Pozition = GenerateRandNum().ToString();
+			Generator.UpdateSeed(DateTime.Now.Ticks);
+			DataFromGUI.PozitionStr = Generator.GenerateNum().ToString();
 		}
 	}
 }

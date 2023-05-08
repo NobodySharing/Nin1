@@ -19,6 +19,7 @@ namespace GUI
 		public TableLibrary TL = new();
 		public Settings S;
 		public Crypto C;
+
 		private const string Invalid_File = "N/A";
 		private const string VPESL_filter = "VPE Settings Library files (*.vpesl)|*.vpesl";
 		private const string VPETL_filter = "VPE Table Library files (*.vpetl)|*.vpetl";
@@ -111,6 +112,11 @@ namespace GUI
 		{
 			Generator.UpdateSeed(DateTime.Now.Ticks);
 			return Generator.GenerateNum();
+		}
+
+		public ushort[] GenerateSpaceMinMax(ushort MinFrom = 4, ushort MinTo = 14, ushort MaxFrom = 16, ushort MaxTo = 30)
+		{
+			return Generator.GenerateSpaceMinMax(MinFrom, MinTo, MaxFrom, MaxTo);
 		}
 
 		public decimal[] GenerateRNDConsts()

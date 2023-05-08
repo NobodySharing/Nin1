@@ -159,7 +159,7 @@ namespace VPE
 				Remains.RemoveAt(RandIndex);
 				if (R.NextDouble() <= fillPortion)
 				{
-					
+
 					Temp[SelA] = SelB;
 					Temp[SelB] = SelA;
 				}
@@ -173,10 +173,11 @@ namespace VPE
 		{
 			return Convert.ToUInt16(R.Next(Limit));
 		}
-
+		/// <summary>Vygeneruje konstanty A, B a M pro generátor náhodných znaků.</summary>
+		/// <returns>Pole: A, B a M.</returns>
 		public decimal[] GenerateABM()
 		{
-			decimal[] result = {1, 1, 1};
+			decimal[] result = { 1, 1, 1 };
 			List<uint> AMprimes = new()
 			{
 				PrimeList.Primes[R.Next(0, 30)],
@@ -224,6 +225,11 @@ namespace VPE
 				result[2] *= (decimal)Math.Pow(AMprimes[i], Mexps[i]);
 			}
 			return result;
+		}
+
+		public ushort[] GenerateSpaceMinMax(ushort MinFrom = 4, ushort MinTo = 14, ushort MaxFrom = 16, ushort MaxTo = 30)
+		{
+			return new ushort[2] { (ushort)R.Next(MinFrom, MinTo), (ushort)R.Next(MaxFrom, MaxTo) };
 		}
 	}
 }

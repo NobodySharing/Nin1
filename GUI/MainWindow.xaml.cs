@@ -23,22 +23,22 @@ namespace GUI
 		public MainWindow ()
 		{
 			InitializeComponent ();
+			DataContext = DataFromGUI;
 		}
 		#region Common
+		private C_VPE_MainWin DataFromGUI = new();
 		private PersistentStorage PS = new();
 		
 		#endregion
 
 		#region VPE
-		private string InText { get; set; }
-		private string OutText { get; set; }
 		private VPE_VM VPE = new();
 		VPESettingsComp VPESettWin;
 		VPESettingsSelector VPESettingsSelector;
 
-		private void MI_VPE_Encrypt_Click(object sender, RoutedEventArgs e) => OutText = VPE.Encrypt(InText);
+		private void MI_VPE_Encrypt_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_EncrypStr = VPE.Encrypt(DataFromGUI.VPE_NormalStr);
 
-		private void MI_VPE_Decrypt_Click(object sender, RoutedEventArgs e) => OutText = VPE.Decrypt(InText);
+		private void MI_VPE_Decrypt_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_NormalStr = VPE.Decrypt(DataFromGUI.VPE_EncrypStr);
 
 		private void MI_VPE_SettingsComp_Click(object sender, RoutedEventArgs e)
 		{
@@ -52,13 +52,13 @@ namespace GUI
 			VPESettingsSelector.Show();
 		}
 
-		private void MI_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e) => InText = VPE.OpenMsgFile();
+		private void MI_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_NormalStr = VPE.OpenMsgFile();
 
-		private void MI_VPE_OpenEncMsgFile_Click(object sender, RoutedEventArgs e) => OutText = VPE.OpenMsgFile();
+		private void MI_VPE_OpenEncMsgFile_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_EncrypStr = VPE.OpenMsgFile();
 
-		private void MI_VPE_SaveEncMsgFile_Click(object sender, RoutedEventArgs e) => VPE.SaveMsgFile(OutText);
+		private void MI_VPE_SaveEncMsgFile_Click(object sender, RoutedEventArgs e) => VPE.SaveMsgFile(DataFromGUI.VPE_EncrypStr);
 
-		private void MI_VPE_SaveUneMsgFile_Click(object sender, RoutedEventArgs e) => VPE.SaveMsgFile(InText);
+		private void MI_VPE_SaveUneMsgFile_Click(object sender, RoutedEventArgs e) => VPE.SaveMsgFile(DataFromGUI.VPE_NormalStr);
 
 		private void MI_VPE_QuickSettGen_Click(object sender, RoutedEventArgs e) => VPE.QuickSettGen();
 

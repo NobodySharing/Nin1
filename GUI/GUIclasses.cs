@@ -8,50 +8,51 @@ using VPE;
 
 namespace GUI
 {
-	public class C_UC_Table : INotifyPropertyChanged
+	#region Main win
+	public class C_VPE_MainWin : INotifyPropertyChanged
 	{
-		private string PozitionV;
-		private List<uint> RotorsV = new();
-		public uint SelectedR { get; set; }
-		public string Pozition
+		private string VPE_NormalStrV;
+		private string VPE_EncrypStrV;
+		
+		public string VPE_NormalStr
 		{
 			get
 			{
-				return PozitionV;
+				return VPE_NormalStrV;
 			}
 			set
 			{
-				if (PozitionV != value)
+				if (VPE_NormalStrV != value)
 				{
-					PozitionV = value;
-					OnPropertyChanged("Pozition");
+					VPE_NormalStrV = value;
+					OnPropertyChanged("VPE_NormalStr");
 				}
 			}
 		}
-
-		public List<uint> Rotors
+		public string VPE_EncrypStr
 		{
 			get
 			{
-				return RotorsV;
+				return VPE_EncrypStrV;
 			}
 			set
 			{
-				if (RotorsV != value)
+				if (VPE_EncrypStrV != value)
 				{
-					RotorsV = value;
-					OnPropertyChanged("Rotors");
+					VPE_EncrypStrV = value;
+					OnPropertyChanged("VPE_EncrypStr");
 				}
 			}
 		}
-
+		
 		public event PropertyChangedEventHandler PropertyChanged;
 		private void OnPropertyChanged(string info)
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(info));
 		}
 	}
-
+	#endregion
+	#region VPE
 	public class C_VPE_Sett : INotifyPropertyChanged
 	{
 		private List<ushort> SwapsV = new();
@@ -420,4 +421,76 @@ namespace GUI
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(info));
 		}
 	}
+
+	public class C_UC_Table : INotifyPropertyChanged
+	{
+		private string PozitionStrV;
+		private List<string> RotorsV = new();
+		private int SelectedRIdxV;
+		public string PozitionStr
+		{
+			get
+			{
+				return PozitionStrV;
+			}
+			set
+			{
+				if (PozitionStrV != value)
+				{
+					PozitionStrV = value;
+					OnPropertyChanged("PozitionStr");
+				}
+			}
+		}
+		public ushort? PozitionNum
+		{
+			get
+			{
+				if (ushort.TryParse(PozitionStrV, out ushort num))
+				{
+					return num;
+				}
+				else
+				{
+					return null; // Neplatné číslo.
+				}
+			}
+		}
+		public List<string> RotorsStrs
+		{
+			get
+			{
+				return RotorsV;
+			}
+			set
+			{
+				if (RotorsV != value)
+				{
+					RotorsV = value;
+					OnPropertyChanged("RotorsStrs");
+				}
+			}
+		}
+		public int SelectedRIdx
+		{
+			get
+			{
+				return SelectedRIdxV;
+			}
+			set
+			{
+				if (SelectedRIdxV != value)
+				{
+					SelectedRIdxV = value;
+					OnPropertyChanged(" SelectedRIdx");
+				}
+			}
+		}
+		public event PropertyChangedEventHandler PropertyChanged;
+		private void OnPropertyChanged(string info)
+		{
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(info));
+		}
+	}
+	#endregion
 }
