@@ -9,14 +9,20 @@ using VPE;
 
 namespace GUI
 {
-	public partial class UC_Table : UserControl
+	public partial class UC_Rotor : UserControl
 	{
 		private readonly Generators Generator = new(Codepage.Limit, DateTime.Now.Ticks);
 
 		public ushort SelTable { get; set; }
 
-		public C_UC_Table DataFromGUI;
-		public UC_Table(C_UC_Table Binding)
+		public C_UC_Rotor DataFromGUI;
+
+		public UC_Rotor()
+		{
+			InitializeComponent();
+		}
+
+		public UC_Rotor(C_UC_Rotor Binding)
 		{
 			InitializeComponent();
 			DataFromGUI = Binding;

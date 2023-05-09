@@ -36,16 +36,7 @@
 					<TextBlock Grid.Column="1" Text="Pozition"/>
 				</Grid>
 				<StackPanel x:Name="SP_Rotors" Grid.Row="1" Orientation="Vertical" CanVerticallyScroll="True">
-					<local:UC_Table x:Name="UCT_0"/>
-					<local:UC_Table x:Name="UCT_1"/>
-					<local:UC_Table x:Name="UCT_2"/>
-					<local:UC_Table x:Name="UCT_3"/>
-					<local:UC_Table x:Name="UCT_4"/>
-					<local:UC_Table x:Name="UCT_5"/>
-					<local:UC_Table x:Name="UCT_6"/>
-					<local:UC_Table x:Name="UCT_7"/>
-					<local:UC_Table x:Name="UCT_8"/>
-					<local:UC_Table x:Name="UCT_9"/>
+					
 				</StackPanel>
 				<StackPanel Grid.Row="2" Orientation="Horizontal">
 					<Button x:Name="B_Rotors_Add" Content="Add" Click="B_Rotors_Add_Click" Margin="2, 0, 2, 0" Padding="2, 0, 2, 0"/>

@@ -48,7 +48,7 @@ namespace GUI
 
 		private void MI_VPE_SettingsSel_Click(object sender, RoutedEventArgs e)
 		{
-			VPESettingsSelector = new();
+			VPESettingsSelector = new(ref VPE);
 			VPESettingsSelector.Show();
 		}
 

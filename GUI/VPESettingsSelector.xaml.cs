@@ -16,9 +16,13 @@ namespace GUI
 {
 	public partial class VPESettingsSelector : Window
 	{
-		public VPESettingsSelector()
+		private VPE_VM DataFromGUI;
+		public VPESettingsSelector(ref VPE_VM model)
 		{
 			InitializeComponent();
+			DataFromGUI = model;
+			DataContext = DataFromGUI;
 		}
+
 	}
 }

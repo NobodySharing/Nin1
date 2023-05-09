@@ -21,14 +21,14 @@ namespace GUI
 		private readonly VPE_VM VPE;
 		private ushort RotorsInGUI = 10, SwapsInGUI = 5;
 		private const ushort TablesMax = 50, SwapsMax = 20; // Kolik tam může být maximálně tabulek a swapů, v GUI.
-		public C_VPE_Sett DataFromGUI = new();
-		private List<C_UC_Table> DataForRotors;
+		public C_VPE_Sett DataFromGUI;
 		public VPESettingsComp (ref VPE_VM VModel)
 		{
 			InitializeComponent ();
 			VPE = VModel;
+			DataFromGUI = VPE.DataFromGUI_Sett;
 			DataContext = DataFromGUI;
-			InitialRotorPopulation();
+			InitialRotorPopulation(RotorsInGUI);
 		}
 		#region GUI eventy
 		private void B_Submit_Click (object sender, RoutedEventArgs e)
@@ -41,12 +41,8 @@ namespace GUI
 		{
 			if (DataFromGUI.RotorGenCountNum is not null)
 			{
-				VPE?.GenerateRotors(DataFromGUI.RotorGenCountNum.Value);
-				foreach (UC_Table rotor in SP_Rotors.Children)
-				{
-					rotor.UpdateRotorList(VPE.Rotors);
-				}
-				return;
+				VPE.GenerateRotors(DataFromGUI.RotorGenCountNum.Value);
+				VPE.UpdateRotorSelectors();
 			}
 		}
 
@@ -68,15 +64,10 @@ namespace GUI
 
 		private void B_Rotors_Add_Click(object sender, RoutedEventArgs e)
 		{
-			RotorsInGUI = Convert.ToUInt16(SP_Rotors.Children.Count);
 			if (RotorsInGUI < TablesMax)
 			{
-				UC_Table table = new()
-				{
-					Name = "UCT_" + (RotorsInGUI - 1).ToString(),
-				};
-				SP_Rotors.Children.Add(table);
-				B_Rotors_Add.IsEnabled = RotorsInGUI < TablesMax;
+
+				RotorsInGUI++;
 			}
 		}
 
@@ -87,6 +78,7 @@ namespace GUI
 				SP_Rotors.Children.RemoveAt(SP_Rotors.Children.Count - 1);
 				B_Rotors_Remove.IsEnabled = SP_Rotors.Children.Count > 0;
 			}
+			RotorsInGUI--;
 			B_Rotors_Remove.IsEnabled = RotorsInGUI > 0;
 		}
 
@@ -168,13 +160,22 @@ namespace GUI
 		private void B_AllRandom_Click(object sender, RoutedEventArgs e)
 		{
 			VPE.GenerateComplete();
-			DataFromGUI.SetUsingSettings(VPE.S);
+			DataFromGUI.SetUsingSettings(VPE.ActiveSett);
 		}
 		#endregion
 		#region Private
-		private void InitialRotorPopulation()
+		private void InitialRotorPopulation(ushort count)
 		{
-
+			VPE.InitializeRotorSelectors(count);
+			for (ushort i = 0; i < count; i++)
+			{
+				UC_Rotor rotor = new(VPE.DataFromGUI_Sett_Rotors[i])
+				{
+					Name = "UCR_" + i.ToString(),
+					DataContext = VPE.DataFromGUI_Sett_Rotors[i],
+				};
+				SP_Rotors.Children.Add(rotor);
+			}
 		}
 		#endregion
 	}

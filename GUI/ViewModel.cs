@@ -14,11 +14,16 @@ namespace GUI
 {
 	public class VPE_VM
 	{
+		#region Variables
 		private Generators Generator = new(Codepage.Limit, DateTime.Now.Ticks);
 		public SettingsLibrary SL = new();
 		public TableLibrary TL = new();
-		public Settings S;
+		public Settings ActiveSett;
 		public Crypto C;
+
+		internal C_VPE_Sett DataFromGUI_Sett = new();
+		internal List<C_UC_Rotor> DataFromGUI_Sett_Rotors = new();
+		internal C_VPE_SettSel DataFromGUI_SettSel = new();
 
 		private const string Invalid_File = "N/A";
 		private const string VPESL_filter = "VPE Settings Library files (*.vpesl)|*.vpesl";
@@ -29,6 +34,9 @@ namespace GUI
 		public List<uint> Rotors = new();
 		public List<ushort> Refls = new();
 		public List<ushort> Swaps = new();
+		#endregion
+
+		#region Public methods
 		/// <summary>Vygeneruje rotory.</summary>
 		/// <param name="count">Kolik rotorů?</param>
 		/// <returns>Seznam indexů vygenerovaných.</returns>
@@ -65,14 +73,16 @@ namespace GUI
 		/// <summary>Vygeneruje kompletní nastavení.</summary>
 		public void GenerateComplete()
 		{
-			S = Generator.GenerateSetts();
-			SL.Library.Add(S);
-
+			ActiveSett = Generator.GenerateSetts();
+			SL.Library.Add(ActiveSett);
+			TL.Rotors.AddRange(ActiveSett.Rotors);
+			TL.Reflectors.Add(ActiveSett.Reflector);
+			TL.Swaps.AddRange(ActiveSett.Swaps);
 		}
 
 		public void SelectRotors(List<ushort> tables, List<ushort> swaps, ushort reflector)
 		{
-			S = TL.Select(tables, swaps, reflector);
+			ActiveSett = TL.Select(tables, swaps, reflector);
 		}
 
 		public void LoadTables()
@@ -87,7 +97,7 @@ namespace GUI
 
 		public void LoadSpecific()
 		{
-			S = FileHandling.ReadSpecific(OpenFile(VPES_filter));
+			ActiveSett = FileHandling.ReadSpecific(OpenFile(VPES_filter));
 		}
 
 		public void SaveTables()
@@ -104,7 +114,7 @@ namespace GUI
 			string folder = GetFolder(SaveFile(VPES_filter));
 			if (folder != "N/A")
 			{
-				FileHandling.Save(S, folder);
+				FileHandling.Save(ActiveSett, folder);
 			}
 		}
 
@@ -126,13 +136,13 @@ namespace GUI
 
 		public string Encrypt(string inText)
 		{
-			C = new(S);
+			C = new(ActiveSett);
 			return C?.Encypt(inText);
 		}
 
 		public string Decrypt(string inText)
 		{
-			C = new(S);
+			C = new(ActiveSett);
 			return C?.Decypt(inText);
 		}
 
@@ -148,19 +158,44 @@ namespace GUI
 
 		public void QuickSettGen()
 		{
-			S = Generator.GenerateSetts();
+			ActiveSett = Generator.GenerateSetts();
 		}
 
 		public void QuickSettSave()
 		{
-			FileHandling.Save(S, SaveFile(VPES_filter));
+			FileHandling.Save(ActiveSett, SaveFile(VPES_filter));
 		}
 
 		public void QuickSettOpen()
 		{
-			S = FileHandling.ReadSpecific(OpenFile(VPES_filter));
+			ActiveSett = FileHandling.ReadSpecific(OpenFile(VPES_filter));
 		}
-		#region Obslužné metody
+
+		public void InitializeRotorSelectors(ushort count)
+		{
+			for (ushort i = 0; i < count; i++)
+			{
+				C_UC_Rotor rotor = new();
+				DataFromGUI_Sett_Rotors.Add(rotor);
+			}
+		}
+
+		public void UpdateRotorSelectors()
+		{
+			List<string> rotorNums = new();
+			foreach (Table rotor in TL.Rotors)
+			{
+				rotorNums.Add(rotor.Idx.ToString());
+			}
+			foreach (C_UC_Rotor rotorList in DataFromGUI_Sett_Rotors)
+			{
+				rotorList.RotorsStrs.Clear();
+				rotorList.RotorsStrs = rotorNums;
+			}
+		}
+		#endregion
+
+		#region Private methods
 		/// <summary>Zobrazí dialog otevření souboru a vrátí cestu k němu.</summary>
 		/// <param name="ext">Extensiona.</param>
 		/// <returns>Cesta k souboru.</returns>
@@ -211,7 +246,6 @@ namespace GUI
 			}
 			return path;
 		}
-		
 		#endregion
 	}
 

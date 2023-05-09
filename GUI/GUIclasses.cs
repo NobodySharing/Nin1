@@ -422,10 +422,11 @@ namespace GUI
 		}
 	}
 
-	public class C_UC_Table : INotifyPropertyChanged
+	public class C_UC_Rotor : INotifyPropertyChanged
 	{
 		private string PozitionStrV;
 		private List<string> RotorsV = new();
+		private string SelectedRStrV;
 		private int SelectedRIdxV;
 		public string PozitionStr
 		{
@@ -486,11 +487,79 @@ namespace GUI
 				}
 			}
 		}
+		public string SelectedRStr
+		{
+			get
+			{
+				return SelectedRStrV;
+			}
+			set
+			{
+				if (SelectedRStrV != value)
+				{
+					SelectedRStrV = value;
+					OnPropertyChanged("SelectedRStr");
+				}
+			}
+		}
+		public ushort? SelectedRNum
+		{
+			get
+			{
+				if (ushort.TryParse(SelectedRStrV, out ushort num))
+				{
+					return num;
+				}
+				else
+				{
+					return null; // Neplatné číslo.
+				}
+			}
+		}
+
+
 		public event PropertyChangedEventHandler PropertyChanged;
 		private void OnPropertyChanged(string info)
 		{
 			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(info));
 		}
 	}
+
+	public class C_VPE_SettSel : INotifyPropertyChanged
+	{
+		private List<string> SettsV = new();
+		public List<string> SettsStrs
+		{
+			get
+			{
+				return SettsV;
+			}
+			set
+			{
+				if (SettsV != value)
+				{
+					SettsV = value;
+					OnPropertyChanged("SettsStrs");
+				}
+			}
+		}
+		public event PropertyChangedEventHandler PropertyChanged;
+		private void OnPropertyChanged(string info)
+		{
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(info));
+		}
+	}
+	#endregion
+
+	#region Neue DT
+	#endregion
+
+	#region DT calc
+	#endregion
+
+	#region Factorizator
+	#endregion
+
+	#region Mapy.cz downloader
 	#endregion
 }

@@ -24,6 +24,7 @@ namespace VPE
 			decimal[] ABM = GenerateABM();
 			Settings settings = new()
 			{
+				Name = "Settings automatically generated at " + DateTime.Now.ToString("u"),
 				Reflector = GeneratePairs(0),
 				RandCharConstA = ABM[0],
 				RandCharConstB = ABM[1],
