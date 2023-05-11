@@ -19,8 +19,7 @@ namespace GUI
 	public partial class VPESettingsComp : Window
 	{
 		private readonly VPE_VM VPE;
-		private ushort RotorsInGUI = 10, SwapsInGUI = 5;
-		private const ushort TablesMax = 50, SwapsMax = 20; // Kolik tam může být maximálně tabulek a swapů, v GUI.
+		private const ushort TablesMax = 50, SwapsMax = 25; // Kolik tam může být maximálně tabulek a swapů, v GUI.
 		public C_VPE_Sett DataFromGUI;
 		public VPESettingsComp (ref VPE_VM VModel)
 		{
@@ -28,12 +27,13 @@ namespace GUI
 			VPE = VModel;
 			DataFromGUI = VPE.DataFromGUI_Sett;
 			DataContext = DataFromGUI;
-			InitialRotorPopulation(RotorsInGUI);
+			InitialRotorPopulation(10);
+			InitialSwapsPopulation(5);
 		}
 		#region GUI eventy
 		private void B_Submit_Click (object sender, RoutedEventArgs e)
-		{ // ToDo: Everything.
-			
+		{
+			VPE.ChangeActiveSetts();
 			Close ();
 		}
 
@@ -64,10 +64,19 @@ namespace GUI
 
 		private void B_Rotors_Add_Click(object sender, RoutedEventArgs e)
 		{
-			if (RotorsInGUI < TablesMax)
+			if (SP_Rotors.Children.Count < TablesMax)
 			{
-
-				RotorsInGUI++;
+				C_UC_Rotor DataForRotorGUI = new()
+				{
+					RotorsStrs = VPE.DataFromGUI_Sett_Rotors[0].RotorsStrs,
+				};
+				VPE.DataFromGUI_Sett_Rotors.Add(DataForRotorGUI);
+				UC_Rotor GUIRotor = new()
+				{
+					Name = "UCR_" + (SP_Rotors.Children.Count - 1).ToString(),
+					DataContext = VPE.DataFromGUI_Sett_Rotors.Last(),
+				};
+				SP_Rotors.Children.Add(GUIRotor);
 			}
 		}
 
@@ -76,24 +85,17 @@ namespace GUI
 			if (SP_Rotors.Children.Count > 0)
 			{
 				SP_Rotors.Children.RemoveAt(SP_Rotors.Children.Count - 1);
+				VPE.DataFromGUI_Sett_Rotors.Remove(VPE.DataFromGUI_Sett_Rotors.Last());
 				B_Rotors_Remove.IsEnabled = SP_Rotors.Children.Count > 0;
 			}
-			RotorsInGUI--;
-			B_Rotors_Remove.IsEnabled = RotorsInGUI > 0;
 		}
 
 		private void B_Swaps_Add_Click(object sender, RoutedEventArgs e)
 		{
-			SwapsInGUI = Convert.ToUInt16(SP_Swaps.Children.Count);
-			if (SwapsInGUI < SwapsMax)
+			if (SP_Swaps.Children.Count < SwapsMax)
 			{
-				ComboBox swap = new()
-				{
-					Name = "CB_Swap_" + (SwapsInGUI - 1).ToString(),
-					ItemsSource = VPE.Swaps,
-				};
-				SP_Swaps.Children.Add(swap);
-				B_Swaps_Add.IsEnabled = SwapsInGUI < SwapsMax;
+				SP_Swaps.Children.Add(ConstructCBSwap((ushort)SP_Swaps.Children.Count));
+				B_Swaps_Add.IsEnabled = SP_Swaps.Children.Count < SwapsMax;
 			}
 		}
 
@@ -102,9 +104,10 @@ namespace GUI
 			if (SP_Swaps.Children.Count > 0)
 			{
 				SP_Swaps.Children.RemoveAt(SP_Swaps.Children.Count - 1);
+				VPE.DataFromGUI_Swaps.RemoveAt(SP_Swaps.Children.Count);
 				B_Swaps_Remove.IsEnabled = SP_Swaps.Children.Count > 0;
 			}
-			B_Swaps_Add.IsEnabled = SwapsInGUI > 0;
+			B_Swaps_Add.IsEnabled = SP_Swaps.Children.Count > 0;
 		}
 
 		private void B_Save_Click(object sender, RoutedEventArgs e)
@@ -176,6 +179,36 @@ namespace GUI
 				};
 				SP_Rotors.Children.Add(rotor);
 			}
+		}
+
+		private void InitialSwapsPopulation(ushort count)
+		{
+			VPE.InitializeSwapSelectors(count);
+			for (ushort i = 0; i < count; i++)
+			{
+				SP_Swaps.Children.Add(ConstructCBSwap(i));
+			}
+		}
+
+		private ComboBox ConstructCBSwap(ushort index)
+		{
+			Binding items = new("C_VPE_ComboBox")
+			{
+				Mode = BindingMode.OneWay,
+				Source = VPE.DataFromGUI_Swaps[index].ItemsStrs,
+			};
+			Binding selected = new("C_VPE_ComboBox")
+			{
+				Mode = BindingMode.TwoWay,
+				Source = VPE.DataFromGUI_Swaps[index].SelectedStr,
+			};
+			ComboBox swap = new()
+			{
+				Name = "CB_Swap_" + index.ToString(),
+			};
+			swap.SetBinding(ComboBox.ItemsSourceProperty, items);
+			swap.SetBinding(ComboBox.SelectedValueProperty, selected);
+			return swap;
 		}
 		#endregion
 	}

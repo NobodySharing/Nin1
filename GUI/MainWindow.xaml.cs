@@ -48,7 +48,7 @@ namespace GUI
 
 		private void MI_VPE_SettingsSel_Click(object sender, RoutedEventArgs e)
 		{
-			VPESettingsSelector = new(ref VPE);
+			VPESettingsSelector = new(ref VPE.DataFromGUI_SettSel);
 			VPESettingsSelector.Show();
 		}
 
@@ -64,7 +64,7 @@ namespace GUI
 
 		private void MI_VPE_QuickSettSave_Click(object sender, RoutedEventArgs e) => VPE.QuickSettSave();
 
-		private void MI_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e) => VPE.QuickSettOpen();
+		private void MI_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e) => VPE.LoadSpecific();
 		#endregion
 
 		#region NeueDT

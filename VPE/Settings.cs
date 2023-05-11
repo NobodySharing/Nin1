@@ -312,13 +312,13 @@ namespace VPE
 			Reflectors.AddRange(settingsStorage?.Reflectors);
 		}
 
-		public Settings Select (List<ushort> tables, List<ushort> swaps, int refl)
+		public Settings Select (List<ushort> rotors, List<ushort> swaps, int refl)
 		{
 			Settings s = new()
 			{
 				Reflector = Reflectors[refl],
 			};
-			foreach (ushort i in tables)
+			foreach (ushort i in rotors)
 			{
 				s.Rotors.Add(Rotors[i]);
 			}

@@ -19,7 +19,11 @@
 			<ColumnDefinition Width="4*"/>
 			<ColumnDefinition Width="4*"/>
 		</Grid.ColumnDefinitions>
-		<GroupBox x:Name="GB_Rotors" Grid.Column="0" Header="Rotors settings" Grid.RowSpan="2">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="30"/>
+			<RowDefinition Height="1*"/>
+		</Grid.RowDefinitions>
+		<GroupBox x:Name="GB_Rotors" Grid.Column="0" Grid.Row="1" Header="Rotors settings" Grid.RowSpan="2">
 			<Grid>
 				<Grid.RowDefinitions>
 					<RowDefinition Height="20 px"/>
@@ -45,18 +49,14 @@
 				</StackPanel>
 			</Grid>
 		</GroupBox>
-		<GroupBox x:Name="GB_Swaps" Grid.Column="1" Header="Swap settings">
+		<GroupBox x:Name="GB_Swaps" Grid.Column="1" Grid.Row="1" Header="Swap settings">
 			<Grid>
 				<Grid.RowDefinitions>
 					<RowDefinition Height="1*"/>
 					<RowDefinition Height="20 px"/>
 				</Grid.RowDefinitions>
 				<StackPanel x:Name="SP_Swaps" Grid.Row="0">
-					<ComboBox x:Name="CB_Swap_0" Margin="4, 4, 4, 0" ItemsSource="{Binding Path=Swaps, Mode=OneWay}"/>
-					<ComboBox x:Name="CB_Swap_1" Margin="4, 4, 4, 0" ItemsSource="{Binding Path=Swaps, Mode=OneWay}"/>
-					<ComboBox x:Name="CB_Swap_2" Margin="4, 4, 4, 0" ItemsSource="{Binding Path=Swaps, Mode=OneWay}"/>
-					<ComboBox x:Name="CB_Swap_3" Margin="4, 4, 4, 0" ItemsSource="{Binding Path=Swaps, Mode=OneWay}"/>
-					<ComboBox x:Name="CB_Swap_4" Margin="4, 4, 4, 0" ItemsSource="{Binding Path=Swaps, Mode=OneWay}"/>
+					
 				</StackPanel>
 				<StackPanel Grid.Row="1" Orientation="Horizontal">
 					<Button x:Name="B_Swaps_Add" Grid.Row="1" Content="Add" HorizontalAlignment="Left" Click="B_Swaps_Add_Click" Margin="4, 0, 2, 0" Padding="2, 0, 2, 0"/>
@@ -64,16 +64,16 @@
 				</StackPanel>
 			</Grid>
 		</GroupBox>
-		<Grid Grid.Column="2">
+		<Grid Grid.Column="2" Grid.Row="1">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="55 px"/>
 				<RowDefinition Height="1*"/>
 				<RowDefinition Height="1*"/>
-				<RowDefinition Height="3*"/>
+				<RowDefinition Height="5*"/>
 			</Grid.RowDefinitions>
 			<GroupBox Grid.Row="0" Header="Reflector">
 				<StackPanel>
-					<ComboBox x:Name="CB_Reflector" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,5" Height="21" ItemsSource="{Binding Path=Refls, Mode=OneWay}"/>
+					<ComboBox x:Name="CB_Reflector" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5" MaxHeight="21" ItemsSource="{Binding Path=Refls, Mode=OneWay}" SelectedItem="{Binding Path=SelReflStr, Mode=TwoWay}"/>
 				</StackPanel>
 			</GroupBox>
 			<GroupBox Grid.Row="1" Header="Constant shift">
@@ -127,13 +127,13 @@
 							<TextBox x:Name="TB_RndCharB" Margin="3" Grid.Row="1" Grid.Column="1" Text="{Binding Path=RandCharGenBStr, Mode=TwoWay}"/>
 							<TextBlock Text="M:" Grid.Row="2" Grid.Column="0" Margin="5"/>
 							<TextBox x:Name="TB_RndCharM" Margin="3" Grid.Row="2" Grid.Column="1" Text="{Binding Path=RandCharGenMStr, Mode=TwoWay}"/>
-							<Button x:Name="B_GenRNDConsts" Content="Generate random constants" Margin="10" Click="B_GenRNDConsts_Click" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"/>
+							<Button x:Name="B_GenRNDConsts" Content="Generate random constants" Margin="10" Click="B_GenRNDConsts_Click" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" MaxHeight="25" MaxWidth="180" VerticalAlignment="Top"/>
 						</Grid>
 					</GroupBox>
 				</Grid>
 			</GroupBox>
 		</Grid>
-		<Grid Grid.Column="3">
+		<Grid Grid.Column="3" Grid.Row="1">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="2*"/>
 				<RowDefinition Height="1*"/>

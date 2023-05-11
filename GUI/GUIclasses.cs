@@ -55,8 +55,6 @@ namespace GUI
 	#region VPE
 	public class C_VPE_Sett : INotifyPropertyChanged
 	{
-		private List<ushort> SwapsV = new();
-		private List<ushort> ReflsV = new();
 		private string ConstShiftStrV;
 		private string VarShiftStrV;
 		private string RandCharSpcMinStrV;
@@ -67,6 +65,7 @@ namespace GUI
 		private string RotorGenCountStrV;
 		private string SwapGenCountStrV;
 		private string ReflGenCountStrV;
+		private string SelReflStrV;
 		private string NameStrV;
 		
 		public string ConstShiftStr
@@ -359,6 +358,35 @@ namespace GUI
 				}
 			}
 		}
+		public string SelReflStr
+		{
+			get
+			{
+				return SelReflStrV;
+			}
+			set
+			{
+				if (SelReflStrV != value)
+				{
+					SelReflStrV = value;
+					OnPropertyChanged("SelReflStr");
+				}
+			}
+		}
+		public ushort? SelReflNum
+		{
+			get
+			{
+				if (ushort.TryParse(SelReflStrV, out ushort num))
+				{
+					return num;
+				}
+				else
+				{
+					return null; // Neplatné číslo.
+				}
+			}
+		}
 		public string NameStr
 		{
 			get
@@ -374,37 +402,7 @@ namespace GUI
 				}
 			}
 		}
-		public List<ushort> Swaps
-		{
-			get
-			{
-				return SwapsV;
-			}
-			set
-			{
-				if (SwapsV != value)
-				{
-					SwapsV = value;
-					OnPropertyChanged("Swaps");
-				}
-			}
-		}
-		public List<ushort> Refls
-		{
-			get
-			{
-				return ReflsV;
-			}
-			set
-			{
-				if (ReflsV != value)
-				{
-					ReflsV = value;
-					OnPropertyChanged("Refls");
-				}
-			}
-		}
-
+		
 		public void	SetUsingSettings(Settings s)
 		{
 			ConstShiftStr = s.ConstShift.ToString();
@@ -525,21 +523,51 @@ namespace GUI
 		}
 	}
 
-	public class C_VPE_SettSel : INotifyPropertyChanged
+	public class C_VPE_ComboBox : INotifyPropertyChanged
 	{
-		private List<string> SettsV = new();
-		public List<string> SettsStrs
+		private List<string> ItemsStrsV = new();
+		private string SelectedStrV;
+		public List<string> ItemsStrs
 		{
 			get
 			{
-				return SettsV;
+				return ItemsStrsV;
 			}
 			set
 			{
-				if (SettsV != value)
+				if (ItemsStrsV != value)
 				{
-					SettsV = value;
-					OnPropertyChanged("SettsStrs");
+					ItemsStrsV = value;
+					OnPropertyChanged("ItemsStrs");
+				}
+			}
+		}
+		public string SelectedStr
+		{
+			get
+			{
+				return SelectedStrV;
+			}
+			set
+			{
+				if (SelectedStrV != value)
+				{
+					SelectedStrV = value;
+					OnPropertyChanged("SelectedStr");
+				}
+			}
+		}
+		public ushort? SelectedNum
+		{
+			get
+			{
+				if (ushort.TryParse(SelectedStrV, out ushort num))
+				{
+					return num;
+				}
+				else
+				{
+					return null; // Neplatné číslo.
 				}
 			}
 		}

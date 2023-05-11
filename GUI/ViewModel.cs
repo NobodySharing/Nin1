@@ -15,7 +15,7 @@ namespace GUI
 	public class VPE_VM
 	{
 		#region Variables
-		private Generators Generator = new(Codepage.Limit, DateTime.Now.Ticks);
+		private readonly Generators Generator = new(Codepage.Limit, DateTime.Now.Ticks);
 		public SettingsLibrary SL = new();
 		public TableLibrary TL = new();
 		public Settings ActiveSett;
@@ -23,7 +23,9 @@ namespace GUI
 
 		internal C_VPE_Sett DataFromGUI_Sett = new();
 		internal List<C_UC_Rotor> DataFromGUI_Sett_Rotors = new();
-		internal C_VPE_SettSel DataFromGUI_SettSel = new();
+		internal List<C_VPE_ComboBox> DataFromGUI_Swaps = new();
+		internal C_VPE_ComboBox DataFromGUI_Refl = new();
+		internal C_VPE_ComboBox DataFromGUI_SettSel = new();
 
 		private const string Invalid_File = "N/A";
 		private const string VPESL_filter = "VPE Settings Library files (*.vpesl)|*.vpesl";
@@ -74,15 +76,36 @@ namespace GUI
 		public void GenerateComplete()
 		{
 			ActiveSett = Generator.GenerateSetts();
-			SL.Library.Add(ActiveSett);
-			TL.Rotors.AddRange(ActiveSett.Rotors);
-			TL.Reflectors.Add(ActiveSett.Reflector);
-			TL.Swaps.AddRange(ActiveSett.Swaps);
+			AddActiveSettsToLib();
 		}
 
-		public void SelectRotors(List<ushort> tables, List<ushort> swaps, ushort reflector)
+		public void SelectRotors(List<ushort> rotors, List<ushort> swaps, ushort reflector)
 		{
-			ActiveSett = TL.Select(tables, swaps, reflector);
+			ActiveSett = TL.Select(rotors, swaps, reflector);
+		}
+
+		public void ChangeActiveSetts()
+		{
+			List<ushort> rotors = new(), pozs = new(), swaps = new();
+			foreach (C_UC_Rotor rotor in DataFromGUI_Sett_Rotors)
+			{ // Potenciálně problematické:
+				rotors.Add(rotor.SelectedRNum.Value);
+				pozs.Add(rotor.PozitionNum.Value);
+			}
+			foreach (C_VPE_ComboBox swap in DataFromGUI_Swaps)
+			{ // Potenciálně problematické:
+				swaps.Add(swap.SelectedNum.Value);
+			}
+			ActiveSett = TL.Select(rotors, swaps, DataFromGUI_Refl.SelectedNum.Value);
+			ActiveSett.ChangePozitions(pozs);
+			ActiveSett.Name = DataFromGUI_Sett.NameStr;
+			ActiveSett.ConstShift = DataFromGUI_Sett.ConstShiftNum.Value;
+			ActiveSett.VarShift = DataFromGUI_Sett.VarShiftNum.Value;
+			ActiveSett.RandCharConstA = DataFromGUI_Sett.RandCharGenANum.Value;
+			ActiveSett.RandCharConstB = DataFromGUI_Sett.RandCharGenBNum.Value;
+			ActiveSett.RandCharConstM = DataFromGUI_Sett.RandCharGenMNum.Value;
+			ActiveSett.RandCharSpcMin = DataFromGUI_Sett.RandCharSpcMinNum.Value;
+			ActiveSett.RandCharSpcMax = DataFromGUI_Sett.RandCharSpcMaxNum.Value;
 		}
 
 		public void LoadTables()
@@ -98,6 +121,7 @@ namespace GUI
 		public void LoadSpecific()
 		{
 			ActiveSett = FileHandling.ReadSpecific(OpenFile(VPES_filter));
+			AddActiveSettsToLib();
 		}
 
 		public void SaveTables()
@@ -159,16 +183,12 @@ namespace GUI
 		public void QuickSettGen()
 		{
 			ActiveSett = Generator.GenerateSetts();
+			AddActiveSettsToLib();
 		}
 
 		public void QuickSettSave()
 		{
 			FileHandling.Save(ActiveSett, SaveFile(VPES_filter));
-		}
-
-		public void QuickSettOpen()
-		{
-			ActiveSett = FileHandling.ReadSpecific(OpenFile(VPES_filter));
 		}
 
 		public void InitializeRotorSelectors(ushort count)
@@ -177,6 +197,15 @@ namespace GUI
 			{
 				C_UC_Rotor rotor = new();
 				DataFromGUI_Sett_Rotors.Add(rotor);
+			}
+		}
+
+		public void InitializeSwapSelectors(ushort count)
+		{
+			for (ushort i = 0; i < count; i++)
+			{
+				C_VPE_ComboBox swap = new();
+				DataFromGUI_Swaps.Add(swap);
 			}
 		}
 
@@ -245,6 +274,14 @@ namespace GUI
 				return path[..(idx + 1)];
 			}
 			return path;
+		}
+
+		private void AddActiveSettsToLib ()
+		{
+			SL.Library.Add(ActiveSett);
+			TL.Reflectors.Add(ActiveSett.Reflector);
+			TL.Rotors.AddRange(ActiveSett.Rotors);
+			TL.Swaps.AddRange(ActiveSett.Swaps);
 		}
 		#endregion
 	}

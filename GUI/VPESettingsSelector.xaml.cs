@@ -16,8 +16,8 @@ namespace GUI
 {
 	public partial class VPESettingsSelector : Window
 	{
-		private VPE_VM DataFromGUI;
-		public VPESettingsSelector(ref VPE_VM model)
+		private C_VPE_ComboBox DataFromGUI;
+		public VPESettingsSelector(ref C_VPE_ComboBox model)
 		{
 			InitializeComponent();
 			DataFromGUI = model;
