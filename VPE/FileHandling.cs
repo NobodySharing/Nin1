@@ -3,157 +3,90 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Windows.Shapes;
 
 namespace VPE
 {
 	public static class FileHandling
 	{
-		public const string FileExtSS = ".vpess"; // Very primitive encryption settings storage.
+		public const string FileExtSL = ".vpesl"; // Very primitive encryption setiings library.
+		public const string FileExtTL = ".vpetl"; // Very primitive encryption table library.
 		public const string FileExtS = ".vpes"; // Very primitive encryption settings.
 		public const string FileExtTXT = ".txt";
-		/// <summary>Uloží třídu úložiště nastavení.</summary>
-		/// <param name="what">Třída úložiště nastavení.</param>
-		/// <param name="where">Kam – složka!</param>
-		public static void Save(TableLibrary what, string where)
+		/// <summary>Saves an instance of SettingsLibrary class.</summary>
+		/// <param name="what">SettingsLibrary class.</param>
+		/// <param name="where">Path to a file to be created.</param>
+		public static void Save(SettingsLibrary what, string where)
 		{
-			IEnumerable<string> myFiles = Directory.EnumerateFiles(where, "*" + FileExtSS);
-			string finalFileName;
-			if (myFiles.Count() == 0)
+			if(where.EndsWith(FileExtSL))
 			{
-				finalFileName = where.EndsWith('\\') ? where + "00000" + FileExtSS : where + '\\' + "00000" + FileExtSS;
-				WriteAll(what, finalFileName);
-				return;
+				File.WriteAllBytes(where, what.ToBytes());
 			}
 			else
 			{
-				string fileName;
-				if (myFiles.Count() == 1)
-				{
-					fileName = Path.GetFileName(myFiles.First());
-					if (uint.TryParse(fileName.AsSpan(0, fileName.Length - 6), out uint name))
-					{
-						if (name == 0)
-						{
-							finalFileName = where.EndsWith('\\') ? where + "00001" + FileExtSS : where + '\\' + "00001" + FileExtSS;
-							WriteAll(what, finalFileName);
-							return;
-						}
-						else
-						{
-							finalFileName = where.EndsWith('\\') ? where + "00000" + FileExtSS : where + '\\' + "00000" + FileExtSS;
-							WriteAll(what, finalFileName);
-							return;
-						}
-					}
-				}
-				else
-				{
-					List<uint> fileNums = new();
-					foreach (string file in myFiles)
-					{
-						fileName = Path.GetFileName(file);
-						string onlyFileName = fileName.AsSpan(0, fileName.Length - 6).ToString();
-						if (uint.TryParse(onlyFileName, out uint name))
-						{
-							fileNums.Add(name);
-						}
-					}
-					fileNums = fileNums.OrderBy(x => x).ToList();
-					for (uint i = 0; i <= fileNums.Max() + 1; i++)
-					{
-						if (fileNums.Contains(i))
-						{
-							continue;
-						}
-						else
-						{
-							finalFileName = where.EndsWith('\\') ? where + i.ToString("00000") + FileExtSS : where + '\\' + i.ToString("00000") + FileExtSS;
-							WriteAll(what, finalFileName);
-							return;
-						}
-					}
-					finalFileName = where.EndsWith('\\') ? where + fileNums.Max().ToString("00000") + FileExtSS : where + '\\' + fileNums.Max().ToString("00000") + FileExtSS;
-					WriteAll(what, finalFileName);
-					return;
-				}
+				DirectoryInfo di = new(where);
+				// ToDo: everyhting.
 			}
 		}
-		/// <summary>Uloží třídu nastavení.</summary>
-		/// <param name="what">Třída nastavení.</param>
-		/// <param name="where">Kam – složka!</param>
+		/// <summary>Saves an instance of TableLibrary class.</summary>
+		/// <param name="what">TableLibrary class.</param>
+		/// <param name="where">Path to a file to be created.</param>
+		public static void Save(TableLibrary what, string where)
+		{
+			if (where.EndsWith(FileExtTL))
+			{
+				File.WriteAllBytes(where, what.ToBytes());
+			}
+			else
+			{
+				DirectoryInfo di = new(where);
+				// ToDo: everyhting.
+			}
+		}
+		/// <summary>Saves an instance of Settings class.</summary>
+		/// <param name="what">Settings class.</param>
+		/// <param name="where">Path to a file to be created.</param>
 		public static void Save(Settings what, string where)
 		{
 			if (where.EndsWith(FileExtS))
 			{
-				WriteAll(what, where);
-				return;
-			}
-			IEnumerable<string> myFiles = Directory.EnumerateFiles(where, "*" + FileExtS);
-			string finalFileName;
-			if (!myFiles.Any())
-			{
-				finalFileName = where.EndsWith('\\') ? where + "00000" + FileExtS : where + '\\' + "00000" + FileExtS;
-				WriteAll(what, finalFileName);
-				return;
+				File.WriteAllBytes(where, what.ToBytes());
 			}
 			else
 			{
-				string fileName;
-				if (myFiles.Count() == 1)
-				{
-					fileName = Path.GetFileName(myFiles.First());
-					if (uint.TryParse(fileName.AsSpan(0, fileName.Length - 6), out uint name))
-					{
-						if (name == 0)
-						{
-							finalFileName = where.EndsWith('\\') ? where + "00001" + FileExtS : where + '\\' + "00001" + FileExtS;
-							WriteAll(what, finalFileName);
-							return;
-						}
-						else
-						{
-							finalFileName = where.EndsWith('\\') ? where + "00000" + FileExtS : where + '\\' + "00000" + FileExtS;
-							WriteAll(what, finalFileName);
-							return;
-						}
-					}
-				}
-				else
-				{
-					List<uint> fileNums = new();
-					foreach (string file in myFiles)
-					{
-						fileName = Path.GetFileName(file);
-						string onlyFileName = fileName.AsSpan(0, fileName.Length - 6).ToString();
-						if (uint.TryParse(onlyFileName, out uint name))
-						{
-							fileNums.Add(name);
-						}
-					}
-					fileNums = fileNums.OrderBy(x => x).ToList();
-					for (uint i = 0; i <= fileNums.Max() + 1; i++)
-					{
-						if (fileNums.Contains(i))
-						{
-							continue;
-						}
-						else
-						{
-							finalFileName = where.EndsWith('\\') ? where + i.ToString("00000") + FileExtS : where + '\\' + i.ToString("00000") + FileExtS;
-							WriteAll(what, finalFileName);
-							return;
-						}
-					}
-					finalFileName = where.EndsWith('\\') ? where + fileNums.Max().ToString("00000") + FileExtS : where + '\\' + fileNums.Max().ToString("00000") + FileExtS;
-					WriteAll(what, finalFileName);
-					return;
-				}
+				DirectoryInfo di = new(where);
+				// ToDo: everyhting.
 			}
 		}
-
-		public static TableLibrary ReadAll(string path)
+		/// <summary>Loads SettingsLibrary from a location.</summary>
+		/// <param name="filename">Path to SettingsLibrary.</param>
+		/// <param name="sl">SettingsLibrary loaded from disk.</param>
+		/// <returns>If the load was successful.</returns>
+		public static bool Load (string filename, out SettingsLibrary sl)
 		{
-			return new TableLibrary(File.ReadAllBytes(path));
+			sl = new(File.ReadAllBytes(filename));
+
+			return true;
+		}
+		/// <summary>Loads TableLibrary from a location.</summary>
+		/// <param name="filename">Path to TableLibrary.</param>
+		/// <param name="tl">TableLibrary loaded from disk.</param>
+		/// <returns>If the load was successful.</returns>
+		public static bool Load(string filename, out TableLibrary tl)
+		{
+			tl = new(File.ReadAllBytes(filename));
+			
+			return true;
+		}
+		/// <summary>Loads Settings from a location.</summary>
+		/// <param name="filename">Path to Settings.</param>
+		/// <param name="s">Settings loaded from disk.</param>
+		/// <returns>If the load was successful.</returns>
+		public static bool Load(string filename, out Settings s)
+		{
+			s = new(File.ReadAllBytes(filename));
+
+			return true;
 		}
 
 		public static Settings ReadSpecific(string path)
@@ -169,21 +102,6 @@ namespace VPE
 		public static void SaveText(string path, string text)
 		{
 			File.WriteAllText (path, text);
-		}
-
-		private static void WriteAll(TableLibrary tables, string path)
-		{
-			File.WriteAllBytes(path, tables.ToBytes());
-		}
-
-		private static void WriteAll(Settings settings, string path)
-		{
-			File.WriteAllBytes(path, settings.ToBytes());
-		}
-
-		private static void WriteAll(SettingsLibrary library, string path)
-		{
-			File.WriteAllBytes(path, library.ToBytes());
 		}
 	}
 }

@@ -11,21 +11,21 @@ namespace GUI
 	#region Main win
 	public class C_VPE_MainWin : INotifyPropertyChanged
 	{
-		private string VPE_NormalStrV;
+		private string VPE_PlainStrV;
 		private string VPE_EncrypStrV;
 		
-		public string VPE_NormalStr
+		public string VPE_PlainStr
 		{
 			get
 			{
-				return VPE_NormalStrV;
+				return VPE_PlainStrV;
 			}
 			set
 			{
-				if (VPE_NormalStrV != value)
+				if (VPE_PlainStrV != value)
 				{
-					VPE_NormalStrV = value;
-					OnPropertyChanged("VPE_NormalStr");
+					VPE_PlainStrV = value;
+					OnPropertyChanged("VPE_PlainStr");
 				}
 			}
 		}
@@ -402,7 +402,8 @@ namespace GUI
 				}
 			}
 		}
-		
+		/// <summary>Sets the GUI using Settings class instance. Sets only what it can.</summary>
+		/// <param name="s">Settings to use.</param>
 		public void	SetUsingSettings(Settings s)
 		{
 			ConstShiftStr = s.ConstShift.ToString();

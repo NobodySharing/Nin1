@@ -20,9 +20,22 @@
 			<ColumnDefinition Width="4*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="30"/>
+			<RowDefinition Height="25px"/>
 			<RowDefinition Height="1*"/>
 		</Grid.RowDefinitions>
+		<StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal">
+			<TextBlock Text="Name:" Margin="4"/>
+			<TextBox x:Name="TB_Name" Margin="5,3,5,2" MinWidth="150" Text="{Binding Path=NameStr, Mode=TwoWay}"/>
+			<TextBlock Text="Select settings:" Margin="4"/>
+			<ComboBox x:Name="CB_SettLib" Margin="0,3,0,2" MinWidth="300" ItemsSource="{Binding Path=ItemsStrs, Mode=OneWay}" SelectedItem="{Binding Path=SelectedStr, Mode=TwoWay}">
+				<ComboBox.Resources>
+					<local:C_VPE_ComboBox x:Key="DataFromGUI_Sett_Sel"/>
+				</ComboBox.Resources>
+				<ComboBox.DataContext>
+					<Binding Source="{StaticResource DataFromGUI_Sett_Sel}"/>
+				</ComboBox.DataContext>
+			</ComboBox>
+		</StackPanel>
 		<GroupBox x:Name="GB_Rotors" Grid.Column="0" Grid.Row="1" Header="Rotors settings" Grid.RowSpan="2">
 			<Grid>
 				<Grid.RowDefinitions>
@@ -72,7 +85,13 @@
 				<RowDefinition Height="5*"/>
 			</Grid.RowDefinitions>
 			<GroupBox Grid.Row="0" Header="Reflector">
-				<StackPanel>
+				<StackPanel x:Name="SP_Refls">
+					<StackPanel.Resources>
+						<local:C_VPE_ComboBox x:Key="DataFromGUI_Refl"/>
+					</StackPanel.Resources>
+					<StackPanel.DataContext>
+						<Binding Source="{StaticResource DataFromGUI_Refl}"/>
+					</StackPanel.DataContext>
 					<ComboBox x:Name="CB_Reflector" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5" MaxHeight="21" ItemsSource="{Binding Path=Refls, Mode=OneWay}" SelectedItem="{Binding Path=SelReflStr, Mode=TwoWay}"/>
 				</StackPanel>
 			</GroupBox>
@@ -135,25 +154,23 @@
 		</Grid>
 		<Grid Grid.Column="3" Grid.Row="1">
 			<Grid.RowDefinitions>
+				<RowDefinition Height="5*"/>
 				<RowDefinition Height="2*"/>
-				<RowDefinition Height="1*"/>
-				<RowDefinition Height="1*"/>
+				<RowDefinition Height="40px"/>
 			</Grid.RowDefinitions>
 			<GroupBox Grid.Row="0" Header="Settings storage">
 				<StackPanel Orientation="Vertical">
-					<StackPanel Orientation="Horizontal">
-						<TextBlock Text="Name:"/>
-						<TextBox x:Name="TB_Name" Margin="5,2,2,2" MinWidth="150" Text="{Binding Path=NameStr, Mode=TwoWay}"/>
-					</StackPanel>
-					<Button x:Name="B_Save" Content="Save all" Margin="2" Click="B_Save_Click"/>
-					<Button x:Name="B_Load" Content="Load all" Margin="2" Click="B_Load_Click"/>
-					<Button x:Name="B_LoadMerge" Content="Load and merge" Margin="2" Click="B_LoadMerge_Click"/>
-					<Button x:Name="B_Export_Current" Content="Export current settings to a file" Click="B_Exp_Click" Margin="2"/>
-					<Button x:Name="B_Import_Current" Content="Import settings from a file" Click="B_Imp_Click" Margin="2"/>
+					<CheckBox x:Name="ChB_Overwrite" Content="Overwrite current data after load" Margin="2" Click="ChB_Overwrite_Click"/>
+					<Button x:Name="B_SaveSett" Content="Save current settings to a file" Margin="2" Click="B_SaveSett_Click"/>
+					<Button x:Name="B_LoadSett" Content="Load settings from a file" Margin="2" Click="B_LoadSett_Click"/>
+					<Button x:Name="B_SaveSettLib" Content="Save current settings library to a file" Margin="2" Click="B_SaveSettLib_Click"/>
+					<Button x:Name="B_LoadSettLib" Content="Load settings library from a file" Click="B_LoadSettLib_Click" Margin="2"/>
+					<Button x:Name="B_SaveTableLib" Content="Save current table library to a file" Margin="2" Click="B_SaveTableLib_Click"/>
+					<Button x:Name="B_LoadTableLib" Content="Load table library from a file" Click="B_LoadTableLib_Click" Margin="2"/>
 				</StackPanel>
 			</GroupBox>
 			<GroupBox Grid.Row="1" Header="Generators">
-				<StackPanel>
+				<StackPanel Orientation="Vertical">
 					<StackPanel Orientation="Horizontal">
 						<Button x:Name="B_GenRotors" Content="Generate rotors" Margin="4, 2, 4, 2" MinWidth="112" Click="B_GenRotors_Click"/>
 						<TextBox x:Name="TB_GenRotorsCount" MinWidth="40" Text="{Binding Path=RotorGenCountStr, Mode=OneWayToSource}" Margin="4, 2, 4, 2"/>
@@ -166,18 +183,10 @@
 						<Button x:Name="B_GenSwaps" Content="Generate swaps" Margin="4, 2, 4, 2" MinWidth="112" Click="B_GenSwaps_Click"/>
 						<TextBox x:Name="TB_GenSwapsCount" MinWidth="40" Text="{Binding Path=SwapGenCountStr, Mode=OneWayToSource}" Margin="4, 2, 4, 2"/>
 					</StackPanel>
+					<Button x:Name="B_All_RND" Grid.Row="0" Content="All settings random" HorizontalAlignment="Left" VerticalAlignment="Top" Click="B_AllRandom_Click" MinWidth="112" Margin="4, 2, 4, 2"/>
 				</StackPanel>
 			</GroupBox>
-			<GroupBox Grid.Row="2" Header="Misc.">
-				<Grid>
-					<Grid.RowDefinitions>
-						<RowDefinition Height="1*"/>
-						<RowDefinition Height="30 px"/>
-					</Grid.RowDefinitions>
-					<Button x:Name="B_All_RND" Grid.Row="0" Content="All settings random" HorizontalAlignment="Left" VerticalAlignment="Top" Click="B_AllRandom_Click" Margin="4"/>
-					<Button x:Name="B_Submit" Grid.Row="1" Content="Submit" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="B_Submit_Click" Margin="2" Height="25px" Width="100px"/>
-				</Grid>
-			</GroupBox>
+			<Button x:Name="B_Submit" Grid.Row="2" Content="Submit" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="B_Submit_Click" Margin="5" Height="25px" Width="100px"/>
 		</Grid>
 	</Grid>
 </Window>

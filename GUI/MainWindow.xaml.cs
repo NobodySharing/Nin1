@@ -20,15 +20,17 @@ namespace GUI
 {
 	public partial class MainWindow : Window
 	{
-		public MainWindow ()
+		
+		#region Common
+		private C_VPE_MainWin DataFromGUI;
+		private PersistentStorage PS = new();
+
+		public MainWindow()
 		{
-			InitializeComponent ();
+			InitializeComponent();
+			DataFromGUI = new();
 			DataContext = DataFromGUI;
 		}
-		#region Common
-		private C_VPE_MainWin DataFromGUI = new();
-		private PersistentStorage PS = new();
-		
 		#endregion
 
 		#region VPE
@@ -36,9 +38,9 @@ namespace GUI
 		VPESettingsComp VPESettWin;
 		VPESettingsSelector VPESettingsSelector;
 
-		private void MI_VPE_Encrypt_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_EncrypStr = VPE.Encrypt(DataFromGUI.VPE_NormalStr);
+		private void MI_VPE_Encrypt_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_EncrypStr = VPE.Encrypt(DataFromGUI.VPE_PlainStr);
 
-		private void MI_VPE_Decrypt_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_NormalStr = VPE.Decrypt(DataFromGUI.VPE_EncrypStr);
+		private void MI_VPE_Decrypt_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_PlainStr = VPE.Decrypt(DataFromGUI.VPE_EncrypStr);
 
 		private void MI_VPE_SettingsComp_Click(object sender, RoutedEventArgs e)
 		{
@@ -46,25 +48,19 @@ namespace GUI
 			VPESettWin.Show();
 		}
 
-		private void MI_VPE_SettingsSel_Click(object sender, RoutedEventArgs e)
-		{
-			VPESettingsSelector = new(ref VPE.DataFromGUI_SettSel);
-			VPESettingsSelector.Show();
-		}
-
-		private void MI_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_NormalStr = VPE.OpenMsgFile();
+		private void MI_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_PlainStr = VPE.OpenMsgFile();
 
 		private void MI_VPE_OpenEncMsgFile_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_EncrypStr = VPE.OpenMsgFile();
 
 		private void MI_VPE_SaveEncMsgFile_Click(object sender, RoutedEventArgs e) => VPE.SaveMsgFile(DataFromGUI.VPE_EncrypStr);
 
-		private void MI_VPE_SaveUneMsgFile_Click(object sender, RoutedEventArgs e) => VPE.SaveMsgFile(DataFromGUI.VPE_NormalStr);
+		private void MI_VPE_SaveUneMsgFile_Click(object sender, RoutedEventArgs e) => VPE.SaveMsgFile(DataFromGUI.VPE_PlainStr);
 
 		private void MI_VPE_QuickSettGen_Click(object sender, RoutedEventArgs e) => VPE.QuickSettGen();
 
-		private void MI_VPE_QuickSettSave_Click(object sender, RoutedEventArgs e) => VPE.QuickSettSave();
+		private void MI_VPE_QuickSettSave_Click(object sender, RoutedEventArgs e) => VPE.SaveSettings();
 
-		private void MI_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e) => VPE.LoadSpecific();
+		private void MI_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e) => VPE.LoadSettings();
 		#endregion
 
 		#region NeueDT

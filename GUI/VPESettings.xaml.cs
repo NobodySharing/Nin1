@@ -20,13 +20,13 @@ namespace GUI
 	{
 		private readonly VPE_VM VPE;
 		private const ushort TablesMax = 50, SwapsMax = 25; // Kolik tam může být maximálně tabulek a swapů, v GUI.
-		public C_VPE_Sett DataFromGUI;
+		//public C_VPE_Sett DataFromGUI;
 		public VPESettingsComp (ref VPE_VM VModel)
 		{
 			InitializeComponent ();
 			VPE = VModel;
-			DataFromGUI = VPE.DataFromGUI_Sett;
-			DataContext = DataFromGUI;
+			DataContext = VPE.DataFromGUI_Sett;
+			SP_Refls.DataContext = VPE.DataFromGUI_Refl;
 			InitialRotorPopulation(10);
 			InitialSwapsPopulation(5);
 		}
@@ -39,62 +39,44 @@ namespace GUI
 
 		private void B_GenRotors_Click (object sender, RoutedEventArgs e)
 		{
-			if (DataFromGUI.RotorGenCountNum is not null)
+			if (VPE.DataFromGUI_Sett.RotorGenCountNum is not null)
 			{
-				VPE.GenerateRotors(DataFromGUI.RotorGenCountNum.Value);
+				VPE.GenerateRotors(VPE.DataFromGUI_Sett.RotorGenCountNum.Value);
 				VPE.UpdateRotorSelectors();
 			}
 		}
 
 		private void B_GenRefl_Click (object sender, RoutedEventArgs e)
 		{
-			if (DataFromGUI.ReflGenCountNum is not null)
+			if (VPE.DataFromGUI_Sett.ReflGenCountNum is not null)
 			{
-				VPE?.GenerateReflector(DataFromGUI.ReflGenCountNum.Value);
+				VPE?.GenerateReflector(VPE.DataFromGUI_Sett.ReflGenCountNum.Value);
 			}	
 		}
 
 		private void B_GenSwaps_Click (object sender, RoutedEventArgs e)
 		{
-			if (DataFromGUI.SwapGenCountNum is not null)
+			if (VPE.DataFromGUI_Sett.SwapGenCountNum is not null)
 			{
-				VPE?.GenerateSwaps(DataFromGUI.SwapGenCountNum.Value);
+				VPE?.GenerateSwaps(VPE.DataFromGUI_Sett.SwapGenCountNum.Value);
 			}
 		}
 
 		private void B_Rotors_Add_Click(object sender, RoutedEventArgs e)
 		{
-			if (SP_Rotors.Children.Count < TablesMax)
-			{
-				C_UC_Rotor DataForRotorGUI = new()
-				{
-					RotorsStrs = VPE.DataFromGUI_Sett_Rotors[0].RotorsStrs,
-				};
-				VPE.DataFromGUI_Sett_Rotors.Add(DataForRotorGUI);
-				UC_Rotor GUIRotor = new()
-				{
-					Name = "UCR_" + (SP_Rotors.Children.Count - 1).ToString(),
-					DataContext = VPE.DataFromGUI_Sett_Rotors.Last(),
-				};
-				SP_Rotors.Children.Add(GUIRotor);
-			}
+			AddRotorsGUI();
 		}
 
 		private void B_Rotors_Remove_Click(object sender, RoutedEventArgs e)
 		{
-			if (SP_Rotors.Children.Count > 0)
-			{
-				SP_Rotors.Children.RemoveAt(SP_Rotors.Children.Count - 1);
-				VPE.DataFromGUI_Sett_Rotors.Remove(VPE.DataFromGUI_Sett_Rotors.Last());
-				B_Rotors_Remove.IsEnabled = SP_Rotors.Children.Count > 0;
-			}
+			RemoveRotorsGUI();
 		}
 
 		private void B_Swaps_Add_Click(object sender, RoutedEventArgs e)
 		{
 			if (SP_Swaps.Children.Count < SwapsMax)
 			{
-				SP_Swaps.Children.Add(ConstructCBSwap((ushort)SP_Swaps.Children.Count));
+				SP_Swaps.Children.Add(ConstructCBSwap());
 				B_Swaps_Add.IsEnabled = SP_Swaps.Children.Count < SwapsMax;
 			}
 		}
@@ -110,60 +92,69 @@ namespace GUI
 			B_Swaps_Add.IsEnabled = SP_Swaps.Children.Count > 0;
 		}
 
-		private void B_Save_Click(object sender, RoutedEventArgs e)
+		private void B_SaveSett_Click(object sender, RoutedEventArgs e)
 		{
-			VPE?.SaveTables();
+			VPE.SaveSettings();
 		}
 
-		private void B_Load_Click(object sender, RoutedEventArgs e)
+		private void B_LoadSett_Click(object sender, RoutedEventArgs e)
 		{
-			VPE.LoadTables();
+			VPE.LoadSettings();
 		}
 
-		private void B_LoadMerge_Click(object sender, RoutedEventArgs e)
+		private void B_SaveSettLib_Click(object sender, RoutedEventArgs e)
 		{
-			VPE.LoadAndMerge();
+			VPE.SaveSettingsLib();
 		}
 
-		private void B_Exp_Click(object sender, RoutedEventArgs e)
+		private void B_LoadSettLib_Click(object sender, RoutedEventArgs e)
 		{
-			VPE?.SaveSpecific();
+			VPE.LoadSettingsLib();
 		}
 
-		private void B_Imp_Click(object sender, RoutedEventArgs e)
+		private void B_SaveTableLib_Click(object sender, RoutedEventArgs e)
 		{
-			VPE?.LoadSpecific();
+			VPE.SaveTableLib();
+		}
+
+		private void B_LoadTableLib_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.LoadTableLib();
 		}
 
 		private void B_GenerateConstShift_Click(object sender, RoutedEventArgs e)
 		{
-			DataFromGUI.ConstShiftStr = VPE?.GenerateRandNum().ToString();
+			VPE.DataFromGUI_Sett.ConstShiftStr = VPE.GenerateRandNum().ToString();
 		}
 
 		private void B_GenerateVarShift_Click(object sender, RoutedEventArgs e)
 		{
-			DataFromGUI.VarShiftStr = VPE?.GenerateRandNum().ToString();
+			VPE.DataFromGUI_Sett.VarShiftStr = VPE.GenerateRandNum().ToString();
 		}
 
 		private void B_RandCharSpc_Click(object sender, RoutedEventArgs e)
 		{
-			ushort[] space = VPE?.GenerateSpaceMinMax();
-			DataFromGUI.RandCharSpcMinStr = space[0].ToString();
-			DataFromGUI.RandCharSpcMaxStr = space[1].ToString();
+			VPE.GenerateSpaceMinMax();
 		}
 
 		private void B_GenRNDConsts_Click(object sender, RoutedEventArgs e)
 		{
-			decimal[] consts = VPE?.GenerateRNDConsts();
-			DataFromGUI.RandCharGenAStr = consts[0].ToString();
-			DataFromGUI.RandCharGenBStr = consts[1].ToString();
-			DataFromGUI.RandCharGenMStr = consts[2].ToString();
+			VPE.GenerateRNDConsts();
 		}
 
 		private void B_AllRandom_Click(object sender, RoutedEventArgs e)
 		{
 			VPE.GenerateComplete();
-			DataFromGUI.SetUsingSettings(VPE.ActiveSett);
+			SynchronizeRotorCount();
+			SynchronizeRotorSelAndPoz();
+			SynchronizeSwapCount();
+			SynchronizeSwapSel();
+			VPE.DataFromGUI_Refl.SelectedStr = VPE.ActiveSett.Reflector.Idx.ToString();
+		}
+
+		private void ChB_Overwrite_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.Overwrite = !VPE.Overwrite;
 		}
 		#endregion
 		#region Private
@@ -175,7 +166,6 @@ namespace GUI
 				UC_Rotor rotor = new(VPE.DataFromGUI_Sett_Rotors[i])
 				{
 					Name = "UCR_" + i.ToString(),
-					DataContext = VPE.DataFromGUI_Sett_Rotors[i],
 				};
 				SP_Rotors.Children.Add(rotor);
 			}
@@ -186,29 +176,126 @@ namespace GUI
 			VPE.InitializeSwapSelectors(count);
 			for (ushort i = 0; i < count; i++)
 			{
-				SP_Swaps.Children.Add(ConstructCBSwap(i));
+				SP_Swaps.Children.Add(ConstructCBSwap());
 			}
 		}
 
-		private ComboBox ConstructCBSwap(ushort index)
+		private ComboBox ConstructCBSwap()
 		{
 			Binding items = new("C_VPE_ComboBox")
 			{
 				Mode = BindingMode.OneWay,
-				Source = VPE.DataFromGUI_Swaps[index].ItemsStrs,
+				Source = VPE.DataFromGUI_Swaps[SP_Swaps.Children.Count].ItemsStrs,
 			};
 			Binding selected = new("C_VPE_ComboBox")
 			{
 				Mode = BindingMode.TwoWay,
-				Source = VPE.DataFromGUI_Swaps[index].SelectedStr,
+				Source = VPE.DataFromGUI_Swaps[SP_Swaps.Children.Count].SelectedStr,
 			};
 			ComboBox swap = new()
 			{
-				Name = "CB_Swap_" + index.ToString(),
+				Name = "CB_Swap_" + SP_Swaps.Children.Count.ToString(),
 			};
 			swap.SetBinding(ComboBox.ItemsSourceProperty, items);
 			swap.SetBinding(ComboBox.SelectedValueProperty, selected);
 			return swap;
+		}
+
+		private void SynchronizeRotorCount()
+		{
+			if (VPE.ActiveSett.Rotors.Count != SP_Rotors.Children.Count)
+			{
+				if (VPE.ActiveSett.Rotors.Count > SP_Rotors.Children.Count)
+				{
+					AddRotorsGUI(VPE.ActiveSett.Rotors.Count - SP_Rotors.Children.Count);
+				}
+				else
+				{
+					RemoveRotorsGUI(SP_Rotors.Children.Count - VPE.ActiveSett.Rotors.Count);
+				}
+			}
+		}
+		
+		private void AddRotorsGUI(int count = 1)
+		{
+			for (int i = 0; i <= count; i++)
+			{
+				if (SP_Rotors.Children.Count < TablesMax)
+				{
+					C_UC_Rotor DataForRotorGUI = new()
+					{
+						RotorsStrs = VPE.DataFromGUI_Sett_Rotors[0].RotorsStrs,
+					};
+					VPE.DataFromGUI_Sett_Rotors.Add(DataForRotorGUI);
+					UC_Rotor GUIRotor = new(DataForRotorGUI)
+					{
+						Name = "UCR_" + (SP_Rotors.Children.Count - 1).ToString(),
+					};
+					SP_Rotors.Children.Add(GUIRotor);
+				}
+			}
+		}
+
+		private void RemoveRotorsGUI(int count = 1)
+		{
+			for (int i = 0; i <= count; i++)
+			{
+				if (SP_Rotors.Children.Count > 0)
+				{
+					SP_Rotors.Children.RemoveAt(SP_Rotors.Children.Count - 1);
+					VPE.DataFromGUI_Sett_Rotors.Remove(VPE.DataFromGUI_Sett_Rotors.Last());
+					B_Rotors_Remove.IsEnabled = SP_Rotors.Children.Count > 0;
+				}
+			}
+		}
+
+		private void SynchronizeSwapCount()
+		{
+			if (VPE.ActiveSett.Swaps.Count != SP_Swaps.Children.Count)
+			{
+				if (VPE.ActiveSett.Swaps.Count > SP_Swaps.Children.Count)
+				{
+					AddSwapsGUI(VPE.ActiveSett.Swaps.Count - SP_Swaps.Children.Count);
+				}
+				else
+				{
+					RemoveSwapsGUI(SP_Swaps.Children.Count - VPE.ActiveSett.Swaps.Count);
+				}
+			}
+		}
+
+		private void AddSwapsGUI(int count = 1)
+		{
+			for (ushort i = 0; i < count; i++)
+			{
+				SP_Swaps.Children.Add(ConstructCBSwap());
+			}
+		}
+
+		private void RemoveSwapsGUI(int count = 1)
+		{
+			for (ushort i = 0; i < count; i++)
+			{
+				SP_Swaps.Children.RemoveAt(SP_Swaps.Children.Count - 1);
+				VPE.DataFromGUI_Swaps.RemoveAt(VPE.DataFromGUI_Swaps.Count - 1);
+			}
+		}
+
+		private void SynchronizeRotorSelAndPoz()
+		{
+			for(int i = 0; i < VPE.DataFromGUI_Sett_Rotors.Count; i++)
+			{
+				VPE.DataFromGUI_Sett_Rotors[i].SelectedRStr = VPE.ActiveSett.Rotors[i].Idx.ToString();
+				VPE.DataFromGUI_Sett_Rotors[i].PozitionStr = VPE.ActiveSett.Rotors[i].Pozition.ToString();
+			}
+		}
+
+		private void SynchronizeSwapSel()
+		{
+			for (int i = 0; i < VPE.DataFromGUI_Swaps.Count; i++)
+			{
+				VPE.DataFromGUI_Swaps[i].SelectedStr = VPE.ActiveSett.Swaps[i].Idx.ToString();
+			}
 		}
 		#endregion
 	}

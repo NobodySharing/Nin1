@@ -17,14 +17,14 @@ namespace VPE
 			Limit = Lim;
 			UpdateSeed(Seed);
 		}
-		/// <summary>Vygeneruje celou třídu nastavení.</summary>
-		/// <returns>Nastavení.</returns>
+		/// <summary>Generates complete instance of Settings class.</summary>
+		/// <returns>Settings.</returns>
 		public Settings GenerateSetts()
 		{
 			decimal[] ABM = GenerateABM();
 			Settings settings = new()
 			{
-				Name = "Settings automatically generated at " + DateTime.Now.ToString("u"),
+				Name = DateTime.Now.ToString("u") + " (automatically generated)",
 				Reflector = GeneratePairs(0),
 				RandCharConstA = ABM[0],
 				RandCharConstB = ABM[1],
@@ -228,7 +228,7 @@ namespace VPE
 			return result;
 		}
 
-		public ushort[] GenerateSpaceMinMax(ushort MinFrom = 4, ushort MinTo = 14, ushort MaxFrom = 16, ushort MaxTo = 30)
+		public ushort[] GenerateSpaceMinMax(ushort MinFrom = 2, ushort MinTo = 8, ushort MaxFrom = 10, ushort MaxTo = 20)
 		{
 			return new ushort[2] { (ushort)R.Next(MinFrom, MinTo), (ushort)R.Next(MaxFrom, MaxTo) };
 		}

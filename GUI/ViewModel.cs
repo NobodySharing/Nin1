@@ -20,22 +20,21 @@ namespace GUI
 		public TableLibrary TL = new();
 		public Settings ActiveSett;
 		public Crypto C;
-
+		public bool Overwrite = false;
+		#endregion
+		#region Classes for binding
 		internal C_VPE_Sett DataFromGUI_Sett = new();
 		internal List<C_UC_Rotor> DataFromGUI_Sett_Rotors = new();
 		internal List<C_VPE_ComboBox> DataFromGUI_Swaps = new();
 		internal C_VPE_ComboBox DataFromGUI_Refl = new();
 		internal C_VPE_ComboBox DataFromGUI_SettSel = new();
-
+		#endregion
+		#region Private constants for file filtering
 		private const string Invalid_File = "N/A";
 		private const string VPESL_filter = "VPE Settings Library files (*.vpesl)|*.vpesl";
 		private const string VPETL_filter = "VPE Table Library files (*.vpetl)|*.vpetl";
 		private const string VPES_filter = "VPE Settings files (*.vpes)|*.vpes";
 		private const string TXT_filter = "Text files (*.txt)|*.txt";
-		public ushort RotorCNTR = 0, ReflCNTR = 0, SwapCNTR = 0;
-		public List<uint> Rotors = new();
-		public List<ushort> Refls = new();
-		public List<ushort> Swaps = new();
 		#endregion
 
 		#region Public methods
@@ -47,9 +46,8 @@ namespace GUI
 			Generator.UpdateSeed(DateTime.Now.Ticks);
 			for (uint i = 0; i < count; i++)
 			{
-				TL.Rotors.Add(Generator.GenerateTable(RotorCNTR));
-				Rotors.Add(RotorCNTR);
-				RotorCNTR++;
+				Generator.UpdateSeed(DateTime.Now.Ticks);
+				TL.Rotors.Add(Generator.GenerateTable((ushort)TL.Rotors.Count));
 			}
 		}
 
@@ -58,8 +56,7 @@ namespace GUI
 			for (uint i = 0; i < count; i++)
 			{
 				Generator.UpdateSeed(DateTime.Now.Ticks);
-				TL.Reflectors.Add(Generator.GeneratePairs(ReflCNTR));
-				ReflCNTR++;
+				TL.Reflectors.Add(Generator.GeneratePairs((ushort)TL.Reflectors.Count));
 			}
 		}
 
@@ -68,32 +65,32 @@ namespace GUI
 			for (uint i = 0; i < count; i++)
 			{
 				Generator.UpdateSeed(DateTime.Now.Ticks);
-				TL.Swaps.Add(Generator.GeneratePairsWithSkips(SwapCNTR));
-				SwapCNTR++;
+				TL.Swaps.Add(Generator.GeneratePairsWithSkips((ushort)TL.Swaps.Count));
 			}
 		}
-		/// <summary>Vygeneruje kompletní nastavení.</summary>
+		/// <summary>Generates complete settings, adds them to library and sets the GUI accordingly.</summary>
 		public void GenerateComplete()
 		{
 			ActiveSett = Generator.GenerateSetts();
 			AddActiveSettsToLib();
+			DataFromGUI_Sett.SetUsingSettings(ActiveSett);			
 		}
 
 		public void SelectRotors(List<ushort> rotors, List<ushort> swaps, ushort reflector)
 		{
 			ActiveSett = TL.Select(rotors, swaps, reflector);
 		}
-
+		/// <summary>Sets active settings using what is in GUI.</summary>
 		public void ChangeActiveSetts()
 		{
 			List<ushort> rotors = new(), pozs = new(), swaps = new();
 			foreach (C_UC_Rotor rotor in DataFromGUI_Sett_Rotors)
-			{ // Potenciálně problematické:
+			{ // Potencially problematic:
 				rotors.Add(rotor.SelectedRNum.Value);
 				pozs.Add(rotor.PozitionNum.Value);
 			}
 			foreach (C_VPE_ComboBox swap in DataFromGUI_Swaps)
-			{ // Potenciálně problematické:
+			{ // Potencially problematic:
 				swaps.Add(swap.SelectedNum.Value);
 			}
 			ActiveSett = TL.Select(rotors, swaps, DataFromGUI_Refl.SelectedNum.Value);
@@ -106,16 +103,6 @@ namespace GUI
 			ActiveSett.RandCharConstM = DataFromGUI_Sett.RandCharGenMNum.Value;
 			ActiveSett.RandCharSpcMin = DataFromGUI_Sett.RandCharSpcMinNum.Value;
 			ActiveSett.RandCharSpcMax = DataFromGUI_Sett.RandCharSpcMaxNum.Value;
-		}
-
-		public void LoadTables()
-		{
-			TL = FileHandling.ReadAll(OpenFile(VPETL_filter));
-		}
-
-		public void LoadAndMerge()
-		{
-			TL.Merge(FileHandling.ReadAll(OpenFile(VPETL_filter)));
 		}
 
 		public void LoadSpecific()
@@ -148,14 +135,19 @@ namespace GUI
 			return Generator.GenerateNum();
 		}
 
-		public ushort[] GenerateSpaceMinMax(ushort MinFrom = 4, ushort MinTo = 14, ushort MaxFrom = 16, ushort MaxTo = 30)
+		public void GenerateSpaceMinMax(ushort MinFrom = 2, ushort MinTo = 8, ushort MaxFrom = 10, ushort MaxTo = 20)
 		{
-			return Generator.GenerateSpaceMinMax(MinFrom, MinTo, MaxFrom, MaxTo);
+			ushort[] space = Generator.GenerateSpaceMinMax(MinFrom, MinTo, MaxFrom, MaxTo);
+			DataFromGUI_Sett.RandCharSpcMinStr = space[0].ToString();
+			DataFromGUI_Sett.RandCharSpcMaxStr = space[1].ToString();
 		}
 
-		public decimal[] GenerateRNDConsts()
+		public void GenerateRNDConsts()
 		{
-			return Generator.GenerateABM();
+			decimal[] consts = Generator.GenerateABM();
+			DataFromGUI_Sett.RandCharGenAStr = consts[0].ToString();
+			DataFromGUI_Sett.RandCharGenBStr = consts[1].ToString();
+			DataFromGUI_Sett.RandCharGenMStr = consts[2].ToString();
 		}
 
 		public string Encrypt(string inText)
@@ -220,6 +212,57 @@ namespace GUI
 			{
 				rotorList.RotorsStrs.Clear();
 				rotorList.RotorsStrs = rotorNums;
+			}
+		}
+
+		public void SaveSettings()
+		{
+			FileHandling.Save(ActiveSett, SaveFile(VPES_filter));
+		}
+
+		public void LoadSettings()
+		{
+			if(Overwrite)
+			{
+
+			}
+			else
+			{
+
+			}
+		}
+
+		public void SaveSettingsLib()
+		{
+			FileHandling.Save(SL, SaveFile(VPESL_filter));
+		}
+
+		public void LoadSettingsLib()
+		{
+			if (Overwrite)
+			{
+
+			}
+			else
+			{
+
+			}
+		}
+
+		public void SaveTableLib()
+		{
+			FileHandling.Save(TL, SaveFile(VPETL_filter));
+		}
+
+		public void LoadTableLib()
+		{
+			if (Overwrite)
+			{
+
+			}
+			else
+			{
+
 			}
 		}
 		#endregion
