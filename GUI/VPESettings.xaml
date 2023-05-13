@@ -163,8 +163,8 @@
 					</Grid.RowDefinitions>
 					<TextBlock Text="A:" Grid.Column="0" Grid.Row="0" Margin="4"/>
 					<TextBlock Text="B:" Grid.Column="0" Grid.Row="1" Margin="4"/>
-					<TextBox x:Name="TB_SwitchA" Grid.Column="1" Grid.Row="0" Margin="3"/>
-					<TextBox x:Name="TB_SwitchB" Grid.Column="1" Grid.Row="1" Margin="3"/>
+					<TextBox x:Name="TB_SwitchA" Grid.Column="1" Grid.Row="0" Margin="3" Text="{Binding Path=SwitchAStr, Mode=TwoWay}"/>
+					<TextBox x:Name="TB_SwitchB" Grid.Column="1" Grid.Row="1" Margin="3" Text="{Binding Path=SwitchBStr, Mode=TwoWay}"/>
 					<Button x:Name="B_GenSwitchConsts" Content="Random" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Margin="3"/>
 				</Grid>
 			</GroupBox>

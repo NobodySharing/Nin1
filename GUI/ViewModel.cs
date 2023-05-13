@@ -149,7 +149,7 @@ namespace GUI
 			ActiveSett = Generator.GenerateSetts();
 			AddSettsToLib();
 		}
-		/// <summary>Sets the GUI and active settings using what was selected in settings selector.</summary>
+		/// <summary>Sets the active settings using what was selected in settings selector.</summary>
 		public void SetUsingSelSettName()
 		{
 			ActiveSett = SL.Library.Find(x => x.Name == DataFromGUI_SettSel.SelectedStr);

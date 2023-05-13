@@ -112,16 +112,15 @@ namespace VPE
 		/// <summary>Konstanta M generátoru náhodných čísel rovnice y = (ax + b) % m. Pro výpočet délky mezery mezi přidanými náhodnými znaky.</summary>
 		public decimal RandCharConstM { get; set; }
 		/// <summary>A constant for character switching.</summary>
-		public ushort SwitchConstAIdx { get; set; }
+		public uint SwitchConstAIdx { get; set; }
 		/// <summary>B constant for character switching.</summary>
-		public ushort SwitchConstBIdx { get; set; }
+		public uint SwitchConstBIdx { get; set; }
 		/// <summary>Jméno nastavení.</summary>
 		public string Name { get; set; }
 		/// <summary>Index nastavení.</summary>
 		public uint Idx { get; set; }
-		/// <summary>Minimální velikost instance třídy, když je převedená na pole bytů. Výpočet je následující:
-		/// 4 × (u)int, 3 tabulky (a jejich obslužné informace), 5 × ushort, 3 × decimal.</summary>
-		private const int MinSize = 4 * 4 + 3 * (170 + 9) + 5 * 2 + 3 * 16;
+		/// <summary>Smallest size of this class instance. (1 164)</summary>
+		private const int MinSize = 182 * 2 + 182 * 2 + 182 * 2 + 2 + 2 + 2 + 2 + 16 + 16 + 16 + 4 + 4 + 4 + 4;
 		public Settings ()
 		{
 
@@ -258,9 +257,9 @@ namespace VPE
 			RandCharConstA = DecimalFromBytes(file, ref pozition);
 			RandCharConstB = DecimalFromBytes(file, ref pozition);
 			RandCharConstM = DecimalFromBytes(file, ref pozition);
-			SwitchConstAIdx = BitConverter.ToUInt16(file, pozition);
+			SwitchConstAIdx = BitConverter.ToUInt32(file, pozition);
 			pozition += 2;
-			SwitchConstBIdx = BitConverter.ToUInt16(file, pozition);
+			SwitchConstBIdx = BitConverter.ToUInt32(file, pozition);
 			pozition += 2;
 		}
 	}

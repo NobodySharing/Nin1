@@ -48,6 +48,7 @@ namespace VPE
 			settings.ConstShift = GenerateNum();
 			settings.VarShift = GenerateNum();
 			settings.SwitchConstAIdx = (ushort)R.Next(12, 78498);
+			settings.SwitchConstBIdx = (ushort)R.Next(12, 78498);
 			return settings;
 		}
 		/// <summary>Aktualizuje seed generátoru čísel.</summary>
