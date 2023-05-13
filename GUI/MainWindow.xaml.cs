@@ -36,17 +36,10 @@ namespace GUI
 		#region VPE
 		private VPE_VM VPE = new();
 		VPESettingsComp VPESettWin;
-		VPESettingsSelector VPESettingsSelector;
 
 		private void MI_VPE_Encrypt_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_EncrypStr = VPE.Encrypt(DataFromGUI.VPE_PlainStr);
 
 		private void MI_VPE_Decrypt_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_PlainStr = VPE.Decrypt(DataFromGUI.VPE_EncrypStr);
-
-		private void MI_VPE_SettingsComp_Click(object sender, RoutedEventArgs e)
-		{
-			VPESettWin = new(ref VPE);
-			VPESettWin.Show();
-		}
 
 		private void MI_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_PlainStr = VPE.OpenMsgFile();
 
@@ -56,11 +49,17 @@ namespace GUI
 
 		private void MI_VPE_SaveUneMsgFile_Click(object sender, RoutedEventArgs e) => VPE.SaveMsgFile(DataFromGUI.VPE_PlainStr);
 
-		private void MI_VPE_QuickSettGen_Click(object sender, RoutedEventArgs e) => VPE.QuickSettGen();
+		private void MI_VPE_QuickSettGen_Click(object sender, RoutedEventArgs e) => VPE.SettGen();
 
 		private void MI_VPE_QuickSettSave_Click(object sender, RoutedEventArgs e) => VPE.SaveSettings();
 
 		private void MI_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e) => VPE.LoadSettings();
+		
+		private void MI_VPE_SettingsComp_Click(object sender, RoutedEventArgs e)
+		{
+			VPESettWin = new(ref VPE);
+			VPESettWin.Show();
+		}
 		#endregion
 
 		#region NeueDT

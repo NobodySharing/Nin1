@@ -33,7 +33,7 @@ namespace GUI
 		#region GUI eventy
 		private void B_Submit_Click (object sender, RoutedEventArgs e)
 		{
-			VPE.ChangeActiveSetts();
+			VPE.ChangeActiveSettsFromGUI();
 			Close ();
 		}
 
@@ -145,19 +145,31 @@ namespace GUI
 		private void B_AllRandom_Click(object sender, RoutedEventArgs e)
 		{
 			VPE.GenerateComplete();
-			SynchronizeRotorCount();
-			SynchronizeRotorSelAndPoz();
-			SynchronizeSwapCount();
-			SynchronizeSwapSel();
-			VPE.DataFromGUI_Refl.SelectedStr = VPE.ActiveSett.Reflector.Idx.ToString();
+			DisplayActiveSettInGUI();
 		}
 
 		private void ChB_Overwrite_Click(object sender, RoutedEventArgs e)
 		{
 			VPE.Overwrite = !VPE.Overwrite;
 		}
+
+		private void CB_SettLib_SelChanged(object sender, SelectionChangedEventArgs e)
+		{
+			VPE.SetUsingSelSettName();
+			DisplayActiveSettInGUI();
+		}
 		#endregion
-		#region Private
+		#region 
+		private void DisplayActiveSettInGUI()
+		{
+			VPE.DataFromGUI_Sett.SetUsingSettings(VPE.ActiveSett);
+			SynchronizeRotorCount();
+			SynchronizeSwapCount();
+			SynchronizeRotorSelAndPoz();
+			SynchronizeSwapSel();
+			VPE.DataFromGUI_Refl.SelectedStr = VPE.ActiveSett.Reflector.Idx.ToString();
+		}
+		
 		private void InitialRotorPopulation(ushort count)
 		{
 			VPE.InitializeRotorSelectors(count);

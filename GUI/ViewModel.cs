@@ -72,16 +72,10 @@ namespace GUI
 		public void GenerateComplete()
 		{
 			ActiveSett = Generator.GenerateSetts();
-			AddActiveSettsToLib();
-			DataFromGUI_Sett.SetUsingSettings(ActiveSett);			
-		}
-
-		public void SelectRotors(List<ushort> rotors, List<ushort> swaps, ushort reflector)
-		{
-			ActiveSett = TL.Select(rotors, swaps, reflector);
+			AddSettsToLib();
 		}
 		/// <summary>Sets active settings using what is in GUI.</summary>
-		public void ChangeActiveSetts()
+		public void ChangeActiveSettsFromGUI()
 		{
 			List<ushort> rotors = new(), pozs = new(), swaps = new();
 			foreach (C_UC_Rotor rotor in DataFromGUI_Sett_Rotors)
@@ -103,30 +97,8 @@ namespace GUI
 			ActiveSett.RandCharConstM = DataFromGUI_Sett.RandCharGenMNum.Value;
 			ActiveSett.RandCharSpcMin = DataFromGUI_Sett.RandCharSpcMinNum.Value;
 			ActiveSett.RandCharSpcMax = DataFromGUI_Sett.RandCharSpcMaxNum.Value;
-		}
-
-		public void LoadSpecific()
-		{
-			ActiveSett = FileHandling.ReadSpecific(OpenFile(VPES_filter));
-			AddActiveSettsToLib();
-		}
-
-		public void SaveTables()
-		{
-			string folder = GetFolder(SaveFile(VPETL_filter));
-			if (folder != "N/A")
-			{
-				FileHandling.Save(TL, folder);
-			}
-		}
-
-		public void SaveSpecific()
-		{
-			string folder = GetFolder(SaveFile(VPES_filter));
-			if (folder != "N/A")
-			{
-				FileHandling.Save(ActiveSett, folder);
-			}
+			ActiveSett.SwitchConstAIdx = DataFromGUI_Sett.SwitchANum.Value;
+			ActiveSett.SwitchConstBIdx = DataFromGUI_Sett.SwitchBNum.Value;
 		}
 
 		public ushort GenerateRandNum()
@@ -164,7 +136,7 @@ namespace GUI
 
 		public string OpenMsgFile()
 		{
-			return FileHandling.ReadText(OpenFile(TXT_filter));
+			return FileHandling.LoadText(OpenFile(TXT_filter));
 		}
 
 		public void SaveMsgFile(string text)
@@ -172,15 +144,15 @@ namespace GUI
 			FileHandling.SaveText(SaveFile(TXT_filter), text);
 		}
 
-		public void QuickSettGen()
+		public void SettGen()
 		{
 			ActiveSett = Generator.GenerateSetts();
-			AddActiveSettsToLib();
+			AddSettsToLib();
 		}
-
-		public void QuickSettSave()
+		/// <summary>Sets the GUI and active settings using what was selected in settings selector.</summary>
+		public void SetUsingSelSettName()
 		{
-			FileHandling.Save(ActiveSett, SaveFile(VPES_filter));
+			ActiveSett = SL.Library.Find(x => x.Name == DataFromGUI_SettSel.SelectedStr);
 		}
 
 		public void InitializeRotorSelectors(ushort count)
@@ -222,14 +194,12 @@ namespace GUI
 
 		public void LoadSettings()
 		{
-			if(Overwrite)
+			FileHandling.Load(OpenFile(VPES_filter), out Settings s);
+			if (Overwrite)
 			{
-
+				ActiveSett = s;
 			}
-			else
-			{
-
-			}
+			AddSettsToLib(s);
 		}
 
 		public void SaveSettingsLib()
@@ -241,11 +211,12 @@ namespace GUI
 		{
 			if (Overwrite)
 			{
-
+				SL.Library.Clear();
 			}
-			else
+			FileHandling.Load(OpenFile(VPESL_filter), out SettingsLibrary sl);
+			foreach (Settings s in sl.Library)
 			{
-
+				AddSettsToLib(s);
 			}
 		}
 
@@ -258,12 +229,14 @@ namespace GUI
 		{
 			if (Overwrite)
 			{
-
+				TL.Reflectors.Clear();
+				TL.Swaps.Clear();
+				TL.Rotors.Clear();
 			}
-			else
-			{
-
-			}
+			FileHandling.Load(OpenFile(VPETL_filter), out TableLibrary tl);
+			TL.Reflectors.AddRange(tl.Reflectors);
+			TL.Swaps.AddRange(tl.Swaps);
+			TL.Rotors.AddRange(tl.Rotors);
 		}
 		#endregion
 
@@ -318,13 +291,21 @@ namespace GUI
 			}
 			return path;
 		}
-
-		private void AddActiveSettsToLib ()
+		/// <summary>Adds active settings to library.</summary>
+		private void AddSettsToLib()
 		{
 			SL.Library.Add(ActiveSett);
 			TL.Reflectors.Add(ActiveSett.Reflector);
 			TL.Rotors.AddRange(ActiveSett.Rotors);
 			TL.Swaps.AddRange(ActiveSett.Swaps);
+		}
+		/// <summary>Adds supplied settings to library.</summary>
+		private void AddSettsToLib(Settings s)
+		{
+			SL.Library.Add(s);
+			TL.Reflectors.Add(s.Reflector);
+			TL.Rotors.AddRange(s.Rotors);
+			TL.Swaps.AddRange(s.Swaps);
 		}
 		#endregion
 	}

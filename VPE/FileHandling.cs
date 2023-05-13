@@ -61,47 +61,33 @@ namespace VPE
 		/// <summary>Loads SettingsLibrary from a location.</summary>
 		/// <param name="filename">Path to SettingsLibrary.</param>
 		/// <param name="sl">SettingsLibrary loaded from disk.</param>
-		/// <returns>If the load was successful.</returns>
-		public static bool Load (string filename, out SettingsLibrary sl)
+		public static void Load(string filename, out SettingsLibrary sl)
 		{
 			sl = new(File.ReadAllBytes(filename));
-
-			return true;
 		}
 		/// <summary>Loads TableLibrary from a location.</summary>
 		/// <param name="filename">Path to TableLibrary.</param>
 		/// <param name="tl">TableLibrary loaded from disk.</param>
-		/// <returns>If the load was successful.</returns>
-		public static bool Load(string filename, out TableLibrary tl)
+		public static void Load(string filename, out TableLibrary tl)
 		{
 			tl = new(File.ReadAllBytes(filename));
-			
-			return true;
 		}
 		/// <summary>Loads Settings from a location.</summary>
 		/// <param name="filename">Path to Settings.</param>
 		/// <param name="s">Settings loaded from disk.</param>
-		/// <returns>If the load was successful.</returns>
-		public static bool Load(string filename, out Settings s)
+		public static void Load(string filename, out Settings s)
 		{
 			s = new(File.ReadAllBytes(filename));
-
-			return true;
-		}
-
-		public static Settings ReadSpecific(string path)
-		{
-			return new Settings(File.ReadAllBytes(path));
-		}
-
-		public static string ReadText(string path)
-		{
-			return File.ReadAllText (path, Encoding.UTF8);
 		}
 
 		public static void SaveText(string path, string text)
 		{
-			File.WriteAllText (path, text);
+			File.WriteAllText(path, text, Encoding.UTF8);
+		}
+
+		public static string LoadText(string path)
+		{
+			return File.ReadAllText (path, Encoding.UTF8);
 		}
 	}
 }

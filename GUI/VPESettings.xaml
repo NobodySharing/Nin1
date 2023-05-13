@@ -27,7 +27,7 @@
 			<TextBlock Text="Name:" Margin="4"/>
 			<TextBox x:Name="TB_Name" Margin="5,3,5,2" MinWidth="150" Text="{Binding Path=NameStr, Mode=TwoWay}"/>
 			<TextBlock Text="Select settings:" Margin="4"/>
-			<ComboBox x:Name="CB_SettLib" Margin="0,3,0,2" MinWidth="300" ItemsSource="{Binding Path=ItemsStrs, Mode=OneWay}" SelectedItem="{Binding Path=SelectedStr, Mode=TwoWay}">
+			<ComboBox x:Name="CB_SettLib" Margin="0,3,0,2" MinWidth="300" ItemsSource="{Binding Path=ItemsStrs, Mode=OneWay}" SelectedItem="{Binding Path=SelectedStr, Mode=TwoWay}" IsReadOnly="True" SelectionChanged="CB_SettLib_SelChanged">
 				<ComboBox.Resources>
 					<local:C_VPE_ComboBox x:Key="DataFromGUI_Sett_Sel"/>
 				</ComboBox.Resources>
@@ -79,10 +79,10 @@
 		</GroupBox>
 		<Grid Grid.Column="2" Grid.Row="1">
 			<Grid.RowDefinitions>
-				<RowDefinition Height="55 px"/>
 				<RowDefinition Height="1*"/>
-				<RowDefinition Height="1*"/>
-				<RowDefinition Height="5*"/>
+				<RowDefinition Height="1.5*"/>
+				<RowDefinition Height="4*"/>
+				<RowDefinition Height="2*"/>
 			</Grid.RowDefinitions>
 			<GroupBox Grid.Row="0" Header="Reflector">
 				<StackPanel x:Name="SP_Refls">
@@ -92,30 +92,28 @@
 					<StackPanel.DataContext>
 						<Binding Source="{StaticResource DataFromGUI_Refl}"/>
 					</StackPanel.DataContext>
-					<ComboBox x:Name="CB_Reflector" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="5" MaxHeight="21" ItemsSource="{Binding Path=Refls, Mode=OneWay}" SelectedItem="{Binding Path=SelReflStr, Mode=TwoWay}"/>
+					<ComboBox x:Name="CB_Reflector" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="6,3,6,3" MaxHeight="21" ItemsSource="{Binding Path=ItemsStrs, Mode=OneWay}" SelectedItem="{Binding Path=SelectedStr, Mode=TwoWay}"/>
 				</StackPanel>
 			</GroupBox>
-			<GroupBox Grid.Row="1" Header="Constant shift">
+			<GroupBox Grid.Row="1" Header="Constant and variable shifts">
 				<StackPanel>
 					<StackPanel Orientation="Horizontal">
+						<TextBlock Text="Constant shift:" Margin="5,4,5,4" MinWidth="90"/>
 						<TextBox x:Name="TB_ConstShift" Text="{Binding Path=ConstShiftStr, Mode=TwoWay}" Width="50" Height="20"/>
-						<Button x:Name="B_ConstShift" Content="Random" HorizontalAlignment="Right" Margin="3" Click="B_GenerateConstShift_Click"/>
+						<Button x:Name="B_ConstShift" Content="Random" HorizontalAlignment="Right" Margin="3" MaxHeight="20" Click="B_GenerateConstShift_Click"/>
 					</StackPanel>
-				</StackPanel>
-			</GroupBox>
-			<GroupBox Grid.Row="2" Header="Variable shift">
-				<StackPanel>
 					<StackPanel Orientation="Horizontal">
+						<TextBlock Text="Variable shift:" Margin="5,4,5,4" MinWidth="90"/>
 						<TextBox x:Name="TB_VarShift" Text="{Binding Path=VarShiftStr, Mode=TwoWay}" Width="50" Height="20"/>
-						<Button x:Name="B_VarShift" Content="Random" HorizontalAlignment="Right" Margin="3" Click="B_GenerateVarShift_Click"/>
+						<Button x:Name="B_VarShift" Content="Random" HorizontalAlignment="Right" Margin="3" MaxHeight="20" Click="B_GenerateVarShift_Click"/>
 					</StackPanel>
 				</StackPanel>
 			</GroupBox>
-			<GroupBox Grid.Row="3" Header="Inserting random chars">
+			<GroupBox Grid.Row="2" Header="Inserting random chars">
 				<Grid>
 					<Grid.RowDefinitions>
-						<RowDefinition Height="30px"/>
-						<RowDefinition Height="30px"/>
+						<RowDefinition Height="25px"/>
+						<RowDefinition Height="25px"/>
 						<RowDefinition Height="1*"/>
 					</Grid.RowDefinitions>
 					<Grid.ColumnDefinitions>
@@ -128,16 +126,16 @@
 					<TextBlock Grid.Row="1" Grid.Column="0" Text="Max space:" Margin="4"/>
 					<TextBox Grid.Row="1" Grid.Column="1" x:Name="TB_RndCharsSpcMax" Text="{Binding Path=RandCharSpcMaxStr, Mode=TwoWay}" Width="40" Height="20"/>
 					<Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" x:Name="B_RndCharsSpc" Content="Random" Margin="3" Click="B_RandCharSpc_Click"/>
-					<GroupBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Header="Properties of random char generator">
+					<GroupBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Header="Spacing between rand chars">
 						<Grid>
 							<Grid.ColumnDefinitions>
 								<ColumnDefinition Width="1*"/>
 								<ColumnDefinition Width="7*"/>
 							</Grid.ColumnDefinitions>
 							<Grid.RowDefinitions>
-								<RowDefinition Height="28px"/>
-								<RowDefinition Height="28px"/>
-								<RowDefinition Height="28px"/>
+								<RowDefinition Height="25px"/>
+								<RowDefinition Height="25px"/>
+								<RowDefinition Height="25px"/>
 								<RowDefinition Height="1*"/>
 							</Grid.RowDefinitions>
 							<TextBlock Text="A:" Grid.Row="0" Grid.Column="0" Margin="5"/>
@@ -146,9 +144,28 @@
 							<TextBox x:Name="TB_RndCharB" Margin="3" Grid.Row="1" Grid.Column="1" Text="{Binding Path=RandCharGenBStr, Mode=TwoWay}"/>
 							<TextBlock Text="M:" Grid.Row="2" Grid.Column="0" Margin="5"/>
 							<TextBox x:Name="TB_RndCharM" Margin="3" Grid.Row="2" Grid.Column="1" Text="{Binding Path=RandCharGenMStr, Mode=TwoWay}"/>
-							<Button x:Name="B_GenRNDConsts" Content="Generate random constants" Margin="10" Click="B_GenRNDConsts_Click" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" MaxHeight="25" MaxWidth="180" VerticalAlignment="Top"/>
+							<Button x:Name="B_GenRNDConsts" Content="Generate random constants" Margin="10,3,10,3" Click="B_GenRNDConsts_Click" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" MaxHeight="25" MaxWidth="180" VerticalAlignment="Top"/>
 						</Grid>
 					</GroupBox>
+				</Grid>
+			</GroupBox>
+			<GroupBox Grid.Row="3" Header="Switching order ofcharacters">
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="25px"/>
+						<ColumnDefinition Width="1*"/>
+						<ColumnDefinition Width="70px"/>
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="25px"/>
+						<RowDefinition Height="25px"/>
+						<RowDefinition Height="1*"/>
+					</Grid.RowDefinitions>
+					<TextBlock Text="A:" Grid.Column="0" Grid.Row="0" Margin="4"/>
+					<TextBlock Text="B:" Grid.Column="0" Grid.Row="1" Margin="4"/>
+					<TextBox x:Name="TB_SwitchA" Grid.Column="1" Grid.Row="0" Margin="3"/>
+					<TextBox x:Name="TB_SwitchB" Grid.Column="1" Grid.Row="1" Margin="3"/>
+					<Button x:Name="B_GenSwitchConsts" Content="Random" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Margin="3"/>
 				</Grid>
 			</GroupBox>
 		</Grid>

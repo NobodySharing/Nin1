@@ -65,7 +65,8 @@ namespace GUI
 		private string RotorGenCountStrV;
 		private string SwapGenCountStrV;
 		private string ReflGenCountStrV;
-		private string SelReflStrV;
+		private string SwitchAStrV;
+		private string SwitchBStrV;
 		private string NameStrV;
 		
 		public string ConstShiftStr
@@ -271,6 +272,64 @@ namespace GUI
 				}
 			}
 		}
+		public string SwitchAStr
+		{
+			get
+			{
+				return SwitchAStrV;
+			}
+			set
+			{
+				if (SwitchAStrV != value)
+				{
+					SwitchAStrV = value;
+					OnPropertyChanged("SwitchAStr");
+				}
+			}
+		}
+		public ushort? SwitchANum
+		{
+			get
+			{
+				if (ushort.TryParse(SwitchAStrV, out ushort num))
+				{
+					return num;
+				}
+				else
+				{
+					return null; // Neplatné číslo.
+				}
+			}
+		}
+		public string SwitchBStr
+		{
+			get
+			{
+				return SwitchBStrV;
+			}
+			set
+			{
+				if (SwitchBStrV != value)
+				{
+					SwitchBStrV = value;
+					OnPropertyChanged("SwitchBStr");
+				}
+			}
+		}
+		public ushort? SwitchBNum
+		{
+			get
+			{
+				if (ushort.TryParse(SwitchBStrV, out ushort num))
+				{
+					return num;
+				}
+				else
+				{
+					return null; // Neplatné číslo.
+				}
+			}
+		}
 		public string RotorGenCountStr
 		{
 			get
@@ -358,35 +417,6 @@ namespace GUI
 				}
 			}
 		}
-		public string SelReflStr
-		{
-			get
-			{
-				return SelReflStrV;
-			}
-			set
-			{
-				if (SelReflStrV != value)
-				{
-					SelReflStrV = value;
-					OnPropertyChanged("SelReflStr");
-				}
-			}
-		}
-		public ushort? SelReflNum
-		{
-			get
-			{
-				if (ushort.TryParse(SelReflStrV, out ushort num))
-				{
-					return num;
-				}
-				else
-				{
-					return null; // Neplatné číslo.
-				}
-			}
-		}
 		public string NameStr
 		{
 			get
@@ -413,6 +443,8 @@ namespace GUI
 			RandCharGenAStr = s.RandCharConstA.ToString();
 			RandCharGenBStr = s.RandCharConstB.ToString();
 			RandCharGenMStr = s.RandCharConstM.ToString();
+			SwitchAStr = s.SwitchConstAIdx.ToString();
+			SwitchBStr = s.SwitchConstBIdx.ToString();
 		}
 		public event PropertyChangedEventHandler PropertyChanged;
 		private void OnPropertyChanged(string info)

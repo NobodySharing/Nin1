@@ -43,10 +43,11 @@ namespace VPE
 				Table t = GeneratePairsWithSkips((ushort)i);
 				settings.Swaps.Add(t);
 			}
-			settings.RandCharSpcMin = (ushort)R.Next(4, 10);
-			settings.RandCharSpcMax = (ushort)(settings.RandCharSpcMin + R.Next(10, 20));
+			settings.RandCharSpcMin = (ushort)R.Next(2, 8);
+			settings.RandCharSpcMax = (ushort)R.Next(10, 20);
 			settings.ConstShift = GenerateNum();
 			settings.VarShift = GenerateNum();
+			settings.SwitchConstAIdx = (ushort)R.Next(12, 78498);
 			return settings;
 		}
 		/// <summary>Aktualizuje seed generátoru čísel.</summary>

@@ -111,6 +111,10 @@ namespace VPE
 		public decimal RandCharConstB { get; set; }
 		/// <summary>Konstanta M generátoru náhodných čísel rovnice y = (ax + b) % m. Pro výpočet délky mezery mezi přidanými náhodnými znaky.</summary>
 		public decimal RandCharConstM { get; set; }
+		/// <summary>A constant for character switching.</summary>
+		public ushort SwitchConstAIdx { get; set; }
+		/// <summary>B constant for character switching.</summary>
+		public ushort SwitchConstBIdx { get; set; }
 		/// <summary>Jméno nastavení.</summary>
 		public string Name { get; set; }
 		/// <summary>Index nastavení.</summary>
@@ -211,6 +215,8 @@ namespace VPE
 			result.AddRange(DecimalToBytes(RandCharConstA));
 			result.AddRange(DecimalToBytes(RandCharConstB));
 			result.AddRange(DecimalToBytes(RandCharConstM));
+			result.AddRange(BitConverter.GetBytes(SwitchConstAIdx));
+			result.AddRange(BitConverter.GetBytes(SwitchConstBIdx));
 			return result.ToArray();
 		}
 		/// <summary>Dekóduje bytové pole na instanci této třídy.</summary>
@@ -252,6 +258,10 @@ namespace VPE
 			RandCharConstA = DecimalFromBytes(file, ref pozition);
 			RandCharConstB = DecimalFromBytes(file, ref pozition);
 			RandCharConstM = DecimalFromBytes(file, ref pozition);
+			SwitchConstAIdx = BitConverter.ToUInt16(file, pozition);
+			pozition += 2;
+			SwitchConstBIdx = BitConverter.ToUInt16(file, pozition);
+			pozition += 2;
 		}
 	}
 	/// <summary>Ukládá množiny tabulek.</summary>

@@ -20,16 +20,18 @@ namespace VPE
 		/// <returns>Zašifrovaný text.</returns>
 		public string Encypt(string Text)
 		{
-			ConvertToNums(Text); // Pøevod textu na èísla.
-			AddRandomChars(); // Pøidávám náhodné znaky, co se budou šifrovat.
-			OrderShift(); // Provede jednoduchý posun celé sady podle poøadí znaku v sadì.
-			Swap(); // Prohodí znaky podle (èásteènì vyplnìné) tabulky.
-			Scramble(); // Zamíchá znaky postupnì dle tabulek, odrazí a pak zpìtnì dle tabulek.
-			Swap();
-			ConstantShift(); // Posune každý znak o konstantu.
-			VariableShift(); // Posune každý znak o promìnné èíslo závislé na seedu a poøadí.
-			AddRandomChars(); // Pøidávám náhodné znaky, znovu, nešifrované.
-			return ConvertToString(); // Pøevede èísla na text.
+			ConvertToNums(Text); // 
+			AddRandomChars(); // 
+			SwitchCharPoz(); // 
+			OrderShift(); // 
+			Swap(); // 
+			Scramble(); // 
+			Swap(); // 
+			ConstantShift(); // 
+			VariableShift(); // 
+			AddRandomChars(); // 
+			SwitchCharPoz(); //
+			return ConvertToString(); // 
 		}
 		/// <summary>Dešifruje text.</summary>
 		/// <param name="Text">Zašifrovaný text.</param>
@@ -37,13 +39,15 @@ namespace VPE
 		public string Decypt(string Text)
 		{
 			ConvertToNums(Text);
+			UnSwitchCharPoz();
 			RemoveRandomChars();
-			UnOrderShift();
+			UnVariableShift();
+			UnConstantShift();
 			Unswap();
 			Unscramble();
 			Unswap();
-			UnConstantShift();
-			UnVariableShift();
+			UnOrderShift();
+			UnSwitchCharPoz();
 			RemoveRandomChars();
 			return ConvertToString();
 		}
@@ -297,6 +301,43 @@ namespace VPE
 		{
 			space = (Sett.RandCharConstA * space + Sett.RandCharConstB) % Sett.RandCharConstM;
 			index += (int)((space % gap) + Sett.RandCharSpcMin);
+		}
+		/// <summary></summary>
+		private void SwitchCharPoz()
+		{
+			List<int> switchTable = ConstructSwitchTable();
+			List<ushort> original = new();
+			original.AddRange(Message);
+			for (int i = 0; i < switchTable.Count; i++)
+			{
+				Message[i] = original[switchTable[i]];
+			}
+		}
+		/// <summary></summary>
+		private void UnSwitchCharPoz()
+		{
+			List<int> switchTable = ConstructSwitchTable();
+			List<ushort> original = new();
+			original.AddRange(Message);
+			for (int i = 0; i < switchTable.Count; i++)
+			{
+				Message[switchTable[i]] = original[i];
+			}
+		}
+		/// <summary></summary>
+		private List<int> ConstructSwitchTable()
+		{
+			List<int> switchTable = new();
+			uint a = Primes[Sett.SwitchConstAIdx], b = Primes[Sett.SwitchConstBIdx], m = (uint)Message.Count;
+			if (m % (a*b) == 0)
+			{
+				m--;
+			}
+			for (int i = 0; i < m; i++)
+			{
+				switchTable.Add(Convert.ToInt32((a * i + b) % m));
+			}
+			return switchTable;
 		}
 	}
 }
