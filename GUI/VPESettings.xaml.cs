@@ -158,6 +158,11 @@ namespace GUI
 			VPE.SetUsingSelSettName();
 			DisplayActiveSettInGUI();
 		}
+
+		private void B_Save_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.ChangeActiveSettsFromGUI();
+		}
 		#endregion
 		#region 
 		private void DisplayActiveSettInGUI()

@@ -18,8 +18,8 @@
 			<ColumnDefinition Width="2*"/>
 			<ColumnDefinition Width="3*"/>
 		</Grid.ColumnDefinitions>
-		<ComboBox x:Name="CB_TableSel" Grid.Column="0" Margin="2, 2, 1, 2" ItemsSource="{Binding Path = Rotors, Mode = OneWay}" SelectedItem="{Binding Path=SelectedRStr, Mode=TwoWay}"/>
-		<TextBox x:Name="TB_Poz" Grid.Column="1" Margin="1, 2, 1, 2" Text="{Binding Path=Pozition, Mode=TwoWay}"/>
-		<Button x:Name="B_Rand_Shift" Content="Random" Click="B_Rand_Shift_Click" Grid.Column="2" Margin="1, 2, 2, 2"/>
+		<ComboBox x:Name="CB_TableSel" Grid.Column="0" Margin="2, 2, 1, 2" ItemsSource="{Binding Path = RotorsStrs, Mode = OneWay}" SelectedItem="{Binding Path=SelectedRStr, Mode=TwoWay}"/>
+		<TextBox x:Name="TB_Poz" Grid.Column="1" Margin="1, 2, 1, 2" Text="{Binding Path=PozitionStr, Mode=TwoWay}"/>
+		<Button x:Name="B_Rand_Shift" Content="Random" Click="B_RandPoz_Click" Grid.Column="2" Margin="1, 2, 2, 2"/>
 	</Grid>
 </UserControl>

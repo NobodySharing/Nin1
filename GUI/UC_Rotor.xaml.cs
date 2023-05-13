@@ -29,7 +29,7 @@ namespace GUI
 			DataContext = DataFromGUI;
 		}
 
-		private void B_Rand_Shift_Click (object sender, RoutedEventArgs e)
+		private void B_RandPoz_Click (object sender, RoutedEventArgs e)
 		{
 			Generator.UpdateSeed(DateTime.Now.Ticks);
 			DataFromGUI.PozitionStr = Generator.GenerateNum().ToString();

@@ -13,7 +13,6 @@ namespace GUI
 	{
 		private string VPE_PlainStrV;
 		private string VPE_EncrypStrV;
-		
 		public string VPE_PlainStr
 		{
 			get

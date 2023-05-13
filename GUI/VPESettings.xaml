@@ -173,7 +173,7 @@
 			<Grid.RowDefinitions>
 				<RowDefinition Height="5*"/>
 				<RowDefinition Height="2*"/>
-				<RowDefinition Height="40px"/>
+				<RowDefinition Height="44px"/>
 			</Grid.RowDefinitions>
 			<GroupBox Grid.Row="0" Header="Settings storage">
 				<StackPanel Orientation="Vertical">
@@ -203,7 +203,12 @@
 					<Button x:Name="B_All_RND" Grid.Row="0" Content="All settings random" HorizontalAlignment="Left" VerticalAlignment="Top" Click="B_AllRandom_Click" MinWidth="112" Margin="4, 2, 4, 2"/>
 				</StackPanel>
 			</GroupBox>
-			<Button x:Name="B_Submit" Grid.Row="2" Content="Submit" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="B_Submit_Click" Margin="5" Height="25px" Width="100px"/>
+			<StackPanel Orientation="Horizontal" Grid.Row="2" >
+				<Button x:Name="B_Save" HorizontalAlignment="Left" Click="B_Save_Click" Margin="2" Height="38px" Width="120px"  Padding="0">
+					<TextBlock Text="Save as current settings" TextWrapping="Wrap" TextAlignment="Center"/>
+				</Button>
+				<Button x:Name="B_Submit" Content="Submit" HorizontalAlignment="Right" Click="B_Submit_Click" Margin="2" Height="25px" Width="80px" BorderThickness="3" FontWeight="Bold"/>
+			</StackPanel>
 		</Grid>
 	</Grid>
 </Window>
