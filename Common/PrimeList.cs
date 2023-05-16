@@ -4,7 +4,21 @@ namespace Common
 {
 	public static class PrimeList
 	{
-		/// <summary>78 498 prvoèísel do 1 000 000.</summary>
+		public const int First1Digit = 0;
+		public const int Last1Digit = 3;
+		public const int First2Digit = 4;
+		public const int Last2Digit = 24;
+		public const int First3Digit = 25;
+		public const int Last3Digit = 167;
+		public const int First4Digit = 168;
+		public const int Last4Digit = 1228;
+		public const int First5Digit = 1229;
+		public const int Last5Digit = 9591;
+		public const int First6Digit = 9592;
+		public const int Last6Digit = 78497;
+		public const int Total = 78498;
+		public const uint NextPrime = 1000003;
+		/// <summary>78 498 primes to 1 000 000.</summary>
 		public static readonly uint[] Primes =
 		{
 			2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157,

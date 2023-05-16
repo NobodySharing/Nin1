@@ -178,7 +178,7 @@ namespace VPE
 			"\t",
 			"\r\n",
 		};
-		private static ushort LimitV = Convert.ToUInt16(CharSet.Count);
+		private static readonly ushort LimitV = Convert.ToUInt16(CharSet.Count);
 		/// <summary>Počet znaků v tabulce.</summary>
 		public static ushort Limit
 		{

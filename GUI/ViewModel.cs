@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Numerics;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 
@@ -92,13 +93,8 @@ namespace GUI
 			ActiveSett.Name = DataFromGUI_Sett.NameStr;
 			ActiveSett.ConstShift = DataFromGUI_Sett.ConstShiftNum.Value;
 			ActiveSett.VarShift = DataFromGUI_Sett.VarShiftNum.Value;
-			ActiveSett.RandCharConstA = DataFromGUI_Sett.RandCharGenANum.Value;
-			ActiveSett.RandCharConstB = DataFromGUI_Sett.RandCharGenBNum.Value;
-			ActiveSett.RandCharConstM = DataFromGUI_Sett.RandCharGenMNum.Value;
 			ActiveSett.RandCharSpcMin = DataFromGUI_Sett.RandCharSpcMinNum.Value;
 			ActiveSett.RandCharSpcMax = DataFromGUI_Sett.RandCharSpcMaxNum.Value;
-			ActiveSett.SwitchConstAIdx = DataFromGUI_Sett.SwitchANum.Value;
-			ActiveSett.SwitchConstBIdx = DataFromGUI_Sett.SwitchBNum.Value;
 		}
 
 		public ushort GenerateRandNum()
@@ -114,12 +110,21 @@ namespace GUI
 			DataFromGUI_Sett.RandCharSpcMaxStr = space[1].ToString();
 		}
 
-		public void GenerateRNDConsts()
+		public void GenerateABMConsts()
 		{
-			decimal[] consts = Generator.GenerateABM();
+			PrimeDefinedConstant[] consts = Generator.GenerateABM();
 			DataFromGUI_Sett.RandCharGenAStr = consts[0].ToString();
 			DataFromGUI_Sett.RandCharGenBStr = consts[1].ToString();
 			DataFromGUI_Sett.RandCharGenMStr = consts[2].ToString();
+		}
+
+		public void GenerateABCDConsts()
+		{
+			PrimeDefinedConstant[] consts = Generator.GenerateABCD();
+			DataFromGUI_Sett.SwitchAStr = consts[0].ToString();
+			DataFromGUI_Sett.SwitchBStr = consts[1].ToString();
+			DataFromGUI_Sett.SwitchCStr = consts[2].ToString();
+			DataFromGUI_Sett.SwitchDStr = consts[3].ToString();
 		}
 
 		public string Encrypt(string inText)

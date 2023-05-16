@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
 using VPE;
 
 namespace GUI
@@ -66,6 +67,8 @@ namespace GUI
 		private string ReflGenCountStrV;
 		private string SwitchAStrV;
 		private string SwitchBStrV;
+		private string SwitchCStrV;
+		private string SwitchDStrV;
 		private string NameStrV;
 		
 		public string ConstShiftStr
@@ -286,11 +289,11 @@ namespace GUI
 				}
 			}
 		}
-		public ushort? SwitchANum
+		public BigInteger? SwitchANum
 		{
 			get
 			{
-				if (ushort.TryParse(SwitchAStrV, out ushort num))
+				if (BigInteger.TryParse(SwitchAStrV, out BigInteger num))
 				{
 					return num;
 				}
@@ -315,11 +318,69 @@ namespace GUI
 				}
 			}
 		}
-		public ushort? SwitchBNum
+		public BigInteger? SwitchBNum
 		{
 			get
 			{
-				if (ushort.TryParse(SwitchBStrV, out ushort num))
+				if (BigInteger.TryParse(SwitchBStrV, out BigInteger num))
+				{
+					return num;
+				}
+				else
+				{
+					return null; // Neplatné číslo.
+				}
+			}
+		}
+		public string SwitchCStr
+		{
+			get
+			{
+				return SwitchCStrV;
+			}
+			set
+			{
+				if (SwitchCStrV != value)
+				{
+					SwitchCStrV = value;
+					OnPropertyChanged("SwitchCStr");
+				}
+			}
+		}
+		public BigInteger? SwitchCNum
+		{
+			get
+			{
+				if (BigInteger.TryParse(SwitchCStrV, out BigInteger num))
+				{
+					return num;
+				}
+				else
+				{
+					return null; // Neplatné číslo.
+				}
+			}
+		}
+		public string SwitchDStr
+		{
+			get
+			{
+				return SwitchDStrV;
+			}
+			set
+			{
+				if (SwitchDStrV != value)
+				{
+					SwitchDStrV = value;
+					OnPropertyChanged("SwitchDStr");
+				}
+			}
+		}
+		public BigInteger? SwitchDNum
+		{
+			get
+			{
+				if (BigInteger.TryParse(SwitchDStrV, out BigInteger num))
 				{
 					return num;
 				}
@@ -442,8 +503,10 @@ namespace GUI
 			RandCharGenAStr = s.RandCharConstA.ToString();
 			RandCharGenBStr = s.RandCharConstB.ToString();
 			RandCharGenMStr = s.RandCharConstM.ToString();
-			SwitchAStr = s.SwitchConstAIdx.ToString();
-			SwitchBStr = s.SwitchConstBIdx.ToString();
+			SwitchAStr = s.SwitchConstA.ToString();
+			SwitchBStr = s.SwitchConstB.ToString();
+			SwitchCStr = s.SwitchConstC.ToString();
+			SwitchDStr = s.SwitchConstD.ToString();
 		}
 		public event PropertyChangedEventHandler PropertyChanged;
 		private void OnPropertyChanged(string info)

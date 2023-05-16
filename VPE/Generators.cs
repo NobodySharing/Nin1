@@ -8,7 +8,7 @@ namespace VPE
 	public class Generators
 	{
 		private Random R;
-		private ushort Limit;
+		private readonly ushort Limit;
 		/// <summary>Vytvoří novou instanci generátoru.</summary>
 		/// <param name="Lim">Maximální hodnota (excluding!), po k</param>
 		/// <param name="Seed">Seed pro vytvoření náhodného generátoru.</param>
@@ -21,7 +21,9 @@ namespace VPE
 		/// <returns>Settings.</returns>
 		public Settings GenerateSetts()
 		{
-			decimal[] ABM = GenerateABM();
+			PrimeDefinedConstant[] ABM = GenerateABM();
+			PrimeDefinedConstant[] ABCD = GenerateABCD();
+			ushort[] spaces = GenerateSpaceMinMax();
 			Settings settings = new()
 			{
 				Name = DateTime.Now.ToString("u") + " (automatically generated)",
@@ -29,6 +31,12 @@ namespace VPE
 				RandCharConstA = ABM[0],
 				RandCharConstB = ABM[1],
 				RandCharConstM = ABM[2],
+				SwitchConstA = ABCD[0],
+				SwitchConstB = ABCD[1],
+				SwitchConstC = ABCD[2],
+				SwitchConstD = ABCD[3],
+				RandCharSpcMin = spaces[0],
+				RandCharSpcMax = spaces[1],
 			};
 			int count = R.Next(12, 42);
 			for (int i = 0; i < count; i++)
@@ -40,15 +48,11 @@ namespace VPE
 			count = R.Next(6, 14);
 			for (int i = 0; i < count; i++)
 			{
-				Table t = GeneratePairsWithSkips((ushort)i);
+				Table t = GeneratePairsWithSkips((ushort)i, GenerateDoubleInRange(9/16, 950/1024));
 				settings.Swaps.Add(t);
 			}
-			settings.RandCharSpcMin = (ushort)R.Next(2, 8);
-			settings.RandCharSpcMax = (ushort)R.Next(10, 20);
 			settings.ConstShift = GenerateNum();
 			settings.VarShift = GenerateNum();
-			settings.SwitchConstAIdx = (ushort)R.Next(12, 78498);
-			settings.SwitchConstBIdx = (ushort)R.Next(12, 78498);
 			return settings;
 		}
 		/// <summary>Aktualizuje seed generátoru čísel.</summary>
@@ -176,56 +180,84 @@ namespace VPE
 		{
 			return Convert.ToUInt16(R.Next(Limit));
 		}
-		/// <summary>Vygeneruje konstanty A, B a M pro generátor náhodných znaků.</summary>
-		/// <returns>Pole: A, B a M.</returns>
-		public decimal[] GenerateABM()
+
+		public double GenerateDoubleInRange(double from, double to)
 		{
-			decimal[] result = { 1, 1, 1 };
-			List<uint> AMprimes = new()
+			if (from > to)
 			{
-				PrimeList.Primes[R.Next(0, 30)],
-				PrimeList.Primes[R.Next(30, 169)],
-				PrimeList.Primes[R.Next(169, 2653)],
+				double temp = from;
+				from = to;
+				to = temp;
+			}
+			double range = to - from;
+			double rand = R.NextDouble();
+			return from + rand * range;
+		}
+		/// <summary>Vygeneruje konstanty A, B a M pro generátor délky mezer mezi náhodnými znaky.</summary>
+		/// <returns>Pole: A, B a M.</returns>
+		public PrimeDefinedConstant[] GenerateABM()
+		{
+			PrimeDefinedConstant[] result = new PrimeDefinedConstant[3];
+			List<int> Aprimes = new(), Bprimes = new(), Mprimes = new();
+			int num;
+			for (byte i  = 0; i < 5; i++)
+			{
+				num = R.Next(0, PrimeList.Total);
+				Aprimes.Add(num);
+				Mprimes.Add(num);
+				Bprimes.Add(R.Next(0, PrimeList.Total));
+			}
+			for (byte i = 0; i < 2; i++)
+			{
+				Aprimes.Add(R.Next(0, PrimeList.Total));
+				Bprimes.Add(R.Next(0, PrimeList.Total));
+			}
+			List<byte> Aexp = new(), Bexp = new(), Mexp = new();
+			for (byte i = 0; i < 7; i++)
+			{
+				Aexp.Add(Convert.ToByte(R.Next(0, GetSizeBasedMax(Aprimes[i]))));
+				Bexp.Add(Convert.ToByte(R.Next(0, GetSizeBasedMax(Bprimes[i]))));
+				if (i < 5)
+				{
+					Mexp.Add(Convert.ToByte(R.Next(0, GetSizeBasedMax(Mprimes[i]))));
+				}
+			}
+			result[0].PrimeIdxs = Aprimes.ToArray();
+			result[0].Powers = Aexp.ToArray();
+			result[1].PrimeIdxs = Bprimes.ToArray();
+			result[1].Powers = Bexp.ToArray();
+			result[2].PrimeIdxs = Mprimes.ToArray();
+			result[2].Powers = Mexp.ToArray();
+			return result;
+		}
+
+		private static int GetSizeBasedMax(int num)
+		{
+			return num switch
+			{
+				<= PrimeList.Last1Digit => 9,
+				<= PrimeList.Last2Digit => 8,
+				<= PrimeList.Last3Digit => 7,
+				<= PrimeList.Last4Digit => 6,
+				<= PrimeList.Last5Digit => 5,
+				<= PrimeList.Last6Digit => 4,
+				_ => 0,
 			};
-			List<uint> Bprimes = new();
-			uint num;
-			byte count = 0;
-			while (count < 5)
+		}
+
+		public PrimeDefinedConstant[] GenerateABCD()
+		{
+			PrimeDefinedConstant[] result = new PrimeDefinedConstant[4];
+			for(byte i = 0; i < result.Length; i++)
 			{
-				num = PrimeList.Primes[R.Next(0, 9592)];
-				if (!AMprimes.Contains(num))
+				result[i] = new();
+				for (byte j = 0; j < R.Next(3, 6); j++)
 				{
-					Bprimes.Add(num);
-					count++;
+					int num = R.Next(PrimeList.First3Digit, PrimeList.Total);
+					byte exp = Convert.ToByte(R.Next(1, GetSizeBasedMax(num)));
+					result[i].PrimeIdxs[j] = num;
+					result[i].Powers[j] = exp;
 				}
-			}
-			List<byte> Aexps = new(), Mexps = new();
-			byte exp;
-			for (byte i = 0; i < 3; i++)
-			{
-				exp = (byte)R.Next(1, 5);
-				Mexps.Add(exp);
-				if (exp > 2)
-				{
-					Aexps.Add(2);
-				}
-				else
-				{
-					Aexps.Add(1);
-				}
-			}
-			for (byte i = 0; i < 3; i++)
-			{
-				result[0] *= (decimal)Math.Pow(AMprimes[i], Aexps[i]);
-			}
-			result[0]++;
-			for (byte i = 0; i < 5; i++)
-			{
-				result[1] *= Bprimes[i];
-			}
-			for (byte i = 0; i < 3; i++)
-			{
-				result[2] *= (decimal)Math.Pow(AMprimes[i], Mexps[i]);
 			}
 			return result;
 		}

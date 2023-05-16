@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Numerics;
 using static Common.PrimeList;
 
 namespace VPE
 {
 	public class Crypto
 	{
-		private Settings Sett;
+		private readonly Settings Sett;
 		/// <summary>Sada èísel reprezentující zprávu. Promìnná, se kterou v celém procesu pracuji.</summary>
 		private List<ushort> Message;
 		public Crypto(Settings S)
@@ -22,7 +23,7 @@ namespace VPE
 		{
 			ConvertToNums(Text); // 
 			AddRandomChars(); // 
-			SwitchCharPoz(); // 
+			SwitchCharPoz(0); // 
 			OrderShift(); // 
 			Swap(); // 
 			Scramble(); // 
@@ -30,7 +31,7 @@ namespace VPE
 			ConstantShift(); // 
 			VariableShift(); // 
 			AddRandomChars(); // 
-			SwitchCharPoz(); //
+			SwitchCharPoz(1); //
 			return ConvertToString(); // 
 		}
 		/// <summary>Dešifruje text.</summary>
@@ -39,7 +40,7 @@ namespace VPE
 		public string Decypt(string Text)
 		{
 			ConvertToNums(Text);
-			UnSwitchCharPoz();
+			UnSwitchCharPoz(1);
 			RemoveRandomChars();
 			UnVariableShift();
 			UnConstantShift();
@@ -47,7 +48,7 @@ namespace VPE
 			Unscramble();
 			Unswap();
 			UnOrderShift();
-			UnSwitchCharPoz();
+			UnSwitchCharPoz(0);
 			RemoveRandomChars();
 			return ConvertToString();
 		}
@@ -170,8 +171,9 @@ namespace VPE
 		{
 			for (int i = 0; Message.Count > 0; i++)
 			{
-				Message[i] += Sett.ConstShift;
-				Message[i] %= Codepage.Limit;
+				uint temp = Message[i];
+				temp += Sett.ConstShift;
+				Message[i] = Convert.ToUInt16(temp % Codepage.Limit);
 			}
 		}
 		/// <summary>Posune èísla zpìt podle posunového parametru.</summary>
@@ -179,8 +181,9 @@ namespace VPE
 		{
 			for (int i = 0; Message.Count > 0; i++)
 			{
-				Message[i] -= Sett.ConstShift;
-				Message[i] %= Codepage.Limit;
+				uint temp = Message[i];
+				temp -= Sett.ConstShift;
+				Message[i] = Convert.ToUInt16(temp % Codepage.Limit);
 			}
 		}
 		/// <summary>Posune èísla podle poøadí.</summary>
@@ -266,7 +269,7 @@ namespace VPE
 			int index = (Sett.RandCharSpcMin + Sett.RandCharSpcMax) % 2; // Inicializace indexu, kam budu pøidávat náhodný znak.
 			Message.Insert(index, Gen.GenerateNum()); // Pøidám náhodný znak, na 0. nebo 1. pozici podle sudosti/lichosti souètu minima a maxima rozsahù mezer.
 			int gap = Sett.RandCharSpcMax - Sett.RandCharSpcMin; // Velikost rozsahu mezery.
-			decimal space = (Math.Floor(Codepage.Limit / (decimal)gap) % gap) + Sett.RandCharSpcMin; // Inicializace mezery. V jádru „náhodný“ výpoèet, pak dání do rozsahu a posunutí o minimum.
+			BigInteger space = (BigInteger)(Math.Floor(Convert.ToDouble(Codepage.Limit / gap)) % gap + Sett.RandCharSpcMin); // Inicializace mezery. V jádru „náhodný“ výpoèet, pak dání do rozsahu a posunutí o minimum.
 			while (index <= Message.Count)
 			{
 				IncrementSpace(ref index, ref space, gap);
@@ -286,7 +289,7 @@ namespace VPE
 			int index = (Sett.RandCharSpcMin + Sett.RandCharSpcMax) % 2;
 			Message.RemoveAt(index);
 			int gap = Sett.RandCharSpcMax - Sett.RandCharSpcMin;
-			decimal space = (Math.Floor(Codepage.Limit / (decimal)gap) % gap) + Sett.RandCharSpcMin;
+			BigInteger space = (BigInteger)(Math.Floor(Convert.ToDouble(Codepage.Limit / gap)) % gap + Sett.RandCharSpcMin);
 			while (index <= Message.Count)
 			{
 				IncrementSpace(ref index, ref space, gap);
@@ -297,15 +300,16 @@ namespace VPE
 		/// <param name="index">Pøedchozí index.</param>
 		/// <param name="space">Pøedchozí mezera.</param>
 		/// <param name="gap">Rozsah velikosti mezery.</param>
-		private void IncrementSpace (ref int index, ref decimal space, int gap)
+		private void IncrementSpace (ref int index, ref BigInteger space, int gap)
 		{
-			space = (Sett.RandCharConstA * space + Sett.RandCharConstB) % Sett.RandCharConstM;
-			index += (int)((space % gap) + Sett.RandCharSpcMin);
+			space = (Sett.RandCharConstA.ComputeConstant() * space + Sett.RandCharConstB.ComputeConstant()) % Sett.RandCharConstM.ComputeConstant();
+			index += Convert.ToInt32((space % gap) + Sett.RandCharSpcMin);
 		}
 		/// <summary></summary>
-		private void SwitchCharPoz()
+		/// <param name="stage"></param>
+		private void SwitchCharPoz(byte stage)
 		{
-			List<int> switchTable = ConstructSwitchTable();
+			List<int> switchTable = ConstructSwitchTable(stage);
 			List<ushort> original = new();
 			original.AddRange(Message);
 			for (int i = 0; i < switchTable.Count; i++)
@@ -314,9 +318,10 @@ namespace VPE
 			}
 		}
 		/// <summary></summary>
-		private void UnSwitchCharPoz()
+		/// <param name="stage"></param>
+		private void UnSwitchCharPoz(byte stage)
 		{
-			List<int> switchTable = ConstructSwitchTable();
+			List<int> switchTable = ConstructSwitchTable(stage);
 			List<ushort> original = new();
 			original.AddRange(Message);
 			for (int i = 0; i < switchTable.Count; i++)
@@ -325,17 +330,30 @@ namespace VPE
 			}
 		}
 		/// <summary></summary>
-		private List<int> ConstructSwitchTable()
+		/// <param name="stage"></param>
+		/// <returns></returns>
+		private List<int> ConstructSwitchTable(byte stage)
 		{
 			List<int> switchTable = new();
-			uint a = Primes[Sett.SwitchConstAIdx], b = Primes[Sett.SwitchConstBIdx], m = (uint)Message.Count;
-			if (m % (a*b) == 0)
+			BigInteger A, B;
+			if (stage == 0)
+			{
+				A = Sett.SwitchConstA.ComputeConstant();
+				B = Sett.SwitchConstB.ComputeConstant();
+			}
+			else
+			{
+				A = Sett.SwitchConstC.ComputeConstant();
+				B = Sett.SwitchConstD.ComputeConstant();
+			}
+			uint m = (uint)Message.Count;
+			if (m % (A * B) == 0)
 			{
 				m--;
 			}
 			for (int i = 0; i < m; i++)
 			{
-				switchTable.Add(Convert.ToInt32((a * i + b) % m));
+				switchTable.Add(Convert.ToInt32((A * i + B) % m));
 			}
 			return switchTable;
 		}

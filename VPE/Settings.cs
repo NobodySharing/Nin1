@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Text;
 using System.Collections.Generic;
-using System.Windows.Media;
+using System.Numerics;
+using Common;
 
 namespace VPE
 {
@@ -98,29 +99,33 @@ namespace VPE
 		/// <summary>Jediný reflektor.</summary>
 		public Table Reflector { get; set; }
 		/// <summary>Konstanta pro pevný posun.</summary>
-		public ushort ConstShift { get; set; }
+		public uint ConstShift { get; set; }
 		/// <summary>Konstanta pro proměnný posun.</summary>
-		public ushort VarShift { get; set; }
+		public uint VarShift { get; set; }
 		/// <summary>Minimální velikost mezery mezi vloženými náhodnými znaky.</summary>
 		public ushort RandCharSpcMin { get; set; }
 		/// <summary>Maximální velikost mezery mezi vloženými náhodnými znaky.</summary>
 		public ushort RandCharSpcMax { get; set; }
 		/// <summary>Konstanta A generátoru náhodných čísel rovnice y = (ax + b) % m. Pro výpočet délky mezery mezi přidanými náhodnými znaky.</summary>
-		public decimal RandCharConstA { get; set; }
+		public PrimeDefinedConstant RandCharConstA { get; set; }
 		/// <summary>Konstanta B generátoru náhodných čísel rovnice y = (ax + b) % m. Pro výpočet délky mezery mezi přidanými náhodnými znaky.</summary>
-		public decimal RandCharConstB { get; set; }
+		public PrimeDefinedConstant RandCharConstB { get; set; }
 		/// <summary>Konstanta M generátoru náhodných čísel rovnice y = (ax + b) % m. Pro výpočet délky mezery mezi přidanými náhodnými znaky.</summary>
-		public decimal RandCharConstM { get; set; }
-		/// <summary>A constant for character switching.</summary>
-		public uint SwitchConstAIdx { get; set; }
-		/// <summary>B constant for character switching.</summary>
-		public uint SwitchConstBIdx { get; set; }
+		public PrimeDefinedConstant RandCharConstM { get; set; }
+		/// <summary>A constant for table creation for character switching. Part of the first pair.</summary>
+		public PrimeDefinedConstant SwitchConstA { get; set; }
+		/// <summary>B constant for table creation for character switching. Part of the first pair.</summary>
+		public PrimeDefinedConstant SwitchConstB { get; set; }
+		/// <summary>C constant for table creation for character switching. Part of the second pair.</summary>
+		public PrimeDefinedConstant SwitchConstC { get; set; }
+		/// <summary>D constant for table creation for character switching. Part of the second pair.</summary>
+		public PrimeDefinedConstant SwitchConstD { get; set; }
 		/// <summary>Jméno nastavení.</summary>
 		public string Name { get; set; }
 		/// <summary>Index nastavení.</summary>
 		public uint Idx { get; set; }
-		/// <summary>Smallest size of this class instance. (1 164)</summary>
-		private const int MinSize = 182 * 2 + 182 * 2 + 182 * 2 + 2 + 2 + 2 + 2 + 16 + 16 + 16 + 4 + 4 + 4 + 4;
+		/// <summary>Smallest size of this class instance. (2 034)</summary>
+		private const int MinSize = 182 * 2 + 182 * 2 + 182 * 4 + 4 + 2 + 2 + 2 + 80 + 80 + 80 + 80 + 80 + 80 + 80 + 4 + 4;
 		public Settings ()
 		{
 
@@ -211,11 +216,13 @@ namespace VPE
 			result.AddRange(BitConverter.GetBytes(VarShift));
 			result.AddRange(BitConverter.GetBytes(RandCharSpcMin));
 			result.AddRange(BitConverter.GetBytes(RandCharSpcMax));
-			result.AddRange(DecimalToBytes(RandCharConstA));
-			result.AddRange(DecimalToBytes(RandCharConstB));
-			result.AddRange(DecimalToBytes(RandCharConstM));
-			result.AddRange(BitConverter.GetBytes(SwitchConstAIdx));
-			result.AddRange(BitConverter.GetBytes(SwitchConstBIdx));
+			result.AddRange(RandCharConstA.ToBytes());
+			result.AddRange(RandCharConstB.ToBytes());
+			result.AddRange(RandCharConstM.ToBytes());
+			result.AddRange(SwitchConstA.ToBytes());
+			result.AddRange(SwitchConstB.ToBytes());
+			result.AddRange(SwitchConstC.ToBytes());
+			result.AddRange(SwitchConstD.ToBytes());
 			return result.ToArray();
 		}
 		/// <summary>Dekóduje bytové pole na instanci této třídy.</summary>
@@ -246,21 +253,89 @@ namespace VPE
 			pozition += 4;
 			Swaps.AddRange(TablesFromBytes(file, ref pozition, rotors, limit));
 			Reflector = TableFromBytes(file, ref pozition, limit);
-			ConstShift = BitConverter.ToUInt16(file, pozition);
-			pozition += 2;
-			VarShift = BitConverter.ToUInt16(file, pozition);
-			pozition += 2;
+			ConstShift = BitConverter.ToUInt32(file, pozition);
+			pozition += 4;
+			VarShift = BitConverter.ToUInt32(file, pozition);
+			pozition += 4;
 			RandCharSpcMin = BitConverter.ToUInt16(file, pozition);
 			pozition += 2;
 			RandCharSpcMax = BitConverter.ToUInt16(file, pozition);
 			pozition += 2;
-			RandCharConstA = DecimalFromBytes(file, ref pozition);
-			RandCharConstB = DecimalFromBytes(file, ref pozition);
-			RandCharConstM = DecimalFromBytes(file, ref pozition);
-			SwitchConstAIdx = BitConverter.ToUInt32(file, pozition);
-			pozition += 2;
-			SwitchConstBIdx = BitConverter.ToUInt32(file, pozition);
-			pozition += 2;
+			PrimeDefinedConstant[] consts = new PrimeDefinedConstant[7];
+			for (int i = 0; i < 7; i++)
+			{
+				consts[i] = new();
+				consts[i].FromBytes(file, ref pozition);
+			}
+			RandCharConstA = consts[0];
+			RandCharConstB = consts[1];
+			RandCharConstM = consts[2];
+			SwitchConstA = consts[3];
+			SwitchConstB = consts[4];
+			SwitchConstC = consts[5];
+			SwitchConstD = consts[6];
+		}
+	}
+	/// <summary>Defines a very large constant. Using it's factorization./summary>
+	public class PrimeDefinedConstant
+	{
+		/// <summary>Maximum count of primes and exponens. Arbitrarly set, yes.</summary>
+		private const int Size = 8;
+		/// <summary>List of indexes of prime numbers. Up to 78 497 ONLY!</summary>
+		public int[] PrimeIdxs = new int[Size];
+		/// <summary>List of corresponging powers, to which a prime with the same index should be raised.</summary>
+		public byte[] Powers = new byte[Size];
+		public PrimeDefinedConstant()
+		{
+			for (int i = 0; i < Size; i++)
+			{
+				PrimeIdxs[i] = -1;
+			}
+		}
+		/// <summary>Computes the constant represented by given primes and their powers.</summary>
+		/// <returns>Really big number. At least that is the idea. With all digits.</returns>
+		public BigInteger ComputeConstant()
+		{
+			BigInteger result = new(1);
+			for (int i = 0; i < Size; i++)
+			{
+				if (PrimeIdxs[i] >= PrimeList.First1Digit || PrimeIdxs[i] <= PrimeList.Last6Digit)
+				{
+					result *= BigInteger.Pow((BigInteger)PrimeList.Primes[PrimeIdxs[i]], Powers[i]);
+				}
+			}
+			return result;
+		}
+		/// <summary>Converts to a resulting number as a string.</summary>
+		/// <returns>Number as a string.</returns>
+		public override string ToString()
+		{
+			return ComputeConstant().ToString();
+		}
+		/// <summary>Converts this instance to byte array.</summary>
+		/// <returns>Byte array representing this instance.</returns>
+		public byte[] ToBytes()
+		{
+			List<byte> result = new();
+			for (int i = 0; i < Size; i++)
+			{
+				result.AddRange(BitConverter.GetBytes(PrimeIdxs[i]));
+				result.Add(Powers[i]);
+			}
+			return result.ToArray();
+		}
+		/// <summary>Fills this instance with decoded data.</summary>
+		/// <param name="bytes">Set of bytes containing data for this class.</param>
+		/// <param name="poz">Pozition in the data to start with.</param>
+		public void FromBytes(byte[] bytes, ref int poz)
+		{
+			for (int i = 0; i < Size; i++)
+			{
+				PrimeIdxs[i] = BitConverter.ToInt32(bytes, poz);
+				poz += 4;
+				Powers[i] = bytes[poz];
+				poz++;
+			}
 		}
 	}
 	/// <summary>Ukládá množiny tabulek.</summary>
@@ -360,15 +435,15 @@ namespace VPE
 		/// <summary>Znovu zindexuje všechny nastavení.</summary>
 		public void ReIndexSetts ()
 		{
-			for (uint i = 0; i < Library.Count; i++)
+			for (int i = 0; i < Library.Count; i++)
 			{
-				Library[(int)i].Idx = i;
+				Library[i].Idx = Convert.ToUInt32(i);
 			}
 		}
 		/// <summary>Převede celou instanci třídy na bytové pole.</summary>
 		public byte[] ToBytes()
 		{
-			List<byte> result = new();
+			List<byte> result = new(262144);
 			foreach (Settings s in Library)
 			{
 				result.AddRange(s.ToBytes());

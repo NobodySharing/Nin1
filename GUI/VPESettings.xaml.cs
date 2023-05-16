@@ -27,6 +27,7 @@ namespace GUI
 			VPE = VModel;
 			DataContext = VPE.DataFromGUI_Sett;
 			SP_Refls.DataContext = VPE.DataFromGUI_Refl;
+			CB_SettLib.DataContext = VPE.DataFromGUI_SettSel;
 			InitialRotorPopulation(10);
 			InitialSwapsPopulation(5);
 		}
@@ -139,7 +140,7 @@ namespace GUI
 
 		private void B_GenRNDConsts_Click(object sender, RoutedEventArgs e)
 		{
-			VPE.GenerateRNDConsts();
+			VPE.GenerateABMConsts();
 		}
 
 		private void B_AllRandom_Click(object sender, RoutedEventArgs e)
@@ -168,6 +169,7 @@ namespace GUI
 		private void DisplayActiveSettInGUI()
 		{
 			VPE.DataFromGUI_Sett.SetUsingSettings(VPE.ActiveSett);
+			// ToDo: Vygeneruj bindingový data pro nový swapy, rotory apod.
 			SynchronizeRotorCount();
 			SynchronizeSwapCount();
 			SynchronizeRotorSelAndPoz();
@@ -212,6 +214,8 @@ namespace GUI
 			ComboBox swap = new()
 			{
 				Name = "CB_Swap_" + SP_Swaps.Children.Count.ToString(),
+				DataContext = VPE.DataFromGUI_Swaps[SP_Swaps.Children.Count],
+				Margin = new Thickness(4, 2, 4, 2),
 			};
 			swap.SetBinding(ComboBox.ItemsSourceProperty, items);
 			swap.SetBinding(ComboBox.SelectedValueProperty, selected);
