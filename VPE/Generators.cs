@@ -172,8 +172,8 @@ namespace VPE
 				}
 				else
 				{
-					temp[SelA] = ushort.MaxValue - 2; // Marking empty spots.
-					temp[SelB] = ushort.MaxValue - 2;
+					temp[SelA] = Table.Blank; // Marking empty spots.
+					temp[SelB] = Table.Blank;
 				}
 			}
 			T.MainTable = temp.ToList();

@@ -133,8 +133,8 @@
 						<ColumnDefinition Width="1*"/>
 					</Grid.ColumnDefinitions>
 					<Grid.RowDefinitions>
-						<RowDefinition Height="4*"/>
-						<RowDefinition Height="1*"/>
+						<RowDefinition Height="19*"/>
+						<RowDefinition Height="5*"/>
 					</Grid.RowDefinitions>
 					<DataGrid Name="DG_RCS_A" Grid.Column="0" Margin="1" Background="MistyRose">
 						<DataGridTextColumn Header="Idx"/>
@@ -160,11 +160,11 @@
 							<RowDefinition Height="30px"/>
 						</Grid.RowDefinitions>
 						<TextBlock Text="A:" Grid.Row="0" Grid.Column="0" Margin="5"/>
-						<TextBox x:Name="TB_RndCharA" Margin="3" Grid.Row="0" Grid.Column="1" Text="{Binding Path=RandCharGenAStr, Mode=TwoWay}" IsEnabled="False"/>
+						<TextBox x:Name="TB_RndCharA" Margin="3" Grid.Row="0" Grid.Column="1" Text="{Binding Path=RandCharGenAStr, Mode=TwoWay}"/>
 						<TextBlock Text="B:" Grid.Row="1" Grid.Column="0" Margin="5"/>
-						<TextBox x:Name="TB_RndCharB" Margin="3" Grid.Row="1" Grid.Column="1" Text="{Binding Path=RandCharGenBStr, Mode=TwoWay}" IsEnabled="False"/>
+						<TextBox x:Name="TB_RndCharB" Margin="3" Grid.Row="1" Grid.Column="1" Text="{Binding Path=RandCharGenBStr, Mode=TwoWay}"/>
 						<TextBlock Text="M:" Grid.Row="2" Grid.Column="0" Margin="5"/>
-						<TextBox x:Name="TB_RndCharM" Margin="3" Grid.Row="2" Grid.Column="1" Text="{Binding Path=RandCharGenMStr, Mode=TwoWay}" IsEnabled="False"/>
+						<TextBox x:Name="TB_RndCharM" Margin="3" Grid.Row="2" Grid.Column="1" Text="{Binding Path=RandCharGenMStr, Mode=TwoWay}"/>
 						<Button x:Name="B_GenRNDConsts" Content="Generate random constants" Margin="5,0,5,0" Click="B_GenRNDConsts_Click" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
 								MaxHeight="25" MaxWidth="250" />
 					</Grid>
@@ -254,7 +254,9 @@
 						<Button x:Name="B_GenSwaps" Content="Generate swaps" Margin="4, 2, 4, 2" MinWidth="112" Click="B_GenSwaps_Click"/>
 						<TextBox x:Name="TB_GenSwapsCount" MinWidth="40" Text="{Binding Path=SwapGenCountStr, Mode=OneWayToSource}" Margin="4, 2, 4, 2"/>
 					</StackPanel>
-					<Button x:Name="B_All_RND" Grid.Row="0" Content="All settings random" HorizontalAlignment="Left" VerticalAlignment="Top" Click="B_AllRandom_Click" MinWidth="112" Margin="4, 2, 4, 2"/>
+					<Button x:Name="B_All_RND" Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Click="B_AllRandom_Click" Margin="4, 4, 4, 2" MinHeight="30" MinWidth="200">
+						<TextBlock Text="All settings random" TextWrapping="Wrap" TextAlignment="Center" FontWeight="Bold"/>
+					</Button>
 				</StackPanel>
 			</GroupBox>
 			<StackPanel Orientation="Horizontal" Grid.Row="2" >

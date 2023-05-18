@@ -184,9 +184,9 @@ namespace GUI
 			VPE.DataFromGUI_Sett.SetUsingSettings(VPE.ActiveSett);
 			VPE.SynchronizeRotorDataForGUI();
 			VPE.SynchronizeSwapDataForGUI();
+			VPE.SynchronizeReflectorDataForGUI();
 			SynchronizeRotorCount();
 			SynchronizeSwapCount();
-			VPE.DataFromGUI_Refl.SelectedStr = VPE.ActiveSett.Reflector.Idx.ToString(); // nehotové
 		}
 		
 		private void InitialRotorPopulation(ushort count)
@@ -213,12 +213,12 @@ namespace GUI
 
 		private ComboBox ConstructCBSwap()
 		{
-			Binding items = new("C_VPE_ComboBox")
+			Binding items = new("ItemsStrs")
 			{
 				Mode = BindingMode.OneWay,
 				Source = VPE.DataFromGUI_Swaps[SP_Swaps.Children.Count].ItemsStrs,
 			};
-			Binding selected = new("C_VPE_ComboBox")
+			Binding selected = new("SelectedStr")
 			{
 				Mode = BindingMode.TwoWay,
 				Source = VPE.DataFromGUI_Swaps[SP_Swaps.Children.Count].SelectedStr,

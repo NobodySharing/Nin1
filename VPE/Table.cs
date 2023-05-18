@@ -5,6 +5,16 @@ namespace VPE
 {
 	public class Table
 	{
+		/// <summary>Provided vlaue was not found.</summary>
+		public const ushort NotFound = ushort.MaxValue;
+		/// <summary>Index is outside of the bounds.</summary>
+		public const ushort Outside = ushort.MaxValue - 1;
+		/// <summary>Table is empty.</summary>
+		public const ushort Empty = ushort.MaxValue - 2;
+		/// <summary>Specified entry in the table is left blank.</summary>
+		public const ushort Blank = ushort.MaxValue - 3;
+		/// <summary>Where the error codes begin. Meaning values greater (or equal) to this are invalid.</summary>
+		public const ushort InvalidArea = ushort.MaxValue - 10;
 		/// <summary>Hlavní tabulka hodnot.</summary>
 		public List<ushort> MainTable { get; set; } = new (256);
 		/// <summary>Jestli je to tabulka párů. Deafultně předpokládám že ne.</summary>
@@ -71,12 +81,12 @@ namespace VPE
 				}
 				else
 				{
-					return ushort.MaxValue - 1;
+					return NotFound;
 				}
 			}
 			else
 			{
-				return ushort.MaxValue;
+				return Empty;
 			}
 		}
 		/// <summary>Vrací hodnotu na základě indexu. Vrací 65535 pokud je tabulka prázdná, 65534 pokud je index větší než počet prvků v tabulce.</summary>
@@ -92,12 +102,12 @@ namespace VPE
 				}
 				else
 				{
-					return ushort.MaxValue - 1;
+					return Outside;
 				}
 			}
 			else
 			{
-				return ushort.MaxValue;
+				return Empty;
 			}
 		}
 		/// <summary>Převede současnou tabulku do listu bytů, bere položky jako 2 byty, tzn. i více jak 256.</summary>

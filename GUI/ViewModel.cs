@@ -10,6 +10,8 @@ using VPE;
 using Factorizator;
 using NeueDT;
 using DTcalc;
+using System.Windows.Media;
+using System.Collections.ObjectModel;
 
 namespace GUI
 {
@@ -93,11 +95,18 @@ namespace GUI
 			ActiveSett.VarShift = DataFromGUI_Sett.VarShiftNum.Value;
 			ActiveSett.RandCharSpcMin = DataFromGUI_Sett.RandCharSpcMinNum.Value;
 			ActiveSett.RandCharSpcMax = DataFromGUI_Sett.RandCharSpcMaxNum.Value;
-			// ToDo: DataGrids.
+			ActiveSett.RandCharConstA = CopyPDCDataFromGUI(DataFromGUI_Sett.RandCharA);
+			ActiveSett.RandCharConstB = CopyPDCDataFromGUI(DataFromGUI_Sett.RandCharB);
+			ActiveSett.RandCharConstM = CopyPDCDataFromGUI(DataFromGUI_Sett.RandCharM);
+			ActiveSett.SwitchConstA = CopyPDCDataFromGUI(DataFromGUI_Sett.SwitchA);
+			ActiveSett.SwitchConstB = CopyPDCDataFromGUI(DataFromGUI_Sett.SwitchB);
+			ActiveSett.SwitchConstC = CopyPDCDataFromGUI(DataFromGUI_Sett.SwitchC);
+			ActiveSett.SwitchConstD = CopyPDCDataFromGUI(DataFromGUI_Sett.SwitchD);
 		}
 
 		public void UpdateActiveSettsFromGUI()
 		{
+			ChangeActiveSettsFromGUI(); // For now.
 			// ToDo: Implement.
 		}
 
@@ -185,33 +194,64 @@ namespace GUI
 		public void SynchronizeRotorDataForGUI()
 		{
 			List<string> rotors = TableLibrary.GetIDs(TL.Rotors);
-			DataFromGUI_Rotors.Clear();
-			foreach (Table rotor in ActiveSett.Rotors)
+			if (DataFromGUI_Rotors.Count != ActiveSett.Rotors.Count)
 			{
-				C_UC_Rotor dataForGUI = new()
+				if (DataFromGUI_Rotors.Count < ActiveSett.Rotors.Count)
 				{
-					RotorsStrs = rotors,
-					SelectedRStr = rotor.Idx.ToString(),
-					SelectedRIdx = (int)rotor.Idx,
-					PozitionStr = rotor.Pozition.ToString(),
-				};
-				DataFromGUI_Rotors.Add(dataForGUI);
+					while(DataFromGUI_Rotors.Count != ActiveSett.Rotors.Count)
+					{
+						DataFromGUI_Rotors.Add(new());
+					}
+				}
+				else
+				{
+					while(DataFromGUI_Rotors.Count != ActiveSett.Rotors.Count)
+					{
+						DataFromGUI_Rotors.RemoveAt(DataFromGUI_Rotors.Count - 1);
+					}
+				}
+			}
+			for (int i = 0; i < ActiveSett.Rotors.Count; i++)
+			{
+				DataFromGUI_Rotors[i].RotorsStrs = rotors;
+				DataFromGUI_Rotors[i].PozitionStr = ActiveSett.Rotors[i].Pozition.ToString();
+				DataFromGUI_Rotors[i].SelectedRIdx = (int)ActiveSett.Rotors[i].Idx;
+				DataFromGUI_Rotors[i].SelectedRStr = ActiveSett.Rotors[i].Idx.ToString();
 			}
 		}
 
 		public void SynchronizeSwapDataForGUI()
 		{
 			List<string> swaps = TableLibrary.GetIDs(TL.Swaps);
-			DataFromGUI_Swaps.Clear();
-			foreach (Table swap in ActiveSett.Swaps)
+			if (DataFromGUI_Swaps.Count != ActiveSett.Swaps.Count)
 			{
-				C_VPE_ComboBox dataForGUI = new()
+				if (DataFromGUI_Swaps.Count < ActiveSett.Swaps.Count)
 				{
-					ItemsStrs = swaps,
-					SelectedStr = swap.Idx.ToString(),
-				};
-				DataFromGUI_Swaps.Add (dataForGUI);
+					while (DataFromGUI_Swaps.Count != ActiveSett.Swaps.Count)
+					{
+						DataFromGUI_Swaps.Add(new());
+					}
+				}
+				else
+				{
+					while (DataFromGUI_Swaps.Count != ActiveSett.Swaps.Count)
+					{
+						DataFromGUI_Swaps.RemoveAt(DataFromGUI_Swaps.Count - 1);
+					}
+				}
 			}
+			for (int i = 0; i < ActiveSett.Swaps.Count; i++)
+			{
+				DataFromGUI_Swaps[i].ItemsStrs = swaps;
+				DataFromGUI_Swaps[i].SelectedStr = ActiveSett.Swaps[i].Idx.ToString();
+			}
+		}
+
+		public void SynchronizeReflectorDataForGUI()
+		{
+			List<string> refls = TableLibrary.GetIDs(TL.Reflectors);
+			DataFromGUI_Refl.ItemsStrs = refls;
+			DataFromGUI_Refl.SelectedStr = ActiveSett.Reflector.Idx.ToString();
 		}
 
 		public void UpdateRotorSelectors()
@@ -398,6 +438,17 @@ namespace GUI
 			TL.Reflectors.Add(s.Reflector);
 			TL.Rotors.AddRange(s.Rotors);
 			TL.Swaps.AddRange(s.Swaps);
+		}
+
+		private static PrimeDefinedConstant CopyPDCDataFromGUI(ObservableCollection<C_PDC> gui)
+		{
+			PrimeDefinedConstant result = new();
+			for (int i = 0; i < Math.Min(result.PrimeIdxs.Length, gui.Count); i++)
+			{
+				result.PrimeIdxs[i] = gui[i].GetIdxNum() == null? -1 : gui[i].GetIdxNum().Value;
+				result.Exponents[i] = (byte)(gui[i].GetExpNum() == null ? 0 : gui[i].GetExpNum().Value);
+			}
+			return result;
 		}
 		#endregion
 	}

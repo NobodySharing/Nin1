@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace VPE
 {
 	public class Crypto
 	{
 		private readonly Settings Sett;
+		private const int MultithreadingThreshold = 16384;
 		/// <summary>Sada èísel reprezentující zprávu. Promìnná, se kterou v celém procesu pracuji.</summary>
 		private List<ushort> Message;
 		public Crypto(Settings S)
@@ -24,9 +26,7 @@ namespace VPE
 			AddRandomChars(); // 
 			SwitchCharPoz(0); // 
 			OrderShift(); // 
-			Swap(); // 
-			Scramble(); // 
-			Swap(); // 
+			MultithreadedPartEnc(); //
 			ConstantShift(); // 
 			VariableShift(); // 
 			AddRandomChars(); // 
@@ -43,13 +43,101 @@ namespace VPE
 			RemoveRandomChars();
 			UnVariableShift();
 			UnConstantShift();
-			Unswap();
-			Unscramble();
-			Unswap();
+			MultithreadedPartDec();
 			UnOrderShift();
 			UnSwitchCharPoz(0);
 			RemoveRandomChars();
 			return ConvertToString();
+		}
+		/// <summary></summary>
+		private void MultithreadedPartEnc()
+		{
+			if (Message.Count < MultithreadingThreshold)
+			{
+				Swap();
+				Scramble();
+				Swap();
+			}
+			else
+			{
+				List<ushort>[] parts = PrepareData(out Settings_Rotors[] rotors);
+				ParallelLoopResult result = Parallel.For(0, Environment.ProcessorCount, (i, state) =>
+				{
+					ForwardPassThroughTables(ref parts[i], rotors[i]);
+				});
+				if (result.IsCompleted)
+				{
+					CombineMessage(parts);
+				}
+			}
+		}
+		/// <summary></summary>
+		private void MultithreadedPartDec()
+		{
+			if (Message.Count < MultithreadingThreshold)
+			{
+				Unswap();
+				Unscramble();
+				Unswap();
+			}
+			else
+			{
+				List<ushort>[] parts = PrepareData(out Settings_Rotors[] rotors);
+				ParallelLoopResult result = Parallel.For(0, Environment.ProcessorCount, (i, state) =>
+				{
+					BackwardPassThroughTables(ref parts[i], rotors[i]);
+				});
+				if (result.IsCompleted)
+				{
+					CombineMessage(parts);
+				}
+			}
+		}
+		/// <summary>Divides the message to segments. Number of those is dependant on logical processor count.
+		/// Last segment should be bit longer, of length of the message is not dividible by processor count.</summary>
+		/// <returns>Divided message.</returns>
+		private List<ushort>[] DivideMessage()
+		{ // All divisions on ints are intentionally done this way. It'll return me only the whole part, which is exactly what I need.
+			List<ushort>[] parts = new List<ushort>[Environment.ProcessorCount];
+			int segLen = Message.Count / Environment.ProcessorCount, i, seg;
+			for (i = 0; i < Message.Count; i++)
+			{
+				seg = i / segLen;
+				if (seg < Environment.ProcessorCount)
+				{
+					parts[seg].Add(Message[i]);
+				}
+				else
+				{
+					parts[Environment.ProcessorCount - 1].Add(Message[i]);
+				}
+			}
+			return parts;
+		}
+		/// <summary></summary>
+		/// <param name="rotors"></param>
+		/// <returns></returns>
+		private List<ushort>[] PrepareData(out Settings_Rotors[] rotors)
+		{
+			List<ushort>[] parts = DivideMessage();
+			rotors = Sett.CopyPrimitives(Environment.ProcessorCount);
+			uint sum = 0;
+			for (int i = 1; i < rotors.Length; i++)
+			{
+				sum += (uint)parts[i - 1].Count;
+				rotors[i].IncrementPozitions(sum);
+			}
+			return parts;
+		}
+		/// <summary></summary>
+		/// <param name="parts"></param>
+		private void CombineMessage(List<ushort>[] parts)
+		{
+			Message.Clear();
+			foreach (List<ushort> part in parts)
+			{
+				Message.AddRange(part);
+			}
 		}
 		/// <summary>Zkonvertuje textovou zprávu na èíselnou reprezentaci podle tabulky znakù.</summary>
 		/// <param name="Text">Textová zpráva.</param>
@@ -101,17 +189,36 @@ namespace VPE
 			}
 			return SB.ToString();
 		}
-		/// <summary>Prohodí èísla postupnì podle všech tabulek.</summary>
+		/// <summary></summary>
+		/// <param name="message"></param>
+		/// <param name="rotors"></param>
+		private void ForwardPassThroughTables(ref List<ushort> message, Settings_Rotors rotors)
+		{
+			Swap(ref message);
+			Scramble(ref message, rotors);
+			Swap(ref message);
+		}
+		/// <summary></summary>
+		/// <param name="message"></param>
+		/// <param name="rotors"></param>
+		private void BackwardPassThroughTables(ref List<ushort> message, Settings_Rotors rotors)
+		{
+			Unswap(ref message);
+			Unscramble(ref message, rotors);
+			Unswap(ref message);
+		}
+		/// <summary></summary>
 		private void Swap()
 		{
+			ushort swapped;
 			for (int i = 0; i < Message.Count; i++)
 			{
 				foreach (Table T in Sett.Swaps)
 				{
-					if (T.FindValueUsingIndex(Message[i]) < ushort.MaxValue - 10) // Error kódy.
+					swapped = T.FindValueUsingIndex(Message[i]);
+					if (swapped < Table.InvalidArea)
 					{
-						ushort swapped = T.FindValueUsingIndex(Message[i]);
-						Message[i] = swapped >= (ushort.MaxValue - 10) ? Message[i] : swapped; // Pokud tam tahle hodnota není, neprohazuji.
+						Message[i] = swapped >= Table.InvalidArea ? Message[i] : swapped;
 					}
 					else
 					{
@@ -120,17 +227,38 @@ namespace VPE
 				}
 			}
 		}
-		/// <summary>Zvrátí prohození èísel, zpìtnì.</summary>
+		/// <summary></summary>
+		private void Swap(ref List<ushort> message)
+		{
+			ushort swapped;
+			for (int i = 0; i < message.Count; i++)
+			{
+				foreach (Table T in Sett.Swaps)
+				{
+					swapped = T.FindValueUsingIndex(message[i]);
+					if (swapped < Table.InvalidArea)
+					{
+						message[i] = swapped >= Table.InvalidArea ? message[i] : swapped;
+					}
+					else
+					{
+						continue;
+					}
+				}
+			}
+		}
+		/// <summary></summary>
 		private void Unswap()
 		{
+			ushort swapped;
 			for (int j = Sett.Swaps.Count - 1; j >= 0; j--)
 			{
 				for (int i = Message.Count - 1; i >= 0; i--)
 				{
-					if (Sett.Swaps[j].FindIndexUsingValue(Message[i]) != ushort.MaxValue)
+					swapped = Sett.Swaps[j].FindIndexUsingValue(Message[i]);
+					if (swapped != Table.NotFound)
 					{
-						ushort swapped = Sett.Swaps[j].FindIndexUsingValue(Message[i]);
-						Message[i] = swapped == (ushort.MaxValue - 1) ? Message[i] : swapped;
+						Message[i] = swapped >= Table.InvalidArea ? Message[i] : swapped;
 					}
 					else
 					{
@@ -139,20 +267,53 @@ namespace VPE
 				}
 			}
 		}
-		/// <summary>Zamíchá èísla podle tabulek.</summary>
+		/// <summary></summary>
+		private void Unswap(ref List<ushort> message)
+		{
+			ushort swapped;
+			for (int j = Sett.Swaps.Count - 1; j >= 0; j--)
+			{
+				for (int i = message.Count - 1; i >= 0; i--)
+				{
+					swapped = Sett.Swaps[j].FindIndexUsingValue(Message[i]);
+					if (swapped != Table.NotFound)
+					{
+						message[i] = swapped >= Table.InvalidArea ? message[i] : swapped;
+					}
+					else
+					{
+						continue;
+					}
+				}
+			}
+		}
+		/// <summary></summary>
 		private void Scramble()
 		{
 			for (int i = 0; i < Message.Count; i++)
 			{
-				ForwardScramble(i); // Dopøedný prùchod.
-				Reflect(i); // Odraz s prohozením.
-				BackwardScramble(i); // Zpìtný prùchod.
-				int Sum = Message[i] + Sett.Rotors[0].Pozition; // Kvùli debugu v samostatné promìnné.
+				ForwardScramble(i);
+				Reflect(i);
+				BackwardScramble(i);
+				int Sum = Message[i] + Sett.Rotors[^1].Pozition;
 				Message[i] = (ushort)(Sum % Codepage.Limit);
 				Sett.IncrementPozitions();
 			}
 		}
-		/// <summary>Odzamíchá èísla podle tabulek.</summary>
+		/// <summary></summary>
+		private void Scramble(ref List<ushort> message, Settings_Rotors sett)
+		{
+			for (int i = 0; i < message.Count; i++)
+			{
+				ForwardScramble(i);
+				Reflect(i);
+				BackwardScramble(i);
+				int Sum = message[i] + sett.Rotors[^1].Pozition;
+				message[i] = (ushort)(Sum % Codepage.Limit);
+				sett.IncrementPozitions();
+			}
+		}
+		/// <summary></summary>
 		private void Unscramble()
 		{
 			for (int i = 0; i < Message.Count; i++)
@@ -160,9 +321,22 @@ namespace VPE
 				BackwardScramble(i);
 				ReflectBack(i);
 				ForwardScramble(i);
-				int Sum = Message[i] + Sett.Rotors[0].Pozition;
+				int Sum = Message[i] + Sett.Rotors[^1].Pozition;
 				Message[i] = (ushort)(Sum % Codepage.Limit);
 				Sett.IncrementPozitions();
+			}
+		}
+		/// <summary></summary>
+		private void Unscramble(ref List<ushort> message, Settings_Rotors sett)
+		{
+			for (int i = 0; i < message.Count; i++)
+			{
+				BackwardScramble(i);
+				ReflectBack(i);
+				ForwardScramble(i);
+				int Sum = message[i] + sett.Rotors[sett.Rotors.Count - 1].Pozition;
+				message[i] = (ushort)(Sum % Codepage.Limit);
+				sett.IncrementPozitions();
 			}
 		}
 		/// <summary>Posune èísla podle posunového parametru.</summary>

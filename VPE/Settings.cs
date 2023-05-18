@@ -3,6 +3,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Numerics;
 using Common;
+using System.Windows.Media;
 
 namespace VPE
 {
@@ -37,10 +38,54 @@ namespace VPE
 			return result;
 		}
 	}
-	public class Settings : Settings_Base
+	/// <summary>Primitive part of the settings class. Contains only lists of tables. Designed for multithreaded encryption.</summary>
+	public class Settings_Rotors : Settings_Base
 	{
 		/// <summary>Všechny rotory.</summary>
 		public List<Table> Rotors { get; private set; } = new();
+		/// <summary>Inkrementuje čísla pozic rotorů. Nejnižší index značí nejnižší řád.</summary>
+		public void IncrementPozitions()
+		{
+			Rotors[0].Pozition++;
+			for (int i = 0; i < Rotors.Count; i++)
+			{
+				if (Rotors[i].Pozition >= Codepage.Limit)
+				{
+					Rotors[i].Pozition = 0;
+					if (i < (Rotors.Count - 1))
+					{
+						Rotors[i + 1].Pozition++;
+					}
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		/// <summary>Increments rotor pozitions by specified amount.</summary>
+		/// <param name="num">By how much to increment.</param>
+		public void IncrementPozitions(uint num)
+		{
+			foreach (Table t in Rotors)
+			{
+				num += t.Pozition;
+				t.Pozition = (ushort)(num % Codepage.Limit);
+				num -= t.Pozition;
+				if (num > 0)
+				{
+					num /= Codepage.Limit;
+				}
+				else
+				{
+					break;
+				}
+			}
+		}
+	}
+	/// <summary>Main class for storing and working with settings data for the encryption algorithm.</summary>
+	public class Settings : Settings_Rotors
+	{
 		/// <summary>Všechny swapy (plugboard).</summary>
 		public List<Table> Swaps { get; private set; } = new();
 		/// <summary>Jediný reflektor.</summary>
@@ -72,7 +117,7 @@ namespace VPE
 		/// <summary>Index nastavení.</summary>
 		public uint Idx { get; set; }
 		/// <summary>Smallest size of this class instance. (2 034)</summary>
-		private const int MinSize = 182 * 2 + 182 * 2 + 182 * 4 + 4 + 2 + 2 + 2 + 80 + 80 + 80 + 80 + 80 + 80 + 80 + 4 + 4;
+		private const int MinSize = 2048;
 		public Settings ()
 		{
 
@@ -90,23 +135,6 @@ namespace VPE
 		public Settings(byte[] file, ref int pozition)
 		{
 			FromBytes(file, ref pozition);
-		}
-		/// <summary>Inkrementuje čísla pozic rotorů. Nejnižší index značí nejvyšší řád.</summary>
-		public void IncrementPozitions()
-		{
-			int Last = Rotors.Count - 1;
-			Rotors[Last].Pozition++;
-			for (int i = Last; i >= 0; i--)
-			{
-				if (Rotors[i].Pozition >= Codepage.Limit)
-				{
-					Rotors[i].Pozition = 0;
-					if (i > 0)
-					{
-						Rotors[i - 1].Pozition++;
-					}
-				}
-			}
 		}
 		/// <summary>Ahtualizuje startovací pozice na současné pozice.</summary>
 		public void UpdateStartPozitions()
@@ -145,6 +173,18 @@ namespace VPE
 				}
 			}
 			return true;
+		}
+		/// <summary></summary>
+		/// <param name="count"></param>
+		/// <returns></returns>
+		public Settings_Rotors[] CopyPrimitives(int count)
+		{
+			Settings_Rotors[] result = new Settings_Rotors[count];
+			for (int i = 0; i < count; i++)
+			{
+				result[i] = CopyPrimitives();
+			}
+			return result;
 		}
 		/// <summary>Převede celou instanci třídy na pole bytů.</summary>
 		public byte[] ToBytes ()
@@ -221,6 +261,16 @@ namespace VPE
 			SwitchConstB = consts[4];
 			SwitchConstC = consts[5];
 			SwitchConstD = consts[6];
+		}
+		/// <summary></summary>
+		/// <returns></returns>
+		private Settings_Rotors CopyPrimitives()
+		{
+			Table[] rotors = new Table[Rotors.Count];
+			Rotors.CopyTo(rotors);
+			Settings_Rotors result = new();
+			result.Rotors.AddRange(rotors);
+			return result;
 		}
 	}
 	/// <summary>Defines a very large constant. Using it's factorization./summary>
