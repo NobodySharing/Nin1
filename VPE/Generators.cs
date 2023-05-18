@@ -48,7 +48,7 @@ namespace VPE
 			count = R.Next(6, 14);
 			for (int i = 0; i < count; i++)
 			{
-				Table t = GeneratePairsWithSkips((ushort)i, GenerateDoubleInRange(9/16, 950/1024));
+				Table t = GeneratePairsWithSkips((ushort)i, GenerateDoubleInRange(9d / 16d, 950d / 1024d));
 				settings.Swaps.Add(t);
 			}
 			settings.ConstShift = GenerateNum();
@@ -146,32 +146,37 @@ namespace VPE
 			Table T = new()
 			{
 				Idx = index,
-				IsPaired = true
+				IsPaired = true,
+				IsIncomplete = true,
 			};
-			ushort[] Temp = new ushort[Codepage.Limit];
-			List<ushort> Remains = new();
+			ushort[] temp = new ushort[Codepage.Limit];
+			List<ushort> remains = new();
 			for (ushort u = 0; u < Limit; u++)
 			{
-				Remains.Add(u);
+				remains.Add(u);
 			}
-			int RandIndex;
+			int randIndex;
 			ushort SelA, SelB;
-			while (Remains.Count > 0)
+			while (remains.Count > 0)
 			{
-				RandIndex = R.Next(Remains.Count);
-				SelA = Remains[RandIndex];
-				Remains.RemoveAt(RandIndex);
-				RandIndex = R.Next(Remains.Count);
-				SelB = Remains[RandIndex];
-				Remains.RemoveAt(RandIndex);
+				randIndex = R.Next(remains.Count);
+				SelA = remains[randIndex];
+				remains.RemoveAt(randIndex);
+				randIndex = R.Next(remains.Count);
+				SelB = remains[randIndex];
+				remains.RemoveAt(randIndex);
 				if (R.NextDouble() <= fillPortion)
 				{
-
-					Temp[SelA] = SelB;
-					Temp[SelB] = SelA;
+					temp[SelA] = SelB;
+					temp[SelB] = SelA;
+				}
+				else
+				{
+					temp[SelA] = ushort.MaxValue - 2; // Marking empty spots.
+					temp[SelB] = ushort.MaxValue - 2;
 				}
 			}
-			T.MainTable = Temp.ToList();
+			T.MainTable = temp.ToList();
 			return T;
 		}
 		/// <summary>Vygeneruje náhodné číslo od 0 do Codepage.Limit.</summary>
@@ -185,9 +190,7 @@ namespace VPE
 		{
 			if (from > to)
 			{
-				double temp = from;
-				from = to;
-				to = temp;
+				(to, from) = (from, to);
 			}
 			double range = to - from;
 			double rand = R.NextDouble();
@@ -198,36 +201,39 @@ namespace VPE
 		public PrimeDefinedConstant[] GenerateABM()
 		{
 			PrimeDefinedConstant[] result = new PrimeDefinedConstant[3];
-			List<int> Aprimes = new(), Bprimes = new(), Mprimes = new();
+			List<int>[] idxs = new List<int>[] { new List<int>(), new List<int>(), new List<int>() }; // A, B, M.
+			List<byte>[] exps = new List<byte>[] { new List<byte>(), new List<byte>(), new List<byte>() }; // A, B, M.
 			int num;
 			for (byte i  = 0; i < 5; i++)
 			{
 				num = R.Next(0, PrimeList.Total);
-				Aprimes.Add(num);
-				Mprimes.Add(num);
-				Bprimes.Add(R.Next(0, PrimeList.Total));
+				idxs[0].Add(num);
+				idxs[1].Add(num);
+				idxs[2].Add(R.Next(0, PrimeList.Total));
 			}
 			for (byte i = 0; i < 2; i++)
 			{
-				Aprimes.Add(R.Next(0, PrimeList.Total));
-				Bprimes.Add(R.Next(0, PrimeList.Total));
+				idxs[0].Add(R.Next(0, PrimeList.Total));
+				idxs[1].Add(R.Next(0, PrimeList.Total));
 			}
-			List<byte> Aexp = new(), Bexp = new(), Mexp = new();
 			for (byte i = 0; i < 7; i++)
 			{
-				Aexp.Add(Convert.ToByte(R.Next(0, GetSizeBasedMax(Aprimes[i]))));
-				Bexp.Add(Convert.ToByte(R.Next(0, GetSizeBasedMax(Bprimes[i]))));
+				exps[0].Add(Convert.ToByte(R.Next(1, GetSizeBasedMax(idxs[0][i]))));
+				exps[1].Add(Convert.ToByte(R.Next(1, GetSizeBasedMax(idxs[1][i]))));
 				if (i < 5)
 				{
-					Mexp.Add(Convert.ToByte(R.Next(0, GetSizeBasedMax(Mprimes[i]))));
+					exps[2].Add(Convert.ToByte(R.Next(1, GetSizeBasedMax(idxs[2][i]))));
 				}
 			}
-			result[0].PrimeIdxs = Aprimes.ToArray();
-			result[0].Powers = Aexp.ToArray();
-			result[1].PrimeIdxs = Bprimes.ToArray();
-			result[1].Powers = Bexp.ToArray();
-			result[2].PrimeIdxs = Mprimes.ToArray();
-			result[2].Powers = Mexp.ToArray();
+			for (int i = 0; i < 3; i++)
+			{
+				result[i] = new();
+				for (int j = 0; j < idxs[i].Count; j++)
+				{
+					result[i].PrimeIdxs[j] = idxs[i][j];
+					result[i].Exponents[j] = exps[i][j];
+				}
+			}
 			return result;
 		}
 
@@ -256,7 +262,7 @@ namespace VPE
 					int num = R.Next(PrimeList.First3Digit, PrimeList.Total);
 					byte exp = Convert.ToByte(R.Next(1, GetSizeBasedMax(num)));
 					result[i].PrimeIdxs[j] = num;
-					result[i].Powers[j] = exp;
+					result[i].Exponents[j] = exp;
 				}
 			}
 			return result;

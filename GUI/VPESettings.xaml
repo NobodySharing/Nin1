@@ -5,33 +5,34 @@
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:local="clr-namespace:GUI"
 		mc:Ignorable="d"
-		Title="VPE Settings composer" Height="640" Width="920">
+		Title="VPE Settings composer" Height="800" Width="1280">
 	<Window.Resources>
 		<local:C_VPE_Sett x:Key="DataFromGUI"/>
+		<local:C_VPE_ComboBox x:Key="DataFromGUI_ComboBox"/>
 	</Window.Resources>
 	<Window.DataContext>
 		<Binding Source="{StaticResource DataFromGUI}"/>
 	</Window.DataContext>
 	<Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="5*"/>
-			<ColumnDefinition Width="2*"/>
+			<ColumnDefinition Width="9*"/>
 			<ColumnDefinition Width="4*"/>
-			<ColumnDefinition Width="4*"/>
+			<ColumnDefinition Width="12*"/>
+			<ColumnDefinition Width="8*"/>
+			<ColumnDefinition Width="7*"/>
 		</Grid.ColumnDefinitions>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="25px"/>
 			<RowDefinition Height="1*"/>
 		</Grid.RowDefinitions>
-		<StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" Orientation="Horizontal">
+		<StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Orientation="Horizontal">
 			<TextBlock Text="Name:" Margin="4"/>
 			<TextBox x:Name="TB_Name" Margin="5,3,5,2" MinWidth="150" Text="{Binding Path=NameStr, Mode=TwoWay}"/>
+			<Button x:Name="B_Rename" Content="Rename currently selected" Padding="5,0,5,0" Margin="5,0,5,0" MaxHeight="21" Click="B_Rename_Click"/>
 			<TextBlock Text="Select settings:" Margin="4"/>
-			<ComboBox x:Name="CB_SettLib" Margin="0,3,0,2" MinWidth="300"  IsReadOnly="True" SelectionChanged="CB_SettLib_SelChanged"
-					  ItemsSource="{Binding Path=ItemsStrs, Mode=OneWay}" SelectedItem="{Binding Path=SelectedStr, Mode=TwoWay}" DataContext="{DynamicResource DataFromGUI_Sett_Sel}">
-				<ComboBox.Resources>
-					<local:C_VPE_ComboBox x:Key="DataFromGUI_Sett_Sel"/>
-				</ComboBox.Resources>
+			<ComboBox x:Name="CB_SettLib" Margin="0,3,0,2" MinWidth="300" SelectionChanged="CB_SettLib_SelChanged"
+					  ItemsSource="{Binding Path=ItemsStrs, Mode=OneWay}" SelectedItem="{Binding Path=SelectedStr, Mode=TwoWay}"
+					  DataContext="{StaticResource DataFromGUI_ComboBox}">
 			</ComboBox>
 		</StackPanel>
 		<GroupBox x:Name="GB_Rotors" Grid.Column="0" Grid.Row="1" Header="Rotors settings" Grid.RowSpan="2">
@@ -77,21 +78,17 @@
 		</GroupBox>
 		<Grid Grid.Column="2" Grid.Row="1">
 			<Grid.RowDefinitions>
-				<RowDefinition Height="2*"/>
-				<RowDefinition Height="3*"/>
-				<RowDefinition Height="8*"/>
 				<RowDefinition Height="4*"/>
+				<RowDefinition Height="5*"/>
+				<RowDefinition Height="5*"/>
+				<RowDefinition Height="36*"/>
 			</Grid.RowDefinitions>
 			<GroupBox Grid.Row="0" Header="Reflector">
 				<StackPanel x:Name="SP_Refls">
-					<StackPanel.Resources>
-						<local:C_VPE_ComboBox x:Key="DataFromGUI_Refl"/>
-					</StackPanel.Resources>
-					<StackPanel.DataContext>
-						<Binding Source="{StaticResource DataFromGUI_Refl}"/>
-					</StackPanel.DataContext>
 					<ComboBox x:Name="CB_Reflector" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="6,3,6,3" MaxHeight="21"
-							  ItemsSource="{Binding Path=ItemsStrs, Mode=OneWay}" SelectedItem="{Binding Path=SelectedStr, Mode=TwoWay}" DataContext="{DynamicResource DataFromGUI_Refl}"/>
+							  ItemsSource="{Binding Path=ItemsStrs, Mode=OneWay}" SelectedItem="{Binding Path=SelectedStr, Mode=TwoWay}"
+							  DataContext="{StaticResource DataFromGUI_ComboBox}">
+					</ComboBox>
 				</StackPanel>
 			</GroupBox>
 			<GroupBox Grid.Row="1" Header="Constant and variable shifts">
@@ -118,6 +115,7 @@
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="70px"/>
 						<ColumnDefinition Width="50px"/>
+						<ColumnDefinition Width="90px"/>
 						<ColumnDefinition Width="1*"/>
 					</Grid.ColumnDefinitions>
 					<TextBlock Grid.Row="0" Grid.Column="0" Text="Min space:" Margin="4"/>
@@ -125,50 +123,107 @@
 					<TextBlock Grid.Row="1" Grid.Column="0" Text="Max space:" Margin="4"/>
 					<TextBox Grid.Row="1" Grid.Column="1" x:Name="TB_RndCharsSpcMax" Text="{Binding Path=RandCharSpcMaxStr, Mode=TwoWay}" Width="40" Height="20"/>
 					<Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" x:Name="B_RndCharsSpc" Content="Random" Margin="3" Click="B_RandCharSpc_Click"/>
-					<GroupBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Header="Spacing between rand chars">
-						<Grid>
-							<Grid.ColumnDefinitions>
-								<ColumnDefinition Width="1*"/>
-								<ColumnDefinition Width="7*"/>
-							</Grid.ColumnDefinitions>
-							<Grid.RowDefinitions>
-								<RowDefinition Height="25px"/>
-								<RowDefinition Height="25px"/>
-								<RowDefinition Height="25px"/>
-								<RowDefinition Height="1*"/>
-							</Grid.RowDefinitions>
-							<TextBlock Text="A:" Grid.Row="0" Grid.Column="0" Margin="5"/>
-							<TextBox x:Name="TB_RndCharA" Margin="3" Grid.Row="0" Grid.Column="1" Text="{Binding Path=RandCharGenAStr, Mode=TwoWay}"/>
-							<TextBlock Text="B:" Grid.Row="1" Grid.Column="0" Margin="5"/>
-							<TextBox x:Name="TB_RndCharB" Margin="3" Grid.Row="1" Grid.Column="1" Text="{Binding Path=RandCharGenBStr, Mode=TwoWay}"/>
-							<TextBlock Text="M:" Grid.Row="2" Grid.Column="0" Margin="5"/>
-							<TextBox x:Name="TB_RndCharM" Margin="3" Grid.Row="2" Grid.Column="1" Text="{Binding Path=RandCharGenMStr, Mode=TwoWay}"/>
-							<Button x:Name="B_GenRNDConsts" Content="Generate random constants" Margin="10,3,10,3" Click="B_GenRNDConsts_Click" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" MaxHeight="25" MaxWidth="180" VerticalAlignment="Top"/>
-						</Grid>
-					</GroupBox>
 				</Grid>
 			</GroupBox>
-			<GroupBox Grid.Row="3" Header="Switching order ofcharacters">
+			<GroupBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Header="Spacing between random charsacters">
 				<Grid>
 					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="25px"/>
 						<ColumnDefinition Width="1*"/>
-						<ColumnDefinition Width="70px"/>
+						<ColumnDefinition Width="1*"/>
+						<ColumnDefinition Width="1*"/>
 					</Grid.ColumnDefinitions>
 					<Grid.RowDefinitions>
-						<RowDefinition Height="25px"/>
-						<RowDefinition Height="25px"/>
+						<RowDefinition Height="4*"/>
 						<RowDefinition Height="1*"/>
 					</Grid.RowDefinitions>
-					<TextBlock Text="A:" Grid.Column="0" Grid.Row="0" Margin="4"/>
-					<TextBlock Text="B:" Grid.Column="0" Grid.Row="1" Margin="4"/>
-					<TextBox x:Name="TB_SwitchA" Grid.Column="1" Grid.Row="0" Margin="3" Text="{Binding Path=SwitchAStr, Mode=TwoWay}"/>
-					<TextBox x:Name="TB_SwitchB" Grid.Column="1" Grid.Row="1" Margin="3" Text="{Binding Path=SwitchBStr, Mode=TwoWay}"/>
-					<Button x:Name="B_GenSwitchConsts" Content="Random" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Margin="3"/>
+					<DataGrid Name="DG_RCS_A" Grid.Column="0" Margin="1" Background="MistyRose">
+						<DataGridTextColumn Header="Idx"/>
+						<DataGridTextColumn Header="Exp"/>
+					</DataGrid>
+					<DataGrid Name="DG_RCS_B" Grid.Column="1" Margin="1" Background="MistyRose">
+						<DataGridTextColumn Header="Idx"/>
+						<DataGridTextColumn Header="Exp"/>
+					</DataGrid>
+					<DataGrid Name="DG_RCS_M" Grid.Column="2" Margin="1" Background="MistyRose">
+						<DataGridTextColumn Header="Idx"/>
+						<DataGridTextColumn Header="Exp"/>
+					</DataGrid>
+					<Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="1*"/>
+							<ColumnDefinition Width="7*"/>
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="25px"/>
+							<RowDefinition Height="25px"/>
+							<RowDefinition Height="25px"/>
+							<RowDefinition Height="30px"/>
+						</Grid.RowDefinitions>
+						<TextBlock Text="A:" Grid.Row="0" Grid.Column="0" Margin="5"/>
+						<TextBox x:Name="TB_RndCharA" Margin="3" Grid.Row="0" Grid.Column="1" Text="{Binding Path=RandCharGenAStr, Mode=TwoWay}" IsEnabled="False"/>
+						<TextBlock Text="B:" Grid.Row="1" Grid.Column="0" Margin="5"/>
+						<TextBox x:Name="TB_RndCharB" Margin="3" Grid.Row="1" Grid.Column="1" Text="{Binding Path=RandCharGenBStr, Mode=TwoWay}" IsEnabled="False"/>
+						<TextBlock Text="M:" Grid.Row="2" Grid.Column="0" Margin="5"/>
+						<TextBox x:Name="TB_RndCharM" Margin="3" Grid.Row="2" Grid.Column="1" Text="{Binding Path=RandCharGenMStr, Mode=TwoWay}" IsEnabled="False"/>
+						<Button x:Name="B_GenRNDConsts" Content="Generate random constants" Margin="5,0,5,0" Click="B_GenRNDConsts_Click" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
+								MaxHeight="25" MaxWidth="250" />
+					</Grid>
 				</Grid>
 			</GroupBox>
 		</Grid>
-		<Grid Grid.Column="3" Grid.Row="1">
+		<GroupBox Grid.Row="1" Grid.Column="3" Header="Switching order of characters">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="1*"/>
+					<ColumnDefinition Width="1*"/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="1*"/>
+					<RowDefinition Height="50px"/>
+					<RowDefinition Height="1*"/>
+					<RowDefinition Height="50px"/>
+					<RowDefinition Height="30px"/>
+				</Grid.RowDefinitions>
+				<DataGrid Name="DG_SC_A" Grid.Column="0" Grid.Row="0" Margin="1" Background="MistyRose">
+					<DataGridTextColumn Header="Idx"/>
+					<DataGridTextColumn Header="Exp"/>
+				</DataGrid>
+				<DataGrid Name="DG_SC_B" Grid.Column="1" Grid.Row="0" Margin="1" Background="MistyRose">
+					<DataGridTextColumn Header="Idx"/>
+					<DataGridTextColumn Header="Exp"/>
+				</DataGrid>
+				<DataGrid Name="DG_SC_C" Grid.Column="0" Grid.Row="2" Margin="1" Background="MistyRose">
+					<DataGridTextColumn Header="Idx"/>
+					<DataGridTextColumn Header="Exp"/>
+				</DataGrid>
+				<DataGrid Name="DG_SC_D" Grid.Column="1" Grid.Row="2" Margin="1" Background="MistyRose">
+					<DataGridTextColumn Header="Idx"/>
+					<DataGridTextColumn Header="Exp"/>
+				</DataGrid>
+				<StackPanel Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" Orientation="Vertical">
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Text="A:" MinWidth="12" MinHeight="16" Margin="2"/>
+						<TextBox x:Name="TB_SwitchA" Margin="2" Text="{Binding Path=SwitchAStr, Mode=TwoWay}" Width="220"/>
+					</StackPanel>
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Text="B:" MinWidth="12" MinHeight="16" Margin="2"/>
+						<TextBox x:Name="TB_SwitchB" Margin="2" Text="{Binding Path=SwitchBStr, Mode=TwoWay}" Width="220"/>
+					</StackPanel>
+				</StackPanel>
+				<StackPanel Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Orientation="Vertical">
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Text="C:" MinWidth="12" MinHeight="16" Margin="2"/>
+						<TextBox x:Name="TB_SwitchC" Margin="2" Text="{Binding Path=SwitchCStr, Mode=TwoWay}" Width="220"/>
+					</StackPanel>
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Text="D:" MinWidth="12" MinHeight="16" Margin="2"/>
+						<TextBox x:Name="TB_SwitchD" Margin="2" Text="{Binding Path=SwitchDStr, Mode=TwoWay}" Width="220"/>
+					</StackPanel>
+				</StackPanel>
+				<Button x:Name="B_GenSwitchConsts" Content="Generate random constants" Click="B_GenSwitchConsts_Click" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" Margin="2" MaxHeight="25"/>
+			</Grid>
+		</GroupBox>
+		<Grid Grid.Column="4" Grid.Row="1">
 			<Grid.RowDefinitions>
 				<RowDefinition Height="5*"/>
 				<RowDefinition Height="2*"/>
@@ -203,8 +258,8 @@
 				</StackPanel>
 			</GroupBox>
 			<StackPanel Orientation="Horizontal" Grid.Row="2" >
-				<Button x:Name="B_Save" HorizontalAlignment="Left" Click="B_Save_Click" Margin="2" Height="38px" Width="120px"  Padding="0">
-					<TextBlock Text="Save as current settings" TextWrapping="Wrap" TextAlignment="Center"/>
+				<Button x:Name="B_Save" HorizontalAlignment="Left" Click="B_SaveChang_Click" Margin="2" Height="38px" Width="120px"  Padding="0">
+					<TextBlock Text="Save edits to current settings" TextWrapping="Wrap" TextAlignment="Center"/>
 				</Button>
 				<Button x:Name="B_Submit" Content="Submit" HorizontalAlignment="Right" Click="B_Submit_Click" Margin="2" Height="25px" Width="80px" BorderThickness="3" FontWeight="Bold"/>
 			</StackPanel>

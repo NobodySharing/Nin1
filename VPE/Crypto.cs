@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Numerics;
-using static Common.PrimeList;
 
 namespace VPE
 {
@@ -112,7 +111,7 @@ namespace VPE
 					if (T.FindValueUsingIndex(Message[i]) < ushort.MaxValue - 10) // Error kódy.
 					{
 						ushort swapped = T.FindValueUsingIndex(Message[i]);
-						Message[i] = swapped == (ushort.MaxValue - 1) ? Message[i] : swapped; // Pokud tam tahle hodnota není, neprohazuji.
+						Message[i] = swapped >= (ushort.MaxValue - 10) ? Message[i] : swapped; // Pokud tam tahle hodnota není, neprohazuji.
 					}
 					else
 					{
@@ -262,48 +261,45 @@ namespace VPE
 				Message[i] = Sett.Rotors[j].FindIndexUsingValue(Remain);
 			}
 		}
-		/// <summary>Pøidá náhodné znaky do sady.</summary>
+		/// <summary>Adds random chars to the message.</summary>
 		private void AddRandomChars()
 		{
 			Generators Gen = new (Codepage.Limit, DateTime.Now.Ticks);
-			int index = (Sett.RandCharSpcMin + Sett.RandCharSpcMax) % 2; // Inicializace indexu, kam budu pøidávat náhodný znak.
-			Message.Insert(index, Gen.GenerateNum()); // Pøidám náhodný znak, na 0. nebo 1. pozici podle sudosti/lichosti souètu minima a maxima rozsahù mezer.
-			int gap = Sett.RandCharSpcMax - Sett.RandCharSpcMin; // Velikost rozsahu mezery.
+			int index = (Sett.RandCharSpcMin + Sett.RandCharSpcMax) % 2; // Index inicialization, where I will add random char.
+			int gap = Sett.RandCharSpcMax - Sett.RandCharSpcMin;
 			BigInteger space = (BigInteger)(Math.Floor(Convert.ToDouble(Codepage.Limit / gap)) % gap + Sett.RandCharSpcMin); // Inicializace mezery. V jádru „náhodný“ výpoèet, pak dání do rozsahu a posunutí o minimum.
-			while (index <= Message.Count)
+			BigInteger A = Sett.RandCharConstA.ComputeConstant(1), B = Sett.RandCharConstB.ComputeConstant(), M = Sett.RandCharConstM.ComputeConstant(); // I have to precompute the constants here, so I don't compute them every time.
+			while (index < Message.Count)
 			{
-				IncrementSpace(ref index, ref space, gap);
-				if (index <= Message.Count - 1)
-				{
-					Message.Insert(index, Gen.GenerateNum());
-				}
-				else 
-				{
-					break;
-				}
+				Message.Insert(index, Gen.GenerateNum());
+				IncrementSpace(ref index, ref space, gap, A, B, M);
 			}
 		}
-		/// <summary>Odebere náhodné znaky ze sady.</summary>
+		/// <summary>Removes random chars from the message.</summary>
 		private void RemoveRandomChars()
 		{
 			int index = (Sett.RandCharSpcMin + Sett.RandCharSpcMax) % 2;
 			Message.RemoveAt(index);
 			int gap = Sett.RandCharSpcMax - Sett.RandCharSpcMin;
 			BigInteger space = (BigInteger)(Math.Floor(Convert.ToDouble(Codepage.Limit / gap)) % gap + Sett.RandCharSpcMin);
+			BigInteger A = Sett.RandCharConstA.ComputeConstant(1), B = Sett.RandCharConstB.ComputeConstant(), M = Sett.RandCharConstM.ComputeConstant();
 			while (index <= Message.Count)
 			{
-				IncrementSpace(ref index, ref space, gap);
+				IncrementSpace(ref index, ref space, gap, A, B, M);
 				Message.RemoveAt(index);
 			}
 		}
-		/// <summary>Inkrementuje index o novou pseudonáhodnou mezeru.</summary>
-		/// <param name="index">Pøedchozí index.</param>
-		/// <param name="space">Pøedchozí mezera.</param>
-		/// <param name="gap">Rozsah velikosti mezery.</param>
-		private void IncrementSpace (ref int index, ref BigInteger space, int gap)
+		/// <summary>Increments index by new pseudorandom gap.</summary>
+		/// <param name="index">Previous index.</param>
+		/// <param name="space">Previous gap.</param>
+		/// <param name="gap">Max gap size.</param>
+		/// <param name="A">A in y = (Ax + B) % M.</param>
+		/// <param name="B">B in y = (Ax + B) % M.</param>
+		/// <param name="M">M in y = (Ax + B) % M.</param>
+		private void IncrementSpace (ref int index, ref BigInteger space, int gap, BigInteger A, BigInteger B, BigInteger M)
 		{
-			space = (Sett.RandCharConstA.ComputeConstant() * space + Sett.RandCharConstB.ComputeConstant()) % Sett.RandCharConstM.ComputeConstant();
-			index += Convert.ToInt32((space % gap) + Sett.RandCharSpcMin);
+			space = (A * space + B) % M;
+			index +=  (int)(space % gap) + Sett.RandCharSpcMin;
 		}
 		/// <summary></summary>
 		/// <param name="stage"></param>
@@ -353,7 +349,7 @@ namespace VPE
 			}
 			for (int i = 0; i < m; i++)
 			{
-				switchTable.Add(Convert.ToInt32((A * i + B) % m));
+				switchTable.Add((int)((A * i + B) % m));
 			}
 			return switchTable;
 		}

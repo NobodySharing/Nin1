@@ -22,13 +22,12 @@ namespace GUI
 	{
 		
 		#region Common
-		private C_VPE_MainWin DataFromGUI;
+		private C_VPE_MainWin DataFromGUI = new();
 		private PersistentStorage PS = new();
 
 		public MainWindow()
 		{
 			InitializeComponent();
-			DataFromGUI = new();
 			DataContext = DataFromGUI;
 		}
 		#endregion
@@ -37,9 +36,39 @@ namespace GUI
 		private VPE_VM VPE = new();
 		VPESettingsComp VPESettWin;
 
-		private void MI_VPE_Encrypt_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_EncrypStr = VPE.Encrypt(DataFromGUI.VPE_PlainStr);
+		private void MI_VPE_Encrypt_Click(object sender, RoutedEventArgs e)
+		{
+			if(VPE.ActiveSett is not null)
+			{
+				 DataFromGUI.VPE_EncrypStr = VPE.Encrypt(DataFromGUI.VPE_PlainStr);
+			}
+			else
+			{
+				string caption = "Error";
+				string messageBoxText = "I am unable to encrypt your text. No encryption settings were selected.";
+				MessageBoxButton button = MessageBoxButton.OK;
+				MessageBoxImage icon = MessageBoxImage.Error;
+				MessageBoxResult result;
+				result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.OK);
+			}
+		}
 
-		private void MI_VPE_Decrypt_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_PlainStr = VPE.Decrypt(DataFromGUI.VPE_EncrypStr);
+		private void MI_VPE_Decrypt_Click(object sender, RoutedEventArgs e)
+		{
+			if (VPE.ActiveSett is not null)
+			{
+				DataFromGUI.VPE_PlainStr = VPE.Decrypt(DataFromGUI.VPE_EncrypStr);
+			}
+			else
+			{
+				string caption = "Error";
+				string messageBoxText = "I am unable to decrypt your text. No decryption settings were selected.";
+				MessageBoxButton button = MessageBoxButton.OK;
+				MessageBoxImage icon = MessageBoxImage.Error;
+				MessageBoxResult result;
+				result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.OK);
+			}
+		}
 
 		private void MI_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_PlainStr = VPE.OpenMsgFile();
 
@@ -53,7 +82,7 @@ namespace GUI
 
 		private void MI_VPE_QuickSettSave_Click(object sender, RoutedEventArgs e) => VPE.SaveSettings();
 
-		private void MI_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e) => VPE.LoadSettings();
+		private void MI_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e) => VPE.LoadSettings(true);
 		
 		private void MI_VPE_SettingsComp_Click(object sender, RoutedEventArgs e)
 		{

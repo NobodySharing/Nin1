@@ -32,62 +32,9 @@ namespace VPE
 			List<Table> result = new ();
 			for (int i = 0; i < tableCount; i++)
 			{
-				result.Add(TableFromBytes(set, ref pozition, limit));
+				result.Add(new Table (set, ref pozition, limit));
 			}
 			return result;
-		}
-
-		internal static Table TableFromBytes(byte[] set, ref int pozition, ushort limit)
-		{
-			Table t = new()
-			{
-				Idx = BitConverter.ToUInt32(set, pozition)
-			};
-			pozition += 4;
-			t.SetFlags(set[pozition]);
-			pozition++;
-			t.Pozition = BitConverter.ToUInt16(set, pozition);
-			pozition += 2;
-			t.StartPozition = BitConverter.ToUInt16(set, pozition);
-			pozition += 2;
-			for (ushort j = 0; j < limit; j++)
-			{
-				t.MainTable.Add(BitConverter.ToUInt16(set, pozition));
-				pozition += 2;
-			}
-			return t;
-		}
-		/// <summary>Enkóduje decimal do pole 16 bytů.</summary>
-		/// <param name="number">Číslo.</param>
-		/// <returns>Pole 16 bytů.</returns>
-		internal static byte[] DecimalToBytes (decimal number)
-		{
-			byte[] result = new byte[16];
-			int[] temp = decimal.GetBits(number);
-			int i = 0;
-			foreach (int t in temp)
-			{
-				byte[] b = BitConverter.GetBytes(t);
-				for (byte j = 0; j < 4; j++)
-				{
-					result[i++] = b[j];
-				}
-			}
-			return result;
-		}
-		/// <summary>Dekóduje decimal číslo ze sady bytů.</summary>
-		/// <param name="set">Sada bytů.</param>
-		/// <param name="pozition">Pozice, kde začít.</param>
-		/// <returns>Decimal číslo.</returns>
-		internal static decimal DecimalFromBytes(byte[] set, ref int pozition)
-		{
-			int[] temp = new int[4];
-			for (int i = 0; i < 4; i++)
-			{
-				temp[i] = BitConverter.ToInt32(set, pozition);
-				pozition += 4;
-			}
-			return new decimal(temp);
 		}
 	}
 	public class Settings : Settings_Base
@@ -246,13 +193,13 @@ namespace VPE
 			pozition += nameLength * 4;
 			Idx = BitConverter.ToUInt32(file, pozition);
 			pozition += 4;
-			int rotors = BitConverter.ToInt32(file, pozition);
+			int tables = BitConverter.ToInt32(file, pozition);
 			pozition += 4;
-			Rotors.AddRange(TablesFromBytes(file, ref pozition, rotors, limit));
-			rotors = BitConverter.ToInt32(file, pozition);
+			Rotors.AddRange(TablesFromBytes(file, ref pozition, tables, limit));
+			tables = BitConverter.ToInt32(file, pozition);
 			pozition += 4;
-			Swaps.AddRange(TablesFromBytes(file, ref pozition, rotors, limit));
-			Reflector = TableFromBytes(file, ref pozition, limit);
+			Swaps.AddRange(TablesFromBytes(file, ref pozition, tables, limit));
+			Reflector = new Table (file, ref pozition, limit);
 			ConstShift = BitConverter.ToUInt32(file, pozition);
 			pozition += 4;
 			VarShift = BitConverter.ToUInt32(file, pozition);
@@ -284,7 +231,7 @@ namespace VPE
 		/// <summary>List of indexes of prime numbers. Up to 78 497 ONLY!</summary>
 		public int[] PrimeIdxs = new int[Size];
 		/// <summary>List of corresponging powers, to which a prime with the same index should be raised.</summary>
-		public byte[] Powers = new byte[Size];
+		public byte[] Exponents = new byte[Size];
 		public PrimeDefinedConstant()
 		{
 			for (int i = 0; i < Size; i++)
@@ -293,18 +240,19 @@ namespace VPE
 			}
 		}
 		/// <summary>Computes the constant represented by given primes and their powers.</summary>
+		/// <param name="toAdd">How much to add to the result.</param>
 		/// <returns>Really big number. At least that is the idea. With all digits.</returns>
-		public BigInteger ComputeConstant()
+		public BigInteger ComputeConstant(long toAdd = 0)
 		{
 			BigInteger result = new(1);
 			for (int i = 0; i < Size; i++)
 			{
-				if (PrimeIdxs[i] >= PrimeList.First1Digit || PrimeIdxs[i] <= PrimeList.Last6Digit)
+				if (PrimeIdxs[i] >= PrimeList.First1Digit && PrimeIdxs[i] <= PrimeList.Last6Digit)
 				{
-					result *= BigInteger.Pow((BigInteger)PrimeList.Primes[PrimeIdxs[i]], Powers[i]);
+					result *= BigInteger.Pow((BigInteger)PrimeList.Primes[PrimeIdxs[i]], Exponents[i]);
 				}
 			}
-			return result;
+			return result + toAdd;
 		}
 		/// <summary>Converts to a resulting number as a string.</summary>
 		/// <returns>Number as a string.</returns>
@@ -320,7 +268,7 @@ namespace VPE
 			for (int i = 0; i < Size; i++)
 			{
 				result.AddRange(BitConverter.GetBytes(PrimeIdxs[i]));
-				result.Add(Powers[i]);
+				result.Add(Exponents[i]);
 			}
 			return result.ToArray();
 		}
@@ -333,7 +281,7 @@ namespace VPE
 			{
 				PrimeIdxs[i] = BitConverter.ToInt32(bytes, poz);
 				poz += 4;
-				Powers[i] = bytes[poz];
+				Exponents[i] = bytes[poz];
 				poz++;
 			}
 		}
@@ -341,9 +289,9 @@ namespace VPE
 	/// <summary>Ukládá množiny tabulek.</summary>
 	public class TableLibrary : Settings_Base
 	{
-		public List<Table> Swaps { get; private set; } = new();
 		public List<Table> Rotors { get; private set; } = new();
 		public List<Table> Reflectors { get; private set; } = new();
+		public List<Table> Swaps { get; private set; } = new();
 
 		public TableLibrary ()
 		{
@@ -389,11 +337,37 @@ namespace VPE
 			return result.ToArray();
 		}
 
-		public void Merge(TableLibrary settingsStorage)
+		public static List<string> GetIDs(List<Table> what)
 		{
-			Swaps.AddRange(settingsStorage?.Swaps);
-			Rotors.AddRange(settingsStorage?.Rotors);
-			Reflectors.AddRange(settingsStorage?.Reflectors);
+			List<string> result = new();
+			foreach (Table table in what)
+			{
+				result.Add(table.Idx.ToString());
+			}
+			return result;
+		}
+
+		public void Merge(TableLibrary newTables)
+		{
+			if (newTables is null)
+			{
+				return;
+			}
+			foreach(Table rotor in newTables.Rotors)
+			{
+				rotor.Idx = (uint)Rotors.Count;
+				Rotors.Add(rotor);
+			}
+			foreach (Table swap in newTables.Swaps)
+			{
+				swap.Idx = (uint)Swaps.Count;
+				Rotors.Add(swap);
+			}
+			foreach (Table reflector in newTables.Reflectors)
+			{
+				reflector.Idx = (uint)Reflectors.Count;
+				Rotors.Add(reflector);
+			}
 		}
 
 		public Settings Select (List<ushort> rotors, List<ushort> swaps, int refl)

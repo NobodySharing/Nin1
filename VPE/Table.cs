@@ -11,19 +11,44 @@ namespace VPE
 		public bool IsPaired { get; set; } = false;
 		/// <summary>Jestli tabulka má pozice (pro rotory). Deafultně předpokládám že ne.</summary>
 		public bool HasPozition { get; set; } = false;
+		/// <summary>Jestli je vyplněná částečně. Deafultně předpokládám že ne.</summary>
+		public bool IsIncomplete { get; set; } = false;
 		/// <summary>Pokud relevantní, ukazuje na pozici, kde v tabulce začít. Toto se mění s průběhem en/dekrypce.</summary>
 		public ushort Pozition { get; set; }
 		/// <summary>Počáteční pozice v tabulce při začátku en/dekrypce.</summary>
 		public ushort StartPozition { get; set; }
 		/// <summary>Index tabulky, používán k rozeznávání.</summary>
 		public uint Idx { get; set; }
+
+		public Table()
+		{
+
+		}
+
+		public Table(byte[] set, ref int pozition, ushort limit)
+		{
+			Idx = BitConverter.ToUInt32(set, pozition);
+			pozition += 4;
+			SetFlags(set[pozition]);
+			pozition++;
+			Pozition = BitConverter.ToUInt16(set, pozition);
+			pozition += 2;
+			StartPozition = BitConverter.ToUInt16(set, pozition);
+			pozition += 2;
+			for (ushort j = 0; j < limit; j++)
+			{
+				MainTable.Add(BitConverter.ToUInt16(set, pozition));
+				pozition += 2;
+			}
+		}
 		/// <summary>Dá dohromady booly do 1 bytu.</summary>
 		/// <returns>Komprimované flagy.</returns>
 		public byte GetFlags()
 		{
-			int b0 = IsPaired ? 1 : 0;
-			int b1 = HasPozition ? 2 : 0;
-			return (byte)(b0 | b1);
+			byte b0 = IsPaired ? (byte)1 : (byte)0;
+			byte b1 = HasPozition ? (byte)2 : (byte)0;
+			byte b2 = IsIncomplete ? (byte)4 : (byte)0;
+			return (byte)(b0 | b1 | b2);
 		}
 		/// <summary>Rozbalí flagy z bytu.</summary>
 		/// <param name="flags">Komprimované flagy.</param>
@@ -31,6 +56,7 @@ namespace VPE
 		{
 			IsPaired = (flags & 0b00000001) == 1;
 			HasPozition = (flags & 0b00000010) == 2;
+			IsIncomplete = (flags & 0b00000100) == 4;
 		}
 		/// <summary>Vrátí index hodnoty. Vrací 65535 pokud je tabulka prázdná, 65534 pokud neobsahuje hodnotu.</summary>
 		/// <param name="Value">Hodnota.</param>

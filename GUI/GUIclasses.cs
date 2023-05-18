@@ -4,8 +4,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Numerics;
 using VPE;
+using System.Collections.ObjectModel;
 
 namespace GUI
 {
@@ -55,6 +55,10 @@ namespace GUI
 	#region VPE
 	public class C_VPE_Sett : INotifyPropertyChanged
 	{
+		private string NameStrV;
+		private string RotorGenCountStrV;
+		private string SwapGenCountStrV;
+		private string ReflGenCountStrV;
 		private string ConstShiftStrV;
 		private string VarShiftStrV;
 		private string RandCharSpcMinStrV;
@@ -62,15 +66,17 @@ namespace GUI
 		private string RandCharGenAStrV;
 		private string RandCharGenBStrV;
 		private string RandCharGenMStrV;
-		private string RotorGenCountStrV;
-		private string SwapGenCountStrV;
-		private string ReflGenCountStrV;
 		private string SwitchAStrV;
 		private string SwitchBStrV;
 		private string SwitchCStrV;
 		private string SwitchDStrV;
-		private string NameStrV;
-		
+		private ObservableCollection<C_PDC> RandCharAV = new();
+		private ObservableCollection<C_PDC> RandCharBV = new();
+		private ObservableCollection<C_PDC> RandCharMV = new();
+		private ObservableCollection<C_PDC> SwitchAV = new();
+		private ObservableCollection<C_PDC> SwitchBV = new();
+		private ObservableCollection<C_PDC> SwitchCV = new();
+		private ObservableCollection<C_PDC> SwitchDV = new();
 		public string ConstShiftStr
 		{
 			get
@@ -86,11 +92,11 @@ namespace GUI
 				}
 			}
 		}
-		public ushort? ConstShiftNum
+		public uint? ConstShiftNum
 		{
 			get
 			{
-				if (ushort.TryParse(ConstShiftStrV, out ushort num))
+				if (uint.TryParse(ConstShiftStrV, out uint num))
 				{
 					return num;
 				}
@@ -115,11 +121,11 @@ namespace GUI
 				}
 			}
 		}
-		public ushort? VarShiftNum
+		public uint? VarShiftNum
 		{
 			get
 			{
-				if (ushort.TryParse(VarShiftStrV, out ushort num))
+				if (uint.TryParse(VarShiftStrV, out uint num))
 				{
 					return num;
 				}
@@ -202,20 +208,6 @@ namespace GUI
 				}
 			}
 		}
-		public decimal? RandCharGenANum
-		{
-			get
-			{
-				if (decimal.TryParse(RandCharGenAStrV, out decimal num))
-				{
-					return num;
-				}
-				else
-				{
-					return null; // Neplatné číslo.
-				}
-			}
-		}
 		public string RandCharGenBStr
 		{
 			get
@@ -228,20 +220,6 @@ namespace GUI
 				{
 					RandCharGenBStrV = value;
 					OnPropertyChanged("RandCharGenBStr");
-				}
-			}
-		}
-		public decimal? RandCharGenBNum
-		{
-			get
-			{
-				if (decimal.TryParse(RandCharGenBStrV, out decimal num))
-				{
-					return num;
-				}
-				else
-				{
-					return null; // Neplatné číslo.
 				}
 			}
 		}
@@ -260,20 +238,6 @@ namespace GUI
 				}
 			}
 		}
-		public decimal? RandCharGenMNum
-		{
-			get
-			{
-				if (decimal.TryParse(RandCharGenMStrV, out decimal num))
-				{
-					return num;
-				}
-				else
-				{
-					return null; // Neplatné číslo.
-				}
-			}
-		}
 		public string SwitchAStr
 		{
 			get
@@ -286,20 +250,6 @@ namespace GUI
 				{
 					SwitchAStrV = value;
 					OnPropertyChanged("SwitchAStr");
-				}
-			}
-		}
-		public BigInteger? SwitchANum
-		{
-			get
-			{
-				if (BigInteger.TryParse(SwitchAStrV, out BigInteger num))
-				{
-					return num;
-				}
-				else
-				{
-					return null; // Neplatné číslo.
 				}
 			}
 		}
@@ -318,20 +268,6 @@ namespace GUI
 				}
 			}
 		}
-		public BigInteger? SwitchBNum
-		{
-			get
-			{
-				if (BigInteger.TryParse(SwitchBStrV, out BigInteger num))
-				{
-					return num;
-				}
-				else
-				{
-					return null; // Neplatné číslo.
-				}
-			}
-		}
 		public string SwitchCStr
 		{
 			get
@@ -347,20 +283,6 @@ namespace GUI
 				}
 			}
 		}
-		public BigInteger? SwitchCNum
-		{
-			get
-			{
-				if (BigInteger.TryParse(SwitchCStrV, out BigInteger num))
-				{
-					return num;
-				}
-				else
-				{
-					return null; // Neplatné číslo.
-				}
-			}
-		}
 		public string SwitchDStr
 		{
 			get
@@ -373,20 +295,6 @@ namespace GUI
 				{
 					SwitchDStrV = value;
 					OnPropertyChanged("SwitchDStr");
-				}
-			}
-		}
-		public BigInteger? SwitchDNum
-		{
-			get
-			{
-				if (BigInteger.TryParse(SwitchDStrV, out BigInteger num))
-				{
-					return num;
-				}
-				else
-				{
-					return null; // Neplatné číslo.
 				}
 			}
 		}
@@ -492,6 +400,111 @@ namespace GUI
 				}
 			}
 		}
+		public ObservableCollection<C_PDC> RandCharA
+		{
+			get
+			{
+				return RandCharAV;
+			}
+			set
+			{
+				if (RandCharAV != value)
+				{
+					RandCharAV = value;
+					OnPropertyChanged("RandCharA");
+				}
+			}
+		}
+		public ObservableCollection<C_PDC> RandCharB
+		{
+			get
+			{
+				return RandCharBV;
+			}
+			set
+			{
+				if (RandCharBV != value)
+				{
+					RandCharBV = value;
+					OnPropertyChanged("RandCharB");
+				}
+			}
+		}
+		public ObservableCollection<C_PDC> RandCharM
+		{
+			get
+			{
+				return RandCharMV;
+			}
+			set
+			{
+				if (RandCharMV != value)
+				{
+					RandCharMV = value;
+					OnPropertyChanged("RandCharM");
+				}
+			}
+		}
+		public ObservableCollection<C_PDC> SwitchA
+		{
+			get
+			{
+				return SwitchAV;
+			}
+			set
+			{
+				if (SwitchAV != value)
+				{
+					SwitchAV = value;
+					OnPropertyChanged("SwitchA");
+				}
+			}
+		}
+		public ObservableCollection<C_PDC> SwitchB
+		{
+			get
+			{
+				return SwitchBV;
+			}
+			set
+			{
+				if (SwitchBV != value)
+				{
+					SwitchBV = value;
+					OnPropertyChanged("SwitchB");
+				}
+			}
+		}
+		public ObservableCollection<C_PDC> SwitchC
+		{
+			get
+			{
+				return SwitchCV;
+			}
+			set
+			{
+				if (SwitchCV != value)
+				{
+					SwitchCV = value;
+					OnPropertyChanged("SwitchC");
+				}
+			}
+		}
+		public ObservableCollection<C_PDC> SwitchD
+		{
+			get
+			{
+				return SwitchDV;
+			}
+			set
+			{
+				if (SwitchDV != value)
+				{
+					SwitchDV = value;
+					OnPropertyChanged("SwitchD");
+				}
+			}
+		}
 		/// <summary>Sets the GUI using Settings class instance. Sets only what it can.</summary>
 		/// <param name="s">Settings to use.</param>
 		public void	SetUsingSettings(Settings s)
@@ -507,6 +520,28 @@ namespace GUI
 			SwitchBStr = s.SwitchConstB.ToString();
 			SwitchCStr = s.SwitchConstC.ToString();
 			SwitchDStr = s.SwitchConstD.ToString();
+			RandCharA = FillDataGridClass(s.RandCharConstA);
+			RandCharB = FillDataGridClass(s.RandCharConstB);
+			RandCharM = FillDataGridClass(s.RandCharConstM);
+			SwitchA = FillDataGridClass(s.SwitchConstA);
+			SwitchB = FillDataGridClass(s.SwitchConstB);
+			SwitchC = FillDataGridClass(s.SwitchConstC);
+			SwitchD = FillDataGridClass(s.SwitchConstD);
+		}
+
+		private static ObservableCollection<C_PDC> FillDataGridClass(PrimeDefinedConstant data)
+		{
+			ObservableCollection<C_PDC> result = new();
+			for (int i = 0; i < 8; i++)
+			{
+				C_PDC item = new()
+				{
+					IdxStr = data.PrimeIdxs[i].ToString(),
+					ExpStr = data.Exponents[i].ToString(),
+				};
+				result.Add(item);
+			}
+			return result;
 		}
 		public event PropertyChangedEventHandler PropertyChanged;
 		private void OnPropertyChanged(string info)
@@ -610,7 +645,69 @@ namespace GUI
 			}
 		}
 
+		public event PropertyChangedEventHandler PropertyChanged;
+		private void OnPropertyChanged(string info)
+		{
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(info));
+		}
+	}
 
+	public class C_PDC : INotifyPropertyChanged
+	{
+		private string IdxStrV;
+		private string ExpStrV;
+		public string IdxStr
+		{
+			get
+			{
+				return IdxStrV;
+			}
+			set
+			{
+				if (IdxStrV != value)
+				{
+					IdxStrV = value;
+					OnPropertyChanged("IdxStr");
+				}
+			}
+		}
+		public int? GetIdxNum()
+		{
+			if (int.TryParse(IdxStrV, out int num))
+			{
+				return num;
+			}
+			else
+			{
+				return null;
+			}
+		}
+		public string ExpStr
+		{
+			get
+			{
+				return ExpStrV;
+			}
+			set
+			{
+				if (ExpStrV != value)
+				{
+					ExpStrV = value;
+					OnPropertyChanged("ExpStr");
+				}
+			}
+		}
+		public ushort? GetExpNum()
+		{
+			if (ushort.TryParse(ExpStrV, out ushort num))
+			{
+				return num;
+			}
+			else
+			{
+				return null;
+			}
+		}
 		public event PropertyChangedEventHandler PropertyChanged;
 		private void OnPropertyChanged(string info)
 		{

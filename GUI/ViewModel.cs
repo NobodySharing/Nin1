@@ -25,7 +25,7 @@ namespace GUI
 		#endregion
 		#region Classes for binding
 		internal C_VPE_Sett DataFromGUI_Sett = new();
-		internal List<C_UC_Rotor> DataFromGUI_Sett_Rotors = new();
+		internal List<C_UC_Rotor> DataFromGUI_Rotors = new();
 		internal List<C_VPE_ComboBox> DataFromGUI_Swaps = new();
 		internal C_VPE_ComboBox DataFromGUI_Refl = new();
 		internal C_VPE_ComboBox DataFromGUI_SettSel = new();
@@ -39,53 +39,51 @@ namespace GUI
 		#endregion
 
 		#region Public methods
-		/// <summary>Vygeneruje rotory.</summary>
-		/// <param name="count">Kolik rotorů?</param>
-		/// <returns>Seznam indexů vygenerovaných.</returns>
+		
 		public void GenerateRotors(uint count = 20)
 		{
 			Generator.UpdateSeed(DateTime.Now.Ticks);
 			for (uint i = 0; i < count; i++)
 			{
-				Generator.UpdateSeed(DateTime.Now.Ticks);
 				TL.Rotors.Add(Generator.GenerateTable((ushort)TL.Rotors.Count));
 			}
 		}
 
 		public void GenerateReflector(uint count = 5)
 		{
+			Generator.UpdateSeed(DateTime.Now.Ticks);
 			for (uint i = 0; i < count; i++)
 			{
-				Generator.UpdateSeed(DateTime.Now.Ticks);
 				TL.Reflectors.Add(Generator.GeneratePairs((ushort)TL.Reflectors.Count));
 			}
 		}
 
 		public void GenerateSwaps(uint count = 10)
 		{
+			Generator.UpdateSeed(DateTime.Now.Ticks);
 			for (uint i = 0; i < count; i++)
 			{
-				Generator.UpdateSeed(DateTime.Now.Ticks);
-				TL.Swaps.Add(Generator.GeneratePairsWithSkips((ushort)TL.Swaps.Count));
+				TL.Swaps.Add(Generator.GeneratePairsWithSkips((ushort)TL.Swaps.Count, Generator.GenerateDoubleInRange(9d / 16d, 950d / 1024d)));
 			}
 		}
 		/// <summary>Generates complete settings, adds them to library and sets the GUI accordingly.</summary>
 		public void GenerateComplete()
 		{
 			ActiveSett = Generator.GenerateSetts();
+			ActiveSett.UpdateStartPozitions();
 			AddSettsToLib();
 		}
 		/// <summary>Sets active settings using what is in GUI.</summary>
 		public void ChangeActiveSettsFromGUI()
 		{
 			List<ushort> rotors = new(), pozs = new(), swaps = new();
-			foreach (C_UC_Rotor rotor in DataFromGUI_Sett_Rotors)
-			{ // Potencially problematic:
+			foreach (C_UC_Rotor rotor in DataFromGUI_Rotors)
+			{
 				rotors.Add(rotor.SelectedRNum.Value);
 				pozs.Add(rotor.PozitionNum.Value);
 			}
 			foreach (C_VPE_ComboBox swap in DataFromGUI_Swaps)
-			{ // Potencially problematic:
+			{
 				swaps.Add(swap.SelectedNum.Value);
 			}
 			ActiveSett = TL.Select(rotors, swaps, DataFromGUI_Refl.SelectedNum.Value);
@@ -95,6 +93,12 @@ namespace GUI
 			ActiveSett.VarShift = DataFromGUI_Sett.VarShiftNum.Value;
 			ActiveSett.RandCharSpcMin = DataFromGUI_Sett.RandCharSpcMinNum.Value;
 			ActiveSett.RandCharSpcMax = DataFromGUI_Sett.RandCharSpcMaxNum.Value;
+			// ToDo: DataGrids.
+		}
+
+		public void UpdateActiveSettsFromGUI()
+		{
+			// ToDo: Implement.
 		}
 
 		public ushort GenerateRandNum()
@@ -165,7 +169,7 @@ namespace GUI
 			for (ushort i = 0; i < count; i++)
 			{
 				C_UC_Rotor rotor = new();
-				DataFromGUI_Sett_Rotors.Add(rotor);
+				DataFromGUI_Rotors.Add(rotor);
 			}
 		}
 
@@ -178,6 +182,38 @@ namespace GUI
 			}
 		}
 
+		public void SynchronizeRotorDataForGUI()
+		{
+			List<string> rotors = TableLibrary.GetIDs(TL.Rotors);
+			DataFromGUI_Rotors.Clear();
+			foreach (Table rotor in ActiveSett.Rotors)
+			{
+				C_UC_Rotor dataForGUI = new()
+				{
+					RotorsStrs = rotors,
+					SelectedRStr = rotor.Idx.ToString(),
+					SelectedRIdx = (int)rotor.Idx,
+					PozitionStr = rotor.Pozition.ToString(),
+				};
+				DataFromGUI_Rotors.Add(dataForGUI);
+			}
+		}
+
+		public void SynchronizeSwapDataForGUI()
+		{
+			List<string> swaps = TableLibrary.GetIDs(TL.Swaps);
+			DataFromGUI_Swaps.Clear();
+			foreach (Table swap in ActiveSett.Swaps)
+			{
+				C_VPE_ComboBox dataForGUI = new()
+				{
+					ItemsStrs = swaps,
+					SelectedStr = swap.Idx.ToString(),
+				};
+				DataFromGUI_Swaps.Add (dataForGUI);
+			}
+		}
+
 		public void UpdateRotorSelectors()
 		{
 			List<string> rotorNums = new();
@@ -185,11 +221,52 @@ namespace GUI
 			{
 				rotorNums.Add(rotor.Idx.ToString());
 			}
-			foreach (C_UC_Rotor rotorList in DataFromGUI_Sett_Rotors)
+			foreach (C_UC_Rotor rotorList in DataFromGUI_Rotors)
 			{
 				rotorList.RotorsStrs.Clear();
 				rotorList.RotorsStrs = rotorNums;
 			}
+		}
+
+		public void UpdateReflSelector()
+		{
+			List<string> reflNums = new();
+			foreach (Table refl in TL.Reflectors)
+			{
+				reflNums.Add(refl.Idx.ToString());
+			}
+			DataFromGUI_Refl.ItemsStrs.Clear();
+			DataFromGUI_Refl.ItemsStrs = reflNums;
+		}
+
+		public void UpdateSwapSelector()
+		{
+			List<string> swapsNums = new();
+			foreach (Table swap in TL.Swaps)
+			{
+				swapsNums.Add(swap.Idx.ToString());
+			}
+			foreach (C_VPE_ComboBox swap in DataFromGUI_Swaps)
+			{
+				swap.ItemsStrs.Clear();
+				swap.ItemsStrs = swapsNums;
+			}
+		}
+
+		public void UpdateSettingsSelector()
+		{
+			List<string> names = new();
+			foreach (Settings s in SL.Library)
+			{
+				names.Add(s.Name);
+			}
+			DataFromGUI_SettSel.ItemsStrs.Clear();
+			DataFromGUI_SettSel.ItemsStrs = names;
+		}
+
+		public void RenameSelSett()
+		{
+			ActiveSett.Name = DataFromGUI_Sett.NameStr;
 		}
 
 		public void SaveSettings()
@@ -197,12 +274,22 @@ namespace GUI
 			FileHandling.Save(ActiveSett, SaveFile(VPES_filter));
 		}
 
-		public void LoadSettings()
+		public void LoadSettings(bool? OverrideOverwrite = null)
 		{
 			FileHandling.Load(OpenFile(VPES_filter), out Settings s);
-			if (Overwrite)
+			if (OverrideOverwrite is not null)
 			{
-				ActiveSett = s;
+				if (OverrideOverwrite.Value)
+				{
+					ActiveSett = s;
+				}
+			}
+			else
+			{
+				if (Overwrite)
+				{
+					ActiveSett = s;
+				}
 			}
 			AddSettsToLib(s);
 		}
