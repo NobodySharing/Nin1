@@ -38,12 +38,12 @@ namespace VPE
 			return result;
 		}
 	}
-	/// <summary>Primitive part of the settings class. Contains only lists of tables. Designed for multithreaded encryption.</summary>
+	/// <summary>Rotor part of the settings class. Contains only lists of tables. Designed for multithreaded encryption.</summary>
 	public class Settings_Rotors : Settings_Base
 	{
-		/// <summary>Všechny rotory.</summary>
+		/// <summary>All rotors (and their pozitons). Lowest index is the lowest order. It rotates every char.</summary>
 		public List<Table> Rotors { get; private set; } = new();
-		/// <summary>Inkrementuje čísla pozic rotorů. Nejnižší index značí nejnižší řád.</summary>
+		/// <summary>Increments pozitional numbers of all rotors.</summary>
 		public void IncrementPozitions()
 		{
 			Rotors[0].Pozition++;
@@ -81,6 +81,61 @@ namespace VPE
 					break;
 				}
 			}
+		}
+		/// <summary></summary>
+		/// <returns></returns>
+		public List<ushort> GetPozitions()
+		{
+			List<ushort> result = new();
+			foreach (Table t in Rotors)
+			{
+				result.Add(t.Pozition);
+			}
+			return result;
+		}
+		/// <summary></summary>
+		/// <param name="pozitions"></param>
+		/// <returns></returns>
+		public bool SetPozitions (List<ushort> pozitions)
+		{
+			if (pozitions == null)
+			{
+				return false;
+			}
+			if (pozitions.Count != Rotors.Count)
+			{
+				return false;
+			}
+			for(int i = 0; i < pozitions.Count; i++)
+			{
+				Rotors[i].Pozition = pozitions[i];
+			}
+			return true;
+		}
+		/// <summary>Clones all rotors specified number of times.</summary>
+		/// <param name="copyCount">How many clones to create.</param>
+		/// <returns>Clones.</returns>
+		public Settings_Rotors[] CloneRotors(int copyCount)
+		{
+			Settings_Rotors[] result = new Settings_Rotors[copyCount];
+			for (int i = 0; i < copyCount; i++)
+			{
+				result[i] = CloneRotors();
+			}
+			return result;
+		}
+		/// <summary>Clones this class instance.</summary>
+		/// <returns>Clone.</returns>
+		private Settings_Rotors CloneRotors()
+		{
+			Table[] rotors = new Table[Rotors.Count];
+			for (int i = 0; i < Rotors.Count; i++)
+			{
+				rotors[i] = Rotors[i].Clone();
+			}
+			Settings_Rotors result = new();
+			result.Rotors.AddRange(rotors);
+			return result;
 		}
 	}
 	/// <summary>Main class for storing and working with settings data for the encryption algorithm.</summary>
@@ -174,18 +229,6 @@ namespace VPE
 			}
 			return true;
 		}
-		/// <summary></summary>
-		/// <param name="count"></param>
-		/// <returns></returns>
-		public Settings_Rotors[] CopyPrimitives(int count)
-		{
-			Settings_Rotors[] result = new Settings_Rotors[count];
-			for (int i = 0; i < count; i++)
-			{
-				result[i] = CopyPrimitives();
-			}
-			return result;
-		}
 		/// <summary>Převede celou instanci třídy na pole bytů.</summary>
 		public byte[] ToBytes ()
 		{
@@ -262,16 +305,7 @@ namespace VPE
 			SwitchConstC = consts[5];
 			SwitchConstD = consts[6];
 		}
-		/// <summary></summary>
-		/// <returns></returns>
-		private Settings_Rotors CopyPrimitives()
-		{
-			Table[] rotors = new Table[Rotors.Count];
-			Rotors.CopyTo(rotors);
-			Settings_Rotors result = new();
-			result.Rotors.AddRange(rotors);
-			return result;
-		}
+		
 	}
 	/// <summary>Defines a very large constant. Using it's factorization./summary>
 	public class PrimeDefinedConstant
@@ -339,6 +373,7 @@ namespace VPE
 	/// <summary>Ukládá množiny tabulek.</summary>
 	public class TableLibrary : Settings_Base
 	{
+		/// <summary>All rotors (and their pozitons). Lowest index is the lowest order. It rotates every char.</summary>
 		public List<Table> Rotors { get; private set; } = new();
 		public List<Table> Reflectors { get; private set; } = new();
 		public List<Table> Swaps { get; private set; } = new();
@@ -347,7 +382,8 @@ namespace VPE
 		{
 
 		}
-
+		/// <summary>Creates an instance of this class by reading data from a file.</summary>
+		/// <param name="file">File (as byte array) with data for this class.</param>
 		public TableLibrary(byte[] file)
 		{
 			if (file == null)
@@ -419,7 +455,11 @@ namespace VPE
 				Rotors.Add(reflector);
 			}
 		}
-
+		/// <summary>Creates Settings class based on tables selection.</summary>
+		/// <param name="rotors">Which rotors to use?</param>
+		/// <param name="swaps">Which swaps to use?</param>
+		/// <param name="refl">Which reflector to use?</param>
+		/// <returns></returns>
 		public Settings Select (List<ushort> rotors, List<ushort> swaps, int refl)
 		{
 			Settings s = new()
@@ -432,7 +472,7 @@ namespace VPE
 			}
 			foreach (ushort i in swaps)
 			{
-				s.Swaps.Add(Rotors[i]);
+				s.Swaps.Add(Swaps[i]);
 			}
 			return s;
 		}

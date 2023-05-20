@@ -18,8 +18,9 @@ namespace VPE
 			UpdateSeed(Seed);
 		}
 		/// <summary>Generates complete instance of Settings class.</summary>
+		/// <param name="idxs">Set of indexies. 0: rotors, 1: swaps, 2: refls, 3: setts.</param>
 		/// <returns>Settings.</returns>
-		public Settings GenerateSetts()
+		public Settings GenerateSetts(uint[] idxs)
 		{
 			PrimeDefinedConstant[] ABM = GenerateABM();
 			PrimeDefinedConstant[] ABCD = GenerateABCD();
@@ -27,7 +28,8 @@ namespace VPE
 			Settings settings = new()
 			{
 				Name = DateTime.Now.ToString("u") + " (automatically generated)",
-				Reflector = GeneratePairs(0),
+				Idx = idxs[3],
+				Reflector = GeneratePairs(idxs[2]),
 				RandCharConstA = ABM[0],
 				RandCharConstB = ABM[1],
 				RandCharConstM = ABM[2],
@@ -41,14 +43,14 @@ namespace VPE
 			int count = R.Next(12, 42);
 			for (int i = 0; i < count; i++)
 			{
-				Table t = GenerateTable((uint)i);
+				Table t = GenerateTable((uint)(idxs[0] + i));
 				t.Pozition = GenerateNum();
 				settings.Rotors.Add(t);
 			}
 			count = R.Next(6, 14);
 			for (int i = 0; i < count; i++)
 			{
-				Table t = GeneratePairsWithSkips((ushort)i, GenerateDoubleInRange(9d / 16d, 950d / 1024d));
+				Table t = GeneratePairsWithSkips((uint)(idxs[1] + i), GenerateDoubleInRange(9d / 16d, 950d / 1024d));
 				settings.Swaps.Add(t);
 			}
 			settings.ConstShift = GenerateNum();
@@ -108,7 +110,7 @@ namespace VPE
 		/// <summary>Vygeneruje párovou tabulku, na reflektory.</summary>
 		/// <param name="index">Index tabulky, použit jako pseudonázev.</param>
 		/// <returns>Výsledná tabulka.</returns>
-		public Table GeneratePairs(ushort index)
+		public Table GeneratePairs(uint index)
 		{
 			Table T = new()
 			{
@@ -141,7 +143,7 @@ namespace VPE
 		/// <param name="index">Index tabulky, použit jako pseudonázev.</param>
 		/// <param name="fillPortion">Jaký podíl záměn má být vyplněn? Nevyplněné položky nebudou zaměňovány.</param>
 		/// <returns>Výsledná tabulka.</returns>
-		public Table GeneratePairsWithSkips(ushort index, double fillPortion = 0.65234375)
+		public Table GeneratePairsWithSkips(uint index, double fillPortion = 0.65234375)
 		{
 			Table T = new()
 			{

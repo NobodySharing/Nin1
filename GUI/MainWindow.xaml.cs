@@ -40,7 +40,7 @@ namespace GUI
 		{
 			if(VPE.ActiveSett is not null)
 			{
-				 DataFromGUI.VPE_EncrypStr = VPE.Encrypt(DataFromGUI.VPE_PlainStr);
+				DataFromGUI.VPE_EncrypStr = VPE.Encrypt(DataFromGUI.VPE_PlainStr);
 			}
 			else
 			{

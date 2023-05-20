@@ -216,12 +216,12 @@ namespace GUI
 			Binding items = new("ItemsStrs")
 			{
 				Mode = BindingMode.OneWay,
-				Source = VPE.DataFromGUI_Swaps[SP_Swaps.Children.Count].ItemsStrs,
+				Source = VPE.DataFromGUI_Swaps[SP_Swaps.Children.Count],
 			};
 			Binding selected = new("SelectedStr")
 			{
 				Mode = BindingMode.TwoWay,
-				Source = VPE.DataFromGUI_Swaps[SP_Swaps.Children.Count].SelectedStr,
+				Source = VPE.DataFromGUI_Swaps[SP_Swaps.Children.Count],
 			};
 			ComboBox swap = new()
 			{

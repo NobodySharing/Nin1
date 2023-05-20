@@ -71,7 +71,7 @@ namespace GUI
 		/// <summary>Generates complete settings, adds them to library and sets the GUI accordingly.</summary>
 		public void GenerateComplete()
 		{
-			ActiveSett = Generator.GenerateSetts();
+			ActiveSett = Generator.GenerateSetts(new uint[] { (uint)TL.Rotors.Count, (uint)TL.Swaps.Count, (uint)TL.Reflectors.Count, (uint)SL.Library.Count });
 			ActiveSett.UpdateStartPozitions();
 			AddSettsToLib();
 		}
@@ -164,7 +164,8 @@ namespace GUI
 
 		public void SettGen()
 		{
-			ActiveSett = Generator.GenerateSetts();
+			ActiveSett = Generator.GenerateSetts(new uint[] { (uint)TL.Rotors.Count, (uint)TL.Swaps.Count, (uint)TL.Reflectors.Count, (uint)SL.Library.Count });
+			ActiveSett.UpdateStartPozitions();
 			AddSettsToLib();
 		}
 		/// <summary>Sets the active settings using what was selected in settings selector.</summary>
@@ -307,6 +308,7 @@ namespace GUI
 		public void RenameSelSett()
 		{
 			ActiveSett.Name = DataFromGUI_Sett.NameStr;
+			UpdateSettingsSelector();
 		}
 
 		public void SaveSettings()
@@ -430,6 +432,7 @@ namespace GUI
 			TL.Reflectors.Add(ActiveSett.Reflector);
 			TL.Rotors.AddRange(ActiveSett.Rotors);
 			TL.Swaps.AddRange(ActiveSett.Swaps);
+			DataFromGUI_SettSel.ItemsStrs.Add(ActiveSett.Name);
 		}
 		/// <summary>Adds supplied settings to library.</summary>
 		private void AddSettsToLib(Settings s)
