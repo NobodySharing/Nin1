@@ -481,7 +481,14 @@ namespace VPE
 		/// <summary>Adds random chars to the message.</summary>
 		private void AddRandomChars()
 		{
-			Generators Gen = new (Codepage.Limit, (long)(Sett.RandCharConstB.ComputeConstant() % long.MaxValue));
+			BigInteger seed0 = 1;
+			foreach (Table rotor in Sett.Rotors)
+			{
+				seed0 *= rotor.Pozition;
+			}
+			seed0 %= (DateTime.MaxValue.Ticks - DateTime.MinValue.Ticks); 
+			long seed1 = DateTime.MinValue.Ticks + (long)seed0;
+			Generators Gen = new (Codepage.Limit, seed1);
 			int index = (Sett.RandCharSpcMin + Sett.RandCharSpcMax) % 2; // Index inicialization, where I will add random char.
 			int gap = Sett.RandCharSpcMax - Sett.RandCharSpcMin;
 			BigInteger space = (BigInteger)(Math.Floor(Convert.ToDouble(Codepage.Limit / gap)) % gap + Sett.RandCharSpcMin); // Inicializace mezery. V jádru „náhodný“ výpočet, pak dání do rozsahu a posunutí o minimum.

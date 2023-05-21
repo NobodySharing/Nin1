@@ -27,8 +27,15 @@ namespace GUI
 			DataContext = VPE.DataFromGUI_Sett;
 			CB_SettLib.DataContext = VPE.DataFromGUI_SettSel;
 			CB_Reflector.DataContext = VPE.DataFromGUI_Refl;
-			InitialRotorPopulation(10);
-			InitialSwapsPopulation(5);
+			if (VPE.ActiveSett is not null)
+			{
+				DisplayActiveSettInGUI();
+			}
+			else
+			{
+				InitialRotorPopulation(10);
+				InitialSwapsPopulation(5);
+			}
 		}
 		#region GUI eventy
 		private void B_Submit_Click (object sender, RoutedEventArgs e)
