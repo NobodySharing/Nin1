@@ -103,6 +103,7 @@ namespace GUI
 		private void B_LoadSett_Click(object sender, RoutedEventArgs e)
 		{
 			VPE.LoadSettings();
+			DisplayActiveSettInGUI();
 		}
 
 		private void B_SaveSettLib_Click(object sender, RoutedEventArgs e)
@@ -181,10 +182,7 @@ namespace GUI
 		#region 
 		private void DisplayActiveSettInGUI()
 		{
-			VPE.DataFromGUI_Sett.SetUsingSettings(VPE.ActiveSett);
-			VPE.SynchronizeRotorDataForGUI();
-			VPE.SynchronizeSwapDataForGUI();
-			VPE.SynchronizeReflectorDataForGUI();
+			VPE.DisplaySettsInGUI(VPE.ActiveSett);
 			SynchronizeRotorCount();
 			SynchronizeSwapCount();
 		}
@@ -268,11 +266,10 @@ namespace GUI
 		{
 			for (int i = 0; i < count; i++)
 			{
-				if (SP_Rotors.Children.Count > 0)
+				if (SP_Rotors.Children.Count > 1)
 				{
 					SP_Rotors.Children.RemoveAt(SP_Rotors.Children.Count - 1);
-					VPE.DataFromGUI_Rotors.Remove(VPE.DataFromGUI_Rotors.Last());
-					B_Rotors_Remove.IsEnabled = SP_Rotors.Children.Count > 0;
+					B_Rotors_Remove.IsEnabled = SP_Rotors.Children.Count > 1;
 				}
 			}
 		}
@@ -304,8 +301,11 @@ namespace GUI
 		{
 			for (ushort i = 0; i < count; i++)
 			{
-				SP_Swaps.Children.RemoveAt(SP_Swaps.Children.Count - 1);
-				VPE.DataFromGUI_Swaps.RemoveAt(VPE.DataFromGUI_Swaps.Count - 1);
+				if (SP_Rotors.Children.Count > 1)
+				{
+					SP_Swaps.Children.RemoveAt(SP_Swaps.Children.Count - 1);
+					B_Swaps_Remove.IsEnabled = SP_Rotors.Children.Count > 1;
+				}
 			}
 		}
 		#endregion

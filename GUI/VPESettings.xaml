@@ -125,7 +125,7 @@
 					<Button Grid.Row="0" Grid.Column="2" Grid.RowSpan="2" x:Name="B_RndCharsSpc" Content="Random" Margin="3" Click="B_RandCharSpc_Click"/>
 				</Grid>
 			</GroupBox>
-			<GroupBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Header="Spacing between random charsacters">
+			<GroupBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Header="Spacing between random characters">
 				<Grid>
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="1*"/>

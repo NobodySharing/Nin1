@@ -37,7 +37,7 @@
 						<MenuItem Header="Generate all settings for current encryption" Click="MI_VPE_QuickSettGen_Click"/>
 						<MenuItem Header="Save currently used settings to a file" Click="MI_VPE_QuickSettSave_Click"/>
 						<MenuItem Header="Open and use settings" Click="MI_VPE_QuickSettOpen_Click"/>
-						<MenuItem Header="Reset rotor pozition counters" Click="MenuItem_Click"/>
+						<MenuItem Header="Reset rotor pozition counters" Click="MI_VPE_RotPozReset_Click"/>
 					</MenuItem>
 					<MenuItem Header="_Encryption">
 						<MenuItem Header="Encrypt" Click="MI_VPE_Encrypt_Click"/>

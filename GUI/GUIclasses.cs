@@ -530,7 +530,7 @@ namespace GUI
 			SwitchD = FillDataGridClass(s.SwitchConstD);
 		}
 
-		private static ObservableCollection<C_PDC> FillDataGridClass(PrimeDefinedConstant data)
+		public static ObservableCollection<C_PDC> FillDataGridClass(PrimeDefinedConstant data)
 		{
 			ObservableCollection<C_PDC> result = new();
 			for (int i = 0; i < 8; i++)

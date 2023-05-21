@@ -106,7 +106,7 @@ namespace VPE
 			{
 				for(int i = 0; i < longest; i++)
 				{
-					for (int j = Dump.Count; j > -1; j--)
+					for (int j = Dump.Count - 1; j > -1; j--)
 					{
 						if (Dump[j].Count > i)
 						{

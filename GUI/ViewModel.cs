@@ -74,6 +74,7 @@ namespace GUI
 			ActiveSett = Generator.GenerateSetts(new uint[] { (uint)TL.Rotors.Count, (uint)TL.Swaps.Count, (uint)TL.Reflectors.Count, (uint)SL.Library.Count });
 			ActiveSett.UpdateStartPozitions();
 			AddSettsToLib();
+			UpdateSettingsSelector();
 		}
 		/// <summary>Sets active settings using what is in GUI.</summary>
 		public void ChangeActiveSettsFromGUI()
@@ -104,6 +105,15 @@ namespace GUI
 			ActiveSett.SwitchConstD = CopyPDCDataFromGUI(DataFromGUI_Sett.SwitchD);
 		}
 
+		public void DisplaySettsInGUI(Settings s = null)
+		{
+			s ??= ActiveSett;
+			DataFromGUI_Sett.SetUsingSettings(s);
+			SynchronizeSwapDataForGUI();
+			SynchronizeRotorDataForGUI();
+			SynchronizeReflectorDataForGUI();
+		}
+
 		public void UpdateActiveSettsFromGUI()
 		{
 			ChangeActiveSettsFromGUI(); // For now.
@@ -129,6 +139,9 @@ namespace GUI
 			DataFromGUI_Sett.RandCharGenAStr = consts[0].ToString();
 			DataFromGUI_Sett.RandCharGenBStr = consts[1].ToString();
 			DataFromGUI_Sett.RandCharGenMStr = consts[2].ToString();
+			DataFromGUI_Sett.RandCharA = C_VPE_Sett.FillDataGridClass(consts[0]);
+			DataFromGUI_Sett.RandCharB = C_VPE_Sett.FillDataGridClass(consts[1]);
+			DataFromGUI_Sett.RandCharM = C_VPE_Sett.FillDataGridClass(consts[2]);
 		}
 
 		public void GenerateABCDConsts()
@@ -138,6 +151,10 @@ namespace GUI
 			DataFromGUI_Sett.SwitchBStr = consts[1].ToString();
 			DataFromGUI_Sett.SwitchCStr = consts[2].ToString();
 			DataFromGUI_Sett.SwitchDStr = consts[3].ToString();
+			DataFromGUI_Sett.SwitchA = C_VPE_Sett.FillDataGridClass(consts[0]);
+			DataFromGUI_Sett.SwitchB = C_VPE_Sett.FillDataGridClass(consts[1]);
+			DataFromGUI_Sett.SwitchC = C_VPE_Sett.FillDataGridClass(consts[2]);
+			DataFromGUI_Sett.SwitchD = C_VPE_Sett.FillDataGridClass(consts[3]);
 		}
 
 		public string Encrypt(string inText)
@@ -332,6 +349,7 @@ namespace GUI
 				if (OverrideOverwrite.Value)
 				{
 					ActiveSett = s;
+					DisplaySettsInGUI(s);
 				}
 			}
 			else
@@ -339,9 +357,11 @@ namespace GUI
 				if (Overwrite)
 				{
 					ActiveSett = s;
+					DisplaySettsInGUI(s);
 				}
 			}
 			AddSettsToLib(s);
+			UpdateSettingsSelector();
 		}
 
 		public void SaveSettingsLib()

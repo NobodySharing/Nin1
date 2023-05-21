@@ -90,7 +90,7 @@ namespace GUI
 			VPESettWin.Show();
 		}
 
-		private void MenuItem_Click(object sender, RoutedEventArgs e) => VPE.ResetRotPoz();
+		private void MI_VPE_RotPozReset_Click(object sender, RoutedEventArgs e) => VPE.ResetRotPoz();
 		#endregion
 
 		#region NeueDT

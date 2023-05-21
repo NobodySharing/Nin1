@@ -321,7 +321,7 @@ namespace VPE
 		/// <summary></summary>
 		private void Scramble()
 		{
-			List<ushort>[] logs = { new List<ushort>(), new List<ushort>(), new List<ushort>() };
+			List<ushort>[] logs = { new List<ushort>(), new List<ushort>() };
 			for (int i = 0; i < Message.Count; i++)
 			{
 				ForwardScramble(i);
@@ -330,7 +330,6 @@ namespace VPE
 				logs[1].Add(Message[i]);
 				BackwardScramble(i);
 				Message[i] = (ushort)((Message[i] + Sett.Rotors[0].Pozition) % Codepage.Limit);
-				logs[2].Add(Message[i]);
 				Sett.IncrementPozitions();
 			}
 			foreach (List<ushort> sub in logs)
@@ -356,7 +355,7 @@ namespace VPE
 		/// <summary></summary>
 		private void Unscramble()
 		{
-			List<ushort>[] logs = { new List<ushort>(), new List<ushort>(), new List<ushort>() };
+			List<ushort>[] logs = { new List<ushort>(), new List<ushort>() };
 			for (int i = 0; i < Message.Count; i++)
 			{
 				ForwardScramble(i);
@@ -365,7 +364,6 @@ namespace VPE
 				logs[1].Add(Message[i]);
 				BackwardScramble(i);
 				Message[i] = (ushort)((Message[i] + Sett.Rotors[0].Pozition) % Codepage.Limit);
-				logs[2].Add(Message[i]);
 				Sett.IncrementPozitions();
 			}
 			foreach(List<ushort> sub in logs)
@@ -454,8 +452,7 @@ namespace VPE
 		/// <returns></returns>
 		private void ForwardScramble(int i)
 		{
-			int sum = Message[i] + Sett.Rotors[0].Pozition;
-			sum %= Codepage.Limit;
+			int sum = (Message[i] + Sett.Rotors[0].Pozition) % Codepage.Limit;
 			Message[i] = Sett.Rotors[0].FindValueUsingIndex((ushort)sum);
 			for (int j = 1; j < Sett.Rotors.Count; j++)
 			{
@@ -486,10 +483,9 @@ namespace VPE
 		/// <returns></returns>
 		private void BackwardScramble(int i)
 		{
-			int sum = Message[i] + Sett.Rotors.Last().Pozition;
-			sum %= Codepage.Limit;
+			int sum = (Message[i] + Sett.Rotors.Last().Pozition) % Codepage.Limit;
 			Message[i] = Sett.Rotors.Last().FindIndexUsingValue((ushort)sum);
-			for (int j = Sett.Rotors.Count - 2; j >= 0; j--)
+			for (int j = Sett.Rotors.Count - 2; j > -1; j--)
 			{
 				sum = (Message[i] + Sett.Rotors[j + 1].Pozition) % Codepage.Limit;
 				sum = (sum + Sett.Rotors[j].Pozition) % Codepage.Limit;
