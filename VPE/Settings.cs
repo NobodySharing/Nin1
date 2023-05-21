@@ -191,7 +191,7 @@ namespace VPE
 		{
 			FromBytes(file, ref pozition);
 		}
-		/// <summary>Ahtualizuje startovací pozice na současné pozice.</summary>
+		/// <summary>Updates starting rotor pozitions to current pozitions.</summary>
 		public void UpdateStartPozitions()
 		{
 			foreach (Table t in Rotors)

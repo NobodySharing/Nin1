@@ -22,8 +22,8 @@ namespace GUI
 	{
 		
 		#region Common
-		private C_VPE_MainWin DataFromGUI = new();
-		private PersistentStorage PS = new();
+		private readonly C_VPE_MainWin DataFromGUI = new();
+		//private readonly PersistentStorage PS = new(); // ToDo: Implement.
 
 		public MainWindow()
 		{
@@ -70,13 +70,13 @@ namespace GUI
 			}
 		}
 
-		private void MI_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_PlainStr = VPE.OpenMsgFile();
+		private void MI_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_PlainStr = VPE_VM.OpenMsgFile();
 
-		private void MI_VPE_OpenEncMsgFile_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_EncrypStr = VPE.OpenMsgFile();
+		private void MI_VPE_OpenEncMsgFile_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_EncrypStr = VPE_VM.OpenMsgFile();
 
-		private void MI_VPE_SaveEncMsgFile_Click(object sender, RoutedEventArgs e) => VPE.SaveMsgFile(DataFromGUI.VPE_EncrypStr);
+		private void MI_VPE_SaveEncMsgFile_Click(object sender, RoutedEventArgs e) => VPE_VM.SaveMsgFile(DataFromGUI.VPE_EncrypStr);
 
-		private void MI_VPE_SaveUneMsgFile_Click(object sender, RoutedEventArgs e) => VPE.SaveMsgFile(DataFromGUI.VPE_PlainStr);
+		private void MI_VPE_SaveUneMsgFile_Click(object sender, RoutedEventArgs e) => VPE_VM.SaveMsgFile(DataFromGUI.VPE_PlainStr);
 
 		private void MI_VPE_QuickSettGen_Click(object sender, RoutedEventArgs e) => VPE.SettGen();
 

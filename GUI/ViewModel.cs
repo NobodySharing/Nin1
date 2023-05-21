@@ -169,12 +169,12 @@ namespace GUI
 			return C.Decypt(inText);
 		}
 
-		public string OpenMsgFile()
+		public static string OpenMsgFile()
 		{
 			return FileHandling.LoadText(OpenFile(TXT_filter));
 		}
 
-		public void SaveMsgFile(string text)
+		public static void SaveMsgFile(string text)
 		{
 			FileHandling.SaveText(SaveFile(TXT_filter), text);
 		}
@@ -406,7 +406,7 @@ namespace GUI
 		/// <summary>Zobrazí dialog otevření souboru a vrátí cestu k němu.</summary>
 		/// <param name="ext">Extensiona.</param>
 		/// <returns>Cesta k souboru.</returns>
-		private string OpenFile(string ext)
+		private static string OpenFile(string ext)
 		{
 			OpenFileDialog OFD = new()
 			{
@@ -425,7 +425,7 @@ namespace GUI
 		/// <summary>Zobrazí dialog uložení souboru a vrátí cestu k němu.</summary>
 		/// <param name="ext">Extensiona.</param>
 		/// <returns>Cesta k souboru.</returns>
-		private string SaveFile(string ext)
+		private static string SaveFile(string ext)
 		{
 			SaveFileDialog SFD = new()
 			{
@@ -440,18 +440,6 @@ namespace GUI
 				}
 			}
 			return Invalid_File;
-		}
-		/// <summary>Extrahuje cestu ke složce, ve které je soubor.</summary>
-		/// <param name="path">Soubor (cesta k).</param>
-		/// <returns>Složka, ve které je soubor.</returns>
-		private string GetFolder(string path)
-		{
-			if (path != Invalid_File)
-			{
-				int idx = path.LastIndexOf('\\');
-				return path[..(idx + 1)];
-			}
-			return path;
 		}
 		/// <summary>Adds active settings to library.</summary>
 		private void AddSettsToLib()

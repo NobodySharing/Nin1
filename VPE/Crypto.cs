@@ -4,81 +4,61 @@ using System.Linq;
 using System.Text;
 using System.Numerics;
 using System.Threading.Tasks;
-using System.DirectoryServices.ActiveDirectory;
 
 namespace VPE
 {
+	/// <summary>The main class doing all the en/decrypting.</summary>
 	public class Crypto
 	{
 		private readonly Settings Sett;
-		private const int MultithreadingThreshold = 16384;
-		/// <summary>Sada čísel reprezentující zprávu. Proměnná, se kterou v celém procesu pracuji.</summary>
+		private const int MultithreadingThreshold = 16384; // Threshold for message length. Longer messages will get processed multithreadly.
+		/// <summary>Set of numbers representing the message. My working memory.</summary>
 		private List<ushort> Message;
+		/// <summary>Initializes a new instance.</summary>
+		/// <param name="S">Settings for en/decryption.</param>
 		public Crypto(Settings S)
 		{
 			Sett = S;
 		}
-		/// <summary>Zašifruje text.</summary>
-		/// <param name="Text">Text na zašifrování.</param>
-		/// <returns>Zašifrovaný text.</returns>
+		/// <summary>Encrypts text.</summary>
+		/// <param name="Text">Text to encrypt.</param>
+		/// <returns>Encrypted text.</returns>
 		public string Encypt(string Text)
 		{
-			ConvertToNums(Text); // OK
-			FileHandling.DebugDump(Message);
-			AddRandomChars(); // 
-			FileHandling.DebugDump(Message);
-			SwitchCharPoz(0); // 
-			FileHandling.DebugDump(Message);
-			OrderShift(); // 
-			FileHandling.DebugDump(Message);
-			MultithreadedPartEnc(); //
-			FileHandling.DebugDump(Message);
-			ConstantShift(); // 
-			FileHandling.DebugDump(Message);
-			VariableShift(); // 
-			FileHandling.DebugDump(Message);
+			ConvertToNums(Text);
 			AddRandomChars();
-			FileHandling.DebugDump(Message);
+			SwitchCharPoz(0);
+			OrderShift();
+			MultithreadedPartEnc();
+			ConstantShift();
+			VariableShift();
+			AddRandomChars();
 			SwitchCharPoz(1);
-			FileHandling.DebugDump(Message);
-			FileHandling.DumpToDisk("Encryption");
 			return ConvertToString();
 		}
-		/// <summary>Dešifruje text.</summary>
-		/// <param name="Text">Zašifrovaný text.</param>
-		/// <returns>Dešifrovaný text.</returns>
+		/// <summary>Decrypts text.</summary>
+		/// <param name="Text">Text to decrypt.</param>
+		/// <returns>Decrypted text.</returns>
 		public string Decypt(string Text)
 		{
 			ConvertToNums(Text);
-			FileHandling.DebugDump(Message);
 			UnSwitchCharPoz(1);
-			FileHandling.DebugDump(Message);
 			RemoveRandomChars();
-			FileHandling.DebugDump(Message);
-			UnVariableShift(); // 
-			FileHandling.DebugDump(Message);
-			UnConstantShift(); // 
-			FileHandling.DebugDump(Message);
-			MultithreadedPartDec(); // 
-			FileHandling.DebugDump(Message);
-			UnOrderShift(); // 
-			FileHandling.DebugDump(Message);
-			UnSwitchCharPoz(0); // 
-			FileHandling.DebugDump(Message);
-			RemoveRandomChars(); // 
-			FileHandling.DebugDump(Message);
-			FileHandling.DumpToDisk("Decryption");
-			return ConvertToString(); // OK
+			UnVariableShift();
+			UnConstantShift();
+			MultithreadedPartDec();
+			UnOrderShift();
+			UnSwitchCharPoz(0);
+			RemoveRandomChars();
+			return ConvertToString();
 		}
-		/// <summary></summary>
+		/// <summary>The main block of encrypting, which can be executed in multiple threads. Decides if that is needed.</summary>
 		private void MultithreadedPartEnc()
 		{
 			if (Message.Count < MultithreadingThreshold)
 			{
 				Swap();
-				FileHandling.DebugDump(Message);
 				Scramble();
-				FileHandling.DebugDump(Message);
 				Unswap();
 			}
 			else
@@ -95,15 +75,13 @@ namespace VPE
 				_ = Sett.SetPozitions(rotors.Last().GetPozitions());
 			}
 		}
-		/// <summary></summary>
+		/// <summary>The main block of decrypting, which can be executed in multiple threads. Decides if that is needed.</summary>
 		private void MultithreadedPartDec()
 		{
 			if (Message.Count < MultithreadingThreshold)
 			{
 				Swap();
-				FileHandling.DebugDump(Message);
 				Unscramble();
-				FileHandling.DebugDump(Message);
 				Unswap();
 			}
 			else
@@ -138,9 +116,9 @@ namespace VPE
 			parts[^1] = last;
 			return parts;
 		}
-		/// <summary></summary>
-		/// <param name="rotors"></param>
-		/// <returns></returns>
+		/// <summary>Does all the preparations for multithreaded en/decryption. Divides the message and prepares settings.</summary>
+		/// <param name="rotors">Prepared settings.</param>
+		/// <returns>Divided message (by number of threads).</returns>
 		private ushort[][] PrepareData(out Settings_Rotors[] rotors)
 		{
 			ushort[][] parts = DivideMessage();
@@ -151,8 +129,8 @@ namespace VPE
 			}
 			return parts;
 		}
-		/// <summary></summary>
-		/// <param name="parts"></param>
+		/// <summary>Combines the message from it's parts to whole message.</summary>
+		/// <param name="parts">Parts of the message.</param>
 		private void CombineMessage(ushort[][] parts)
 		{
 			Message.Clear();
@@ -218,25 +196,25 @@ namespace VPE
 			}
 			return SB.ToString();
 		}
-		/// <summary></summary>
-		/// <param name="message"></param>
-		/// <param name="rotors"></param>
+		/// <summary>Multithreaded version of passing chars through all tables of all kinds.</summary>
+		/// <param name="message">Part of the message.</param>
+		/// <param name="rotors">Rotor settings for this thread.</param>
 		private void ForwardPassThroughTables(ref ushort[] message, Settings_Rotors rotors)
 		{
 			Swap(ref message);
 			Scramble(ref message, rotors);
 			Unswap(ref message);
 		}
-		/// <summary></summary>
-		/// <param name="message"></param>
-		/// <param name="rotors"></param>
+		/// <summary>Multithreaded version of passing chars back through all tables of all kinds.</summary>
+		/// <param name="message">Part of the message.</param>
+		/// <param name="rotors">Rotor settings for this thread.</param>
 		private void BackwardPassThroughTables(ref ushort[] message, Settings_Rotors rotors)
 		{
 			Unswap(ref message);
 			Unscramble(ref message, rotors);
 			Swap(ref message);
 		}
-		/// <summary></summary>
+		/// <summary>Singlethreaded version of passing chars through all swap tables. Always all chars through 1 swap.</summary>
 		private void Swap()
 		{
 			ushort swapped;
@@ -256,8 +234,8 @@ namespace VPE
 				}
 			}
 		}
-		/// <summary></summary>
-		/// <param name="message"></param>
+		/// <summary>Multithreaded version of passing chars through all swap tables. Always all chars through 1 swap.</summary>
+		/// <param name="message">Part of the message.</param>
 		private void Swap(ref ushort[] message)
 		{
 			ushort swapped;
@@ -277,7 +255,7 @@ namespace VPE
 				}
 			}
 		}
-		/// <summary></summary>
+		/// <summary>Singlethreaded version of passing chars back through all swap tables. Always all chars through 1 swap.</summary>
 		private void Unswap()
 		{
 			ushort swapped;
@@ -297,8 +275,8 @@ namespace VPE
 				}
 			}
 		}
-		/// <summary></summary>
-		/// <param name="message"></param>
+		/// <summary>Multithreaded version of passing chars back through all swap tables. Always all chars through 1 swap.</summary>
+		/// <param name="message">Part of the message.</param>
 		private void Unswap(ref ushort[] message)
 		{
 			ushort swapped;
@@ -318,28 +296,20 @@ namespace VPE
 				}
 			}
 		}
-		/// <summary></summary>
+		/// <summary>Singlethreaded version of the main scrambling part. Scrambles chars 1 by 1, every time pass through all rotors, reflect, then pass back.</summary>
 		private void Scramble()
 		{
-			List<ushort>[] logs = { new List<ushort>(), new List<ushort>() };
 			for (int i = 0; i < Message.Count; i++)
 			{
 				ForwardScramble(i);
-				logs[0].Add(Message[i]);
 				Reflect(i);
-				logs[1].Add(Message[i]);
 				BackwardScramble(i);
-				Message[i] = (ushort)((Message[i] + Sett.Rotors[0].Pozition) % Codepage.Limit);
 				Sett.IncrementPozitions();
 			}
-			foreach (List<ushort> sub in logs)
-			{
-				FileHandling.DebugDump(sub);
-			}
 		}
-		/// <summary></summary>
-		/// <param name="message"></param>
-		/// <param name="sett"></param>
+		/// <summary>Multithreaded version of the main scrambling part. Scrambles chars 1 by 1, every time pass through all rotors, reflect, then pass back.</summary>
+		/// <param name="message">Part of the message.</param>
+		/// <param name="sett">Rotor settings for this thread.</param>
 		private void Scramble(ref ushort[] message, Settings_Rotors sett)
 		{
 			for (int i = 0; i < message.Length; i++)
@@ -347,46 +317,34 @@ namespace VPE
 				ForwardScramble(i, ref message, sett);
 				Reflect(i, ref message);
 				BackwardScramble(i, ref message, sett);
-				int Sum = message[i] + sett.Rotors[0].Pozition;
-				message[i] = (ushort)(Sum % Codepage.Limit);
 				sett.IncrementPozitions();
 			}
 		}
-		/// <summary></summary>
+		/// <summary>Singlethreaded version of the main unscrambling part. Unscrambles chars 1 by 1, every time pass through all rotors, reflect, then pass back.</summary>
 		private void Unscramble()
 		{
-			List<ushort>[] logs = { new List<ushort>(), new List<ushort>() };
 			for (int i = 0; i < Message.Count; i++)
 			{
 				ForwardScramble(i);
-				logs[0].Add(Message[i]);
-				ReflectBack(i);
-				logs[1].Add(Message[i]);
+				Reflect(i);
 				BackwardScramble(i);
-				Message[i] = (ushort)((Message[i] + Sett.Rotors[0].Pozition) % Codepage.Limit);
 				Sett.IncrementPozitions();
 			}
-			foreach(List<ushort> sub in logs)
-			{
-				FileHandling.DebugDump(sub);
-			}
 		}
-		/// <summary></summary>
-		/// <param name="message"></param>
-		/// <param name="sett"></param>
+		/// <summary>Multithreaded version of the main unscrambling part. Unscrambles chars 1 by 1, every time pass through all rotors, reflect, then pass back.</summary>
+		/// <param name="message">Part of the message.</param>
+		/// <param name="sett">Rotor settings for this thread.</param>
 		private void Unscramble(ref ushort[] message, Settings_Rotors sett)
 		{
 			for (int i = 0; i < message.Length; i++)
 			{
 				BackwardScramble(i, ref message, sett);
-				ReflectBack(i, ref message);
+				Reflect(i, ref message);
 				ForwardScramble(i, ref message, sett);
-				int Sum = message[i] + sett.Rotors[0].Pozition;
-				message[i] = (ushort)(Sum % Codepage.Limit);
 				sett.IncrementPozitions();
 			}
 		}
-		/// <summary></summary>
+		/// <summary>Shifts all chars by constant amount.</summary>
 		private void ConstantShift()
 		{
 			for (int i = 0; i < Message.Count; i++)
@@ -396,7 +354,7 @@ namespace VPE
 				Message[i] = Convert.ToUInt16(temp % Codepage.Limit);
 			}
 		}
-		/// <summary></summary>
+		/// <summary>Shifts all chars back by constant amount.</summary>
 		private void UnConstantShift()
 		{
 			for (int i = 0; i < Message.Count; i++)
@@ -407,7 +365,7 @@ namespace VPE
 				Message[i] = temp < 0 ? (ushort)(temp + Codepage.Limit) : (ushort)temp;
 			}
 		}
-		/// <summary>Posune čísla podle pořadí.</summary>
+		/// <summary>Shifts all chars by their index.</summary>
 		private void OrderShift()
 		{
 			for (int i = 0; i < Message.Count; i++)
@@ -415,7 +373,7 @@ namespace VPE
 				Message[i] = (ushort)((Message[i] + i) % Codepage.Limit);
 			}
 		}
-		/// <summary>Posune čísla zpět podle pořadí.</summary>
+		/// <summary>Shifts all chars back by their index.</summary>
 		private void UnOrderShift()
 		{
 			int temp;
@@ -425,7 +383,7 @@ namespace VPE
 				Message[i] = temp < 0 ? (ushort)(temp + Codepage.Limit) : (ushort)temp;
 			}
 		}
-		/// <summary></summary>
+		/// <summary>Shifts all chars by variable amount.</summary>
 		private void VariableShift ()
 		{
 			long v, c = Sett.ConstShift >= (Codepage.Limit / 2) ? Sett.ConstShift : Codepage.Limit - Sett.ConstShift;
@@ -436,7 +394,7 @@ namespace VPE
 				Message[i] = v < 0 ? (ushort)(v + Codepage.Limit) : (ushort)v;
 			}
 		}
-		/// <summary></summary>
+		/// <summary>Shifts all chars back by variable amount.</summary>
 		private void UnVariableShift()
 		{
 			long v, c = Sett.ConstShift >= (Codepage.Limit / 2) ? Sett.ConstShift : Codepage.Limit - Sett.ConstShift;
@@ -447,103 +405,78 @@ namespace VPE
 				Message[i] = v < 0 ? (ushort)(v + Codepage.Limit) : (ushort)v;
 			}
 		}
-		/// <summary></summary>
-		/// <param name="i"></param>
-		/// <returns></returns>
+		/// <summary>Forward pass through all rotors, singlethreaded version.</summary>
+		/// <param name="i">Index of a char in the message.</param>
 		private void ForwardScramble(int i)
 		{
-			int sum = (Message[i] + Sett.Rotors[0].Pozition) % Codepage.Limit;
-			Message[i] = Sett.Rotors[0].FindValueUsingIndex((ushort)sum);
+			ushort temp = ModuloSum(Message[i], Sett.Rotors[0].Pozition); // Calculation of the input pozition as the rotor sees it.
+			temp = Sett.Rotors[0].FindValueUsingIndex(temp); // Pass through the table.
 			for (int j = 1; j < Sett.Rotors.Count; j++)
 			{
-				sum = (Message[i] + Sett.Rotors[j - 1].Pozition) % Codepage.Limit;
-				sum = (sum + Sett.Rotors[j].Pozition) % Codepage.Limit;
-				Message[i] = Sett.Rotors[j].FindValueUsingIndex((ushort)sum);
+				temp = ModuloSum(temp, Sett.Rotors[j - 1].Pozition); // Calculation of the output pozition, in absolute terms.
+				temp = ModuloSum(temp, Sett.Rotors[j].Pozition); // Calculation of the input pozition as the (next) rotor sees it.
+				temp = Sett.Rotors[j].FindValueUsingIndex(temp); // Pass through the table.
 			}
+			Message[i] = ModuloSum(temp, Sett.Rotors.Last().Pozition); // Calculation of the exiting pozition, in absolute terms.
 		}
-		/// <summary></summary>
-		/// <param name="i"></param>
-		/// <param name="message"></param>
-		/// <param name="sett"></param>
-		/// <returns></returns>
+		/// <summary>Forward pass through all rotors, multithreaded version.</summary>
+		/// <param name="i">Index of a char in the message.</param>
+		/// <param name="message">Part of the message.</param>
+		/// <param name="sett">Settings for this thread.</param>
 		private void ForwardScramble(int i, ref ushort[] message, Settings_Rotors sett)
 		{
-			int sum = message[i] + sett.Rotors[0].Pozition;
-			ushort remain = (ushort)(sum % Codepage.Limit);
-			message[i] = sett.Rotors[0].FindValueUsingIndex(remain);
+			ushort temp = ModuloSum(message[i], sett.Rotors[0].Pozition); // Calculation of the input pozition as the rotor sees it.
+			temp = sett.Rotors[0].FindValueUsingIndex(temp); // Pass through the table.
 			for (int j = 1; j < sett.Rotors.Count; j++)
 			{
-				sum = message[i] + (sett.Rotors[j].Pozition - sett.Rotors[j - 1].Pozition);
-				remain = (ushort)(sum % Codepage.Limit);
-				message[i] = sett.Rotors[j].FindValueUsingIndex(remain);
+				temp = ModuloSum(temp, sett.Rotors[j - 1].Pozition); // Calculation of the output pozition, in absolute terms.
+				temp = ModuloSum(temp, sett.Rotors[j].Pozition); // Calculation of the input pozition as the (next) rotor sees it.
+				temp = sett.Rotors[j].FindValueUsingIndex(temp); // Pass through the table.
 			}
+			message[i] = ModuloSum(temp, sett.Rotors.Last().Pozition); // Calculation of the exiting pozition, in absolute terms.
 		}
-		/// <summary></summary>
-		/// <param name="i"></param>
-		/// <returns></returns>
+		/// <summary>Backward pass through all rotors, singlethreaded version.</summary>
+		/// <param name="i">Index of a char in the message.</param>
 		private void BackwardScramble(int i)
 		{
-			int sum = (Message[i] + Sett.Rotors.Last().Pozition) % Codepage.Limit;
-			Message[i] = Sett.Rotors.Last().FindIndexUsingValue((ushort)sum);
+			ushort temp = ModuloDiff(Message[i], Sett.Rotors.Last().Pozition);  // Calculation of the input pozition as the rotor sees it.
+			temp = Sett.Rotors.Last().FindIndexUsingValue(temp); // Pass through the table.
 			for (int j = Sett.Rotors.Count - 2; j > -1; j--)
 			{
-				sum = (Message[i] + Sett.Rotors[j + 1].Pozition) % Codepage.Limit;
-				sum = (sum + Sett.Rotors[j].Pozition) % Codepage.Limit;
-				Message[i] = Sett.Rotors[j].FindIndexUsingValue((ushort)sum);
+				temp = ModuloDiff(temp, Sett.Rotors[j + 1].Pozition); // Calculation of the output pozition, in absolute terms.
+				temp = ModuloDiff(temp, Sett.Rotors[j].Pozition); // Calculation of the input pozition as the (next) rotor sees it.
+				temp = Sett.Rotors[j].FindIndexUsingValue(temp); // Pass through the table.
 			}
+			Message[i] = ModuloDiff(temp, Sett.Rotors[0].Pozition); // Calculation of the exiting pozition, in absolute terms.
 		}
-		/// <summary></summary>
-		/// <param name="i"></param>
-		/// <param name="message"></param>
-		/// <param name="sett"></param>
-		/// <returns></returns>
+		/// <summary>Backward pass through all rotors, multithreaded version.</summary>
+		/// <param name="i">Index of a char in the message.</param>
+		/// <param name="message">Part of the message.</param>
+		/// <param name="sett">Settings for this thread.</param>
 		private void BackwardScramble(int i, ref ushort[] message, Settings_Rotors sett)
 		{
-			int sum = message[i] + sett.Rotors[^1].Pozition;
-			ushort remain = (ushort)(sum % Codepage.Limit);
-			message[i] = sett.Rotors[^1].FindIndexUsingValue(remain);
-			for (int j = sett.Rotors.Count - 2; j >= 0; j--)
+			ushort temp = ModuloDiff(message[i], sett.Rotors.Last().Pozition);  // Calculation of the input pozition as the rotor sees it.
+			temp = sett.Rotors.Last().FindIndexUsingValue(temp); // Pass through the table.
+			for (int j = sett.Rotors.Count - 2; j > -1; j--)
 			{
-				sum = message[i] + (sett.Rotors[j].Pozition - sett.Rotors[j + 1].Pozition);
-				remain = (ushort)(sum % Codepage.Limit);
-				message[i] = sett.Rotors[j].FindIndexUsingValue(remain);
+				temp = ModuloDiff(temp, sett.Rotors[j + 1].Pozition); // Calculation of the output pozition, in absolute terms.
+				temp = ModuloDiff(temp, sett.Rotors[j].Pozition); // Calculation of the input pozition as the (next) rotor sees it.
+				temp = sett.Rotors[j].FindIndexUsingValue(temp); // Pass through the table.
 			}
+			message[i] = ModuloDiff(temp, sett.Rotors[0].Pozition); // Calculation of the exiting pozition, in absolute terms.
 		}
-		/// <summary></summary>
-		/// <param name="i"></param>
-		/// <returns></returns>
+		/// <summary>Reflects given value. By design of the reflector, it's the same method for both directions. Singlethreaded version.</summary>
+		/// <param name="i">Index of a char in the message.</param>
 		private void Reflect(int i)
 		{
-			int sum = (Message[i] + Sett.Rotors.Last().Pozition) % Codepage.Limit;
-			Message[i] = Sett.Reflector.FindValueUsingIndex((ushort)sum);
+			Message[i] = Sett.Reflector.FindValueUsingIndex(Message[i]);
 		}
-		/// <summary></summary>
-		/// <param name="i"></param>
-		/// <param name="message"></param>
-		/// <returns></returns>
+		/// <summary>eflects given value. By design of the reflector, it's the same method for both directions. Multithreaded version.</summary>
+		/// <param name="i">Index of a char in the message.</param>
+		/// <param name="message">Part of the message.</param>
 		private void Reflect(int i, ref ushort[] message)
 		{
-			int Sum = message[i] + Sett.Rotors.Last().Pozition;
-			ushort Remain = (ushort)(Sum % Codepage.Limit);
-			message[i] = Sett.Reflector.FindValueUsingIndex(Remain);
-		}
-		/// <summary></summary>
-		/// <param name="i"></param>
-		/// <returns></returns>
-		private void ReflectBack(int i)
-		{
-			int sum = (Message[i] + Sett.Rotors.Last().Pozition) % Codepage.Limit;
-			Message[i] = Sett.Reflector.FindIndexUsingValue((ushort)sum);
-		}
-		/// <summary></summary>
-		/// <param name="i"></param>
-		/// <param name="message"></param>
-		/// <returns></returns>
-		private void ReflectBack(int i, ref ushort[] message)
-		{
-			int Sum = message[i] + Sett.Rotors.Last().Pozition;
-			ushort Remain = (ushort)(Sum % Codepage.Limit);
-			message[i] = Sett.Reflector.FindIndexUsingValue(Remain);
+			message[i] = Sett.Reflector.FindValueUsingIndex(message[i]);
 		}
 		/// <summary>Adds random chars to the message.</summary>
 		private void AddRandomChars()
@@ -597,8 +530,8 @@ namespace VPE
 			space = (A * space + B) % M;
 			index +=  (int)(space % gap) + Sett.RandCharSpcMin;
 		}
-		/// <summary></summary>
-		/// <param name="stage"></param>
+		/// <summary>Switches the pozitions of all characters in the message. Pseudorandomly.</summary>
+		/// <param name="stage">Which stage? So far only 0 or 1.</param>
 		private void SwitchCharPoz(byte stage)
 		{
 			List<int> switchTable = ConstructSwitchTable(stage);
@@ -609,8 +542,8 @@ namespace VPE
 				Message[i] = original[switchTable[i]];
 			}
 		}
-		/// <summary></summary>
-		/// <param name="stage"></param>
+		/// <summary>Switches the pozitions of all characters in the message back.</summary>
+		/// <param name="stage">Which stage? So far only 0 or 1.</param>
 		private void UnSwitchCharPoz(byte stage)
 		{
 			List<int> switchTable = ConstructSwitchTable(stage);
@@ -621,9 +554,9 @@ namespace VPE
 				Message[switchTable[i]] = original[i];
 			}
 		}
-		/// <summary></summary>
-		/// <param name="stage"></param>
-		/// <returns></returns>
+		/// <summary>Constructs the char switching table.</summary>
+		/// <param name="stage">Which stage? So far only 0 or 1.</param>
+		/// <returns>Char switching table.</returns>
 		private List<int> ConstructSwitchTable(byte stage)
 		{
 			List<int> switchTable = new();
@@ -648,6 +581,22 @@ namespace VPE
 				switchTable.Add((int)((A * i + B) % m));
 			}
 			return switchTable;
+		}
+		/// <summary>Computes the modulo sumation. Result will be in range 0 to Codepage.Limit - 1.</summary>
+		/// <param name="A">A number.</param>
+		/// <param name="B">B number.</param>
+		/// <returns>Sumation modulated to 0 to Codepage.Limit - 1.</returns>
+		private ushort ModuloSum (ushort A, ushort B)
+		{
+			return (ushort)((A + B) % Codepage.Limit);
+		}
+		/// <summary>Computes the modulo differentiation. Result will be in range 0 to Codepage.Limit - 1.</summary>
+		/// <param name="A">A number. It matters which is it.</param>
+		/// <param name="B">B number. It matters which is it.</param>
+		/// <returns>Differentiation modulated to 0 to Codepage.Limit - 1.</returns>
+		private ushort ModuloDiff(ushort A, ushort B)
+		{
+			return (ushort)((A - B + Codepage.Limit) % Codepage.Limit);
 		}
 	}
 }
