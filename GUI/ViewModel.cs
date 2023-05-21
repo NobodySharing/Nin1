@@ -143,13 +143,13 @@ namespace GUI
 		public string Encrypt(string inText)
 		{
 			C = new(ActiveSett);
-			return C?.Encypt(inText);
+			return C.Encypt(inText);
 		}
 
 		public string Decrypt(string inText)
 		{
 			C = new(ActiveSett);
-			return C?.Decypt(inText);
+			return C.Decypt(inText);
 		}
 
 		public string OpenMsgFile()
@@ -309,6 +309,14 @@ namespace GUI
 		{
 			ActiveSett.Name = DataFromGUI_Sett.NameStr;
 			UpdateSettingsSelector();
+		}
+
+		public void ResetRotPoz()
+		{
+			foreach(Table rotor in ActiveSett.Rotors)
+			{
+				rotor.Pozition = rotor.StartPozition;
+			}
 		}
 
 		public void SaveSettings()

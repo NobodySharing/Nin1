@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,43 +12,63 @@ namespace VPE
 	{
 		private readonly Settings Sett;
 		private const int MultithreadingThreshold = 16384;
-		/// <summary>Sada ËÌsel reprezentujÌcÌ zpr·vu. PromÏnn·, se kterou v celÈm procesu pracuji.</summary>
+		/// <summary>Sada ƒç√≠sel reprezentuj√≠c√≠ zpr√°vu. Promƒõnn√°, se kterou v cel√©m procesu pracuji.</summary>
 		private List<ushort> Message;
 		public Crypto(Settings S)
 		{
 			Sett = S;
 		}
-		/// <summary>Zaöifruje text.</summary>
-		/// <param name="Text">Text na zaöifrov·nÌ.</param>
-		/// <returns>Zaöifrovan˝ text.</returns>
+		/// <summary>Za≈°ifruje text.</summary>
+		/// <param name="Text">Text na za≈°ifrov√°n√≠.</param>
+		/// <returns>Za≈°ifrovan√Ω text.</returns>
 		public string Encypt(string Text)
 		{
-			ConvertToNums(Text); // 
+			ConvertToNums(Text); // OK
+			FileHandling.DebugDump(Message);
 			AddRandomChars(); // 
+			FileHandling.DebugDump(Message);
 			SwitchCharPoz(0); // 
+			FileHandling.DebugDump(Message);
 			OrderShift(); // 
+			FileHandling.DebugDump(Message);
 			MultithreadedPartEnc(); //
+			FileHandling.DebugDump(Message);
 			ConstantShift(); // 
+			FileHandling.DebugDump(Message);
 			VariableShift(); // 
-			AddRandomChars(); // 
-			SwitchCharPoz(1); //
-			return ConvertToString(); // 
+			FileHandling.DebugDump(Message);
+			AddRandomChars();
+			FileHandling.DebugDump(Message);
+			SwitchCharPoz(1);
+			FileHandling.DebugDump(Message);
+			FileHandling.DumpToDisk("Encryption");
+			return ConvertToString();
 		}
-		/// <summary>Deöifruje text.</summary>
-		/// <param name="Text">Zaöifrovan˝ text.</param>
-		/// <returns>Deöifrovan˝ text.</returns>
+		/// <summary>De≈°ifruje text.</summary>
+		/// <param name="Text">Za≈°ifrovan√Ω text.</param>
+		/// <returns>De≈°ifrovan√Ω text.</returns>
 		public string Decypt(string Text)
 		{
 			ConvertToNums(Text);
+			FileHandling.DebugDump(Message);
 			UnSwitchCharPoz(1);
+			FileHandling.DebugDump(Message);
 			RemoveRandomChars();
-			UnVariableShift();
-			UnConstantShift();
-			MultithreadedPartDec();
-			UnOrderShift();
-			UnSwitchCharPoz(0);
-			RemoveRandomChars();
-			return ConvertToString();
+			FileHandling.DebugDump(Message);
+			UnVariableShift(); // 
+			FileHandling.DebugDump(Message);
+			UnConstantShift(); // 
+			FileHandling.DebugDump(Message);
+			MultithreadedPartDec(); // 
+			FileHandling.DebugDump(Message);
+			UnOrderShift(); // 
+			FileHandling.DebugDump(Message);
+			UnSwitchCharPoz(0); // 
+			FileHandling.DebugDump(Message);
+			RemoveRandomChars(); // 
+			FileHandling.DebugDump(Message);
+			FileHandling.DumpToDisk("Decryption");
+			return ConvertToString(); // OK
 		}
 		/// <summary></summary>
 		private void MultithreadedPartEnc()
@@ -56,7 +76,9 @@ namespace VPE
 			if (Message.Count < MultithreadingThreshold)
 			{
 				Swap();
+				FileHandling.DebugDump(Message);
 				Scramble();
+				FileHandling.DebugDump(Message);
 				Unswap();
 			}
 			else
@@ -78,9 +100,11 @@ namespace VPE
 		{
 			if (Message.Count < MultithreadingThreshold)
 			{
-				Unswap();
-				Unscramble();
 				Swap();
+				FileHandling.DebugDump(Message);
+				Unscramble();
+				FileHandling.DebugDump(Message);
+				Unswap();
 			}
 			else
 			{
@@ -137,15 +161,15 @@ namespace VPE
 				Message.AddRange(part);
 			}
 		}
-		/// <summary>Zkonvertuje textovou zpr·vu na ËÌselnou reprezentaci podle tabulky znak˘.</summary>
-		/// <param name="Text">Textov· zpr·va.</param>
+		/// <summary>Zkonvertuje textovou zpr√°vu na ƒç√≠selnou reprezentaci podle tabulky znak≈Ø.</summary>
+		/// <param name="Text">Textov√° zpr√°va.</param>
 		private void ConvertToNums(string Text)
 		{
 			Message = new(Text.Length);
 			for (int i = 0; i < Text.Length; i++)
 			{
-				char C = Text[i]; // SouËasn˝ znak bokem.
-				char N = i == (Text.Length - 1)? '\0' : Text[i + 1]; // N·sledujÌcÌ znak. Pokud jsem na konci, d·v·m \0, jako znamenÌ toho stavu.
+				char C = Text[i]; // Souƒçasn√Ω znak bokem.
+				char N = i == (Text.Length - 1)? '\0' : Text[i + 1]; // N√°sleduj√≠c√≠ znak. Pokud jsem na konci, d√°v√°m \0, jako znamen√≠ toho stavu.
 				if (C == '\r')
 				{
 					if ((N == '\n') || (N == '\0'))
@@ -171,19 +195,26 @@ namespace VPE
 					Message.Add((ushort)index);
 				}
 				else
-				{ // Pokud znak nezn·m, p¯eskakuji ho.
+				{ // Pokud znak nezn√°m, p≈ôeskakuji ho.
 					continue;
 				}
 			}
 		}
-		/// <summary>P¯evede sadu ËÌsel na text.</summary>
+		/// <summary>P≈ôevede sadu ƒç√≠sel na text.</summary>
 		/// <returns>Text.</returns>
 		private string ConvertToString()
 		{
 			StringBuilder SB = new();
 			foreach (ushort Num in Message)
 			{
-				SB.Append(Codepage.CharSet[Num]);
+				if (Num < Codepage.Limit)
+				{
+					SB.Append(Codepage.CharSet[Num]);
+				}
+				else
+				{
+					SB.Append('‚ú≥');
+				}
 			}
 			return SB.ToString();
 		}
@@ -209,18 +240,18 @@ namespace VPE
 		private void Swap()
 		{
 			ushort swapped;
-			for (int i = 0; i < Message.Count; i++)
+			for (int i = 0; i < Sett.Swaps.Count; i++)
 			{
-				foreach (Table T in Sett.Swaps)
+				for (int j = 0; j < Message.Count; j++)
 				{
-					swapped = T.FindValueUsingIndex(Message[i]);
+					swapped = Sett.Swaps[i].FindValueUsingIndex(Message[j]);
 					if (swapped == Table.Outside || swapped == Table.Empty || swapped == Table.Blank)
 					{
 						continue;
 					}
 					else
 					{
-						Message[i] = swapped;
+						Message[j] = swapped;
 					}
 				}
 			}
@@ -230,18 +261,18 @@ namespace VPE
 		private void Swap(ref ushort[] message)
 		{
 			ushort swapped;
-			for (int i = 0; i < message.Length; i++)
+			for (int i = 0; i < Sett.Swaps.Count; i++)
 			{
-				foreach (Table T in Sett.Swaps)
+				for (int j = 0; j < message.Length; j++)
 				{
-					swapped = T.FindValueUsingIndex(message[i]);
+					swapped = Sett.Swaps[i].FindValueUsingIndex(message[j]);
 					if (swapped == Table.Outside || swapped == Table.Empty || swapped == Table.Blank)
 					{
 						continue;
 					}
 					else
 					{
-						Message[i] = swapped;
+						message[j] = swapped;
 					}
 				}
 			}
@@ -250,18 +281,18 @@ namespace VPE
 		private void Unswap()
 		{
 			ushort swapped;
-			for (int j = Sett.Swaps.Count - 1; j >= 0; j--)
+			for (int i = Sett.Swaps.Count - 1; i >= 0; i--)
 			{
-				for (int i = Message.Count - 1; i >= 0; i--)
+				for (int j = 0; j < Message.Count; j++)
 				{
-					swapped = Sett.Swaps[j].FindIndexUsingValue(Message[i]);
+					swapped = Sett.Swaps[i].FindIndexUsingValue(Message[j]);
 					if (swapped == Table.NotFound || swapped == Table.Empty || swapped == Table.Blank)
 					{
 						continue;
 					}
 					else
 					{
-						Message[i] = swapped;
+						Message[j] = swapped;
 					}
 				}
 			}
@@ -271,18 +302,18 @@ namespace VPE
 		private void Unswap(ref ushort[] message)
 		{
 			ushort swapped;
-			for (int j = Sett.Swaps.Count - 1; j >= 0; j--)
+			for (int i = Sett.Swaps.Count - 1; i >= 0; i--)
 			{
-				for (int i = message.Length - 1; i >= 0; i--)
+				for (int j = 0; j < message.Length; j++)
 				{
-					swapped = Sett.Swaps[j].FindIndexUsingValue(Message[i]);
+					swapped = Sett.Swaps[i].FindIndexUsingValue(message[j]);
 					if (swapped == Table.NotFound || swapped == Table.Empty || swapped == Table.Blank)
 					{
 						continue;
 					}
 					else
 					{
-						Message[i] = swapped;
+						message[j] = swapped;
 					}
 				}
 			}
@@ -290,14 +321,21 @@ namespace VPE
 		/// <summary></summary>
 		private void Scramble()
 		{
+			List<ushort>[] logs = { new List<ushort>(), new List<ushort>(), new List<ushort>() };
 			for (int i = 0; i < Message.Count; i++)
 			{
 				ForwardScramble(i);
+				logs[0].Add(Message[i]);
 				Reflect(i);
+				logs[1].Add(Message[i]);
 				BackwardScramble(i);
-				int Sum = Message[i] + Sett.Rotors[0].Pozition;
-				Message[i] = (ushort)(Sum % Codepage.Limit);
+				Message[i] = (ushort)((Message[i] + Sett.Rotors[0].Pozition) % Codepage.Limit);
+				logs[2].Add(Message[i]);
 				Sett.IncrementPozitions();
+			}
+			foreach (List<ushort> sub in logs)
+			{
+				FileHandling.DebugDump(sub);
 			}
 		}
 		/// <summary></summary>
@@ -318,14 +356,21 @@ namespace VPE
 		/// <summary></summary>
 		private void Unscramble()
 		{
+			List<ushort>[] logs = { new List<ushort>(), new List<ushort>(), new List<ushort>() };
 			for (int i = 0; i < Message.Count; i++)
 			{
-				BackwardScramble(i);
-				ReflectBack(i);
 				ForwardScramble(i);
-				int Sum = Message[i] + Sett.Rotors[^1].Pozition;
-				Message[i] = (ushort)(Sum % Codepage.Limit);
+				logs[0].Add(Message[i]);
+				ReflectBack(i);
+				logs[1].Add(Message[i]);
+				BackwardScramble(i);
+				Message[i] = (ushort)((Message[i] + Sett.Rotors[0].Pozition) % Codepage.Limit);
+				logs[2].Add(Message[i]);
 				Sett.IncrementPozitions();
+			}
+			foreach(List<ushort> sub in logs)
+			{
+				FileHandling.DebugDump(sub);
 			}
 		}
 		/// <summary></summary>
@@ -338,32 +383,33 @@ namespace VPE
 				BackwardScramble(i, ref message, sett);
 				ReflectBack(i, ref message);
 				ForwardScramble(i, ref message, sett);
-				int Sum = message[i] + sett.Rotors[^1].Pozition;
+				int Sum = message[i] + sett.Rotors[0].Pozition;
 				message[i] = (ushort)(Sum % Codepage.Limit);
 				sett.IncrementPozitions();
 			}
 		}
-		/// <summary>Posune ËÌsla podle posunovÈho parametru.</summary>
+		/// <summary></summary>
 		private void ConstantShift()
 		{
 			for (int i = 0; i < Message.Count; i++)
 			{
-				uint temp = Message[i];
+				long temp = Message[i];
 				temp += Sett.ConstShift;
 				Message[i] = Convert.ToUInt16(temp % Codepage.Limit);
 			}
 		}
-		/// <summary>Posune ËÌsla zpÏt podle posunovÈho parametru.</summary>
+		/// <summary></summary>
 		private void UnConstantShift()
 		{
-			for (int i = 0; Message.Count > 0; i++)
+			for (int i = 0; i < Message.Count; i++)
 			{
-				uint temp = Message[i];
+				long temp = Message[i];
 				temp -= Sett.ConstShift;
-				Message[i] = Convert.ToUInt16(temp % Codepage.Limit);
+				temp %= Codepage.Limit;
+				Message[i] = temp < 0 ? (ushort)(temp + Codepage.Limit) : (ushort)temp;
 			}
 		}
-		/// <summary>Posune ËÌsla podle po¯adÌ.</summary>
+		/// <summary>Posune ƒç√≠sla podle po≈ôad√≠.</summary>
 		private void OrderShift()
 		{
 			for (int i = 0; i < Message.Count; i++)
@@ -371,32 +417,36 @@ namespace VPE
 				Message[i] = (ushort)((Message[i] + i) % Codepage.Limit);
 			}
 		}
-		/// <summary>Posune ËÌsla zpÏt podle po¯adÌ.</summary>
+		/// <summary>Posune ƒç√≠sla zpƒõt podle po≈ôad√≠.</summary>
 		private void UnOrderShift()
 		{
+			int temp;
 			for (int i = 0; i < Message.Count; i++)
 			{
-				Message[i] = (ushort)((Message[i] - i) % Codepage.Limit);
+				temp = (Message[i] - i) % Codepage.Limit;
+				Message[i] = temp < 0 ? (ushort)(temp + Codepage.Limit) : (ushort)temp;
 			}
 		}
-		/// <summary>Provede promÏnn˝ posun ËÌsel.</summary>
+		/// <summary></summary>
 		private void VariableShift ()
 		{
-			uint v, c = Sett.ConstShift > (Codepage.Limit / 2) ? Sett.ConstShift : (uint)(Codepage.Limit - Sett.ConstShift);
+			long v, c = Sett.ConstShift >= (Codepage.Limit / 2) ? Sett.ConstShift : Codepage.Limit - Sett.ConstShift;
 			for (int i = 0; i < Message.Count; i++)
 			{
-				v = Message[i] + (uint)(Sett.VarShift * (i % c));
-				Message[i] = (ushort)(v % Codepage.Limit);
+				v = Message[i] + (Sett.VarShift * (i % c));
+				v %= Codepage.Limit;
+				Message[i] = v < 0 ? (ushort)(v + Codepage.Limit) : (ushort)v;
 			}
 		}
-		/// <summary>Provede promÏnn˝ posun zpÏt ËÌsel.</summary>
+		/// <summary></summary>
 		private void UnVariableShift()
 		{
-			uint v, c = Sett.ConstShift > (Codepage.Limit / 2) ? Sett.ConstShift : (uint)(Codepage.Limit - Sett.ConstShift);
+			long v, c = Sett.ConstShift >= (Codepage.Limit / 2) ? Sett.ConstShift : Codepage.Limit - Sett.ConstShift;
 			for (int i = 0; i < Message.Count; i++)
 			{
-				v = Message[i] - (uint)(Sett.VarShift * (i % c));
-				Message[i] = (ushort)(v % Codepage.Limit);
+				v = Message[i] - (Sett.VarShift * (i % c));
+				v %= Codepage.Limit;
+				Message[i] = v < 0 ? (ushort)(v + Codepage.Limit) : (ushort)v;
 			}
 		}
 		/// <summary></summary>
@@ -405,13 +455,13 @@ namespace VPE
 		private void ForwardScramble(int i)
 		{
 			int sum = Message[i] + Sett.Rotors[0].Pozition;
-			ushort remain = (ushort)(sum % Codepage.Limit);
-			Message[i] = Sett.Rotors[0].FindValueUsingIndex(remain);
+			sum %= Codepage.Limit;
+			Message[i] = Sett.Rotors[0].FindValueUsingIndex((ushort)sum);
 			for (int j = 1; j < Sett.Rotors.Count; j++)
 			{
-				sum = Message[i] + (Sett.Rotors[j].Pozition - Sett.Rotors[j - 1].Pozition);
-				remain = (ushort)(sum % Codepage.Limit);
-				Message[i] = Sett.Rotors[j].FindValueUsingIndex(remain);
+				sum = (Message[i] + Sett.Rotors[j - 1].Pozition) % Codepage.Limit;
+				sum = (sum + Sett.Rotors[j].Pozition) % Codepage.Limit;
+				Message[i] = Sett.Rotors[j].FindValueUsingIndex((ushort)sum);
 			}
 		}
 		/// <summary></summary>
@@ -436,14 +486,14 @@ namespace VPE
 		/// <returns></returns>
 		private void BackwardScramble(int i)
 		{
-			int sum = Message[i] + Sett.Rotors[^1].Pozition;
-			ushort remain = (ushort)(sum % Codepage.Limit);
-			Message[i] = Sett.Rotors[^1].FindIndexUsingValue(remain);
+			int sum = Message[i] + Sett.Rotors.Last().Pozition;
+			sum %= Codepage.Limit;
+			Message[i] = Sett.Rotors.Last().FindIndexUsingValue((ushort)sum);
 			for (int j = Sett.Rotors.Count - 2; j >= 0; j--)
 			{
-				sum = Message[i] + (Sett.Rotors[j].Pozition - Sett.Rotors[j + 1].Pozition);
-				remain = (ushort)(sum % Codepage.Limit);
-				Message[i] = Sett.Rotors[j].FindIndexUsingValue(remain);
+				sum = (Message[i] + Sett.Rotors[j + 1].Pozition) % Codepage.Limit;
+				sum = (sum + Sett.Rotors[j].Pozition) % Codepage.Limit;
+				Message[i] = Sett.Rotors[j].FindIndexUsingValue((ushort)sum);
 			}
 		}
 		/// <summary></summary>
@@ -468,9 +518,8 @@ namespace VPE
 		/// <returns></returns>
 		private void Reflect(int i)
 		{
-			int Sum = Message[i] + Sett.Rotors.Last().Pozition;
-			ushort Remain = (ushort)(Sum % Codepage.Limit);
-			Message[i] = Sett.Reflector.FindValueUsingIndex(Remain);
+			int sum = (Message[i] + Sett.Rotors.Last().Pozition) % Codepage.Limit;
+			Message[i] = Sett.Reflector.FindValueUsingIndex((ushort)sum);
 		}
 		/// <summary></summary>
 		/// <param name="i"></param>
@@ -487,9 +536,8 @@ namespace VPE
 		/// <returns></returns>
 		private void ReflectBack(int i)
 		{
-			int Sum = Message[i] + Sett.Rotors.Last().Pozition;
-			ushort Remain = (ushort)(Sum % Codepage.Limit);
-			Message[i] = Sett.Reflector.FindIndexUsingValue(Remain);
+			int sum = (Message[i] + Sett.Rotors.Last().Pozition) % Codepage.Limit;
+			Message[i] = Sett.Reflector.FindIndexUsingValue((ushort)sum);
 		}
 		/// <summary></summary>
 		/// <param name="i"></param>
@@ -504,32 +552,39 @@ namespace VPE
 		/// <summary>Adds random chars to the message.</summary>
 		private void AddRandomChars()
 		{
-			Generators Gen = new (Codepage.Limit, DateTime.Now.Ticks);
+			Generators Gen = new (Codepage.Limit, (long)(Sett.RandCharConstB.ComputeConstant() % long.MaxValue));
 			int index = (Sett.RandCharSpcMin + Sett.RandCharSpcMax) % 2; // Index inicialization, where I will add random char.
 			int gap = Sett.RandCharSpcMax - Sett.RandCharSpcMin;
-			BigInteger space = (BigInteger)(Math.Floor(Convert.ToDouble(Codepage.Limit / gap)) % gap + Sett.RandCharSpcMin); // Inicializace mezery. V j·dru Ñn·hodn˝ì v˝poËet, pak d·nÌ do rozsahu a posunutÌ o minimum.
+			BigInteger space = (BigInteger)(Math.Floor(Convert.ToDouble(Codepage.Limit / gap)) % gap + Sett.RandCharSpcMin); // Inicializace mezery. V j√°dru ‚Äûn√°hodn√Ω‚Äú v√Ωpoƒçet, pak d√°n√≠ do rozsahu a posunut√≠ o minimum.
 			BigInteger A = Sett.RandCharConstA.ComputeConstant(1), B = Sett.RandCharConstB.ComputeConstant(), M = Sett.RandCharConstM.ComputeConstant(); // I have to precompute the constants here, so I don't compute them every time.
 			while (index < Message.Count)
 			{
 				Message.Insert(index, Gen.GenerateNum());
 				IncrementSpace(ref index, ref space, gap, A, B, M);
 			}
+			if (index == Message.Count)
+			{
+				Message.Add(Gen.GenerateNum());
+			}
 		}
 		/// <summary>Removes random chars from the message.</summary>
 		private void RemoveRandomChars()
 		{
 			int index = (Sett.RandCharSpcMin + Sett.RandCharSpcMax) % 2;
-			Message.RemoveAt(index);
 			int gap = Sett.RandCharSpcMax - Sett.RandCharSpcMin;
 			BigInteger space = (BigInteger)(Math.Floor(Convert.ToDouble(Codepage.Limit / gap)) % gap + Sett.RandCharSpcMin);
 			BigInteger A = Sett.RandCharConstA.ComputeConstant(1), B = Sett.RandCharConstB.ComputeConstant(), M = Sett.RandCharConstM.ComputeConstant();
-			List<int> IdxToRemove = new();
-			while (index <= Message.Count)
+			List<int> IdxToRemove = new()
 			{
-				IncrementSpace(ref index, ref space, gap, A, B, M);
+				index
+			};
+			IncrementSpace(ref index, ref space, gap, A, B, M);
+			while (index < Message.Count)
+			{
 				IdxToRemove.Add(index);
+				IncrementSpace(ref index, ref space, gap, A, B, M);
 			}
-			for (int i = IdxToRemove.Count - 1; i >= 0; i--)
+			for (int i = IdxToRemove.Count - 1; i > -1; i--)
 			{
 				Message.RemoveAt(IdxToRemove[i]);
 			}

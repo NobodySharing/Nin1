@@ -266,7 +266,7 @@ namespace GUI
 
 		private void RemoveRotorsGUI(int count = 1)
 		{
-			for (int i = 0; i <= count; i++)
+			for (int i = 0; i < count; i++)
 			{
 				if (SP_Rotors.Children.Count > 0)
 				{

@@ -171,8 +171,8 @@ namespace VPE
 		public string Name { get; set; }
 		/// <summary>Index nastavení.</summary>
 		public uint Idx { get; set; }
-		/// <summary>Smallest size of this class instance. (2 034)</summary>
-		private const int MinSize = 2048;
+		/// <summary>Smallest size of this class instance. Approximated.</summary>
+		private const int MinSize = 1024;
 		public Settings ()
 		{
 

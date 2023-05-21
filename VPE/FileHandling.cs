@@ -13,6 +13,8 @@ namespace VPE
 		public const string FileExtTL = ".vpetl"; // Very primitive encryption table library.
 		public const string FileExtS = ".vpes"; // Very primitive encryption settings.
 		public const string FileExtTXT = ".txt";
+
+		private static List<List<ushort>> Dump = new();
 		/// <summary>Saves an instance of SettingsLibrary class.</summary>
 		/// <param name="what">SettingsLibrary class.</param>
 		/// <param name="where">Path to a file to be created.</param>
@@ -88,6 +90,62 @@ namespace VPE
 		public static string LoadText(string path)
 		{
 			return File.ReadAllText (path, Encoding.UTF8);
+		}
+
+		public static void DebugDump(List<ushort> data)
+		{
+			Dump.Add(data.ToList());
+		}
+
+		public static void DumpToDisk(string desc = "")
+		{
+			string path = "B:\\VPE temp\\";
+			int longest = Math.Max(Dump[0].Count, Dump[^1].Count);
+			string content = "";
+			if (desc == "Decryption")
+			{
+				for(int i = 0; i < longest; i++)
+				{
+					for (int j = Dump.Count; j > -1; j--)
+					{
+						if (Dump[j].Count > i)
+						{
+							content += Dump[j][i].ToString();
+							content += "\t";
+						}
+						else
+						{
+							content += ".";
+							content += "\t";
+						}
+					}
+					content += "\r\n";
+				}
+			}
+			else
+			{
+				for (int i = 0; i < longest; i++)
+				{
+					for (int j = 0; j < Dump.Count; j++)
+					{
+						if (Dump[j].Count > i)
+						{
+							content += Dump[j][i].ToString();
+							content += "\t";
+						}
+						else
+						{
+							content += ".";
+							content += "\t";
+						}
+					}
+					content += "\r\n";
+				}
+			}
+			string filename = DateTime.Now.ToString("u") + " " + desc + ".txt";
+			string filepath = path + filename.Replace(":", "-");
+			File.WriteAllText(filepath, content);
+			Dump.Clear();
 		}
 	}
 }
