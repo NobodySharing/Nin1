@@ -27,16 +27,21 @@
 				</Grid.RowDefinitions>
 				<Menu Grid.Row="0" Grid.ColumnSpan="3" Height="22">
 					<MenuItem Header="_Message">
-						<MenuItem Header="Open unencrypted message file" Click="MI_VPE_OpenUneMsgFile_Click"/>
+						<MenuItem Header="Open plain message file" Click="MI_VPE_OpenUneMsgFile_Click"/>
 						<MenuItem Header="Open encrypted message file" Click="MI_VPE_OpenEncMsgFile_Click"/>
-						<MenuItem Header="Save unencrypted message file" Click="MI_VPE_SaveUneMsgFile_Click"/>
+						<MenuItem Header="Save plain message file" Click="MI_VPE_SaveUneMsgFile_Click"/>
 						<MenuItem Header="Save encrypted message file" Click="MI_VPE_SaveEncMsgFile_Click"/>
 					</MenuItem>
 					<MenuItem Header="_Settings">
 						<MenuItem Header="Open settings composer" Click="MI_VPE_SettingsComp_Click"/>
 						<MenuItem Header="Generate all settings for current encryption" Click="MI_VPE_QuickSettGen_Click"/>
-						<MenuItem Header="Save currently used settings to a file" Click="MI_VPE_QuickSettSave_Click"/>
 						<MenuItem Header="Open and use settings" Click="MI_VPE_QuickSettOpen_Click"/>
+						<MenuItem Header="Save currently used settings to a file" Click="MI_VPE_QuickSettSave_Click"/>
+					</MenuItem>
+					<MenuItem  Header="Rotor pozitions">
+						<CheckBox Content="Update "/>
+						<MenuItem Header=" rotor pozitions"/>
+						<MenuItem Header=" rotor pozitions"/>
 						<MenuItem Header="Reset rotor pozition counters" Click="MI_VPE_RotPozReset_Click"/>
 					</MenuItem>
 					<MenuItem Header="_Encryption">

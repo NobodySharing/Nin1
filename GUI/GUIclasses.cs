@@ -509,6 +509,10 @@ namespace GUI
 		/// <param name="s">Settings to use.</param>
 		public void	SetUsingSettings(Settings s)
 		{
+			if(s == null)
+			{
+				return;
+			}
 			NameStr = s.Name;
 			ConstShiftStr = s.ConstShift.ToString();
 			VarShiftStr = s.VarShift.ToString();

@@ -5,13 +5,13 @@ using System.Text;
 using System.Numerics;
 using System.Threading.Tasks;
 using Microsoft.Win32;
+using System.Windows.Media;
+using System.Collections.ObjectModel;
 
 using VPE;
 using Factorizator;
 using NeueDT;
 using DTcalc;
-using System.Windows.Media;
-using System.Collections.ObjectModel;
 
 namespace GUI
 {
