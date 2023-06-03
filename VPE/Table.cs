@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace VPE
 {
+	/// <summary>Class for table functions. Can be rotor, swap or reflector. Has all the required data.</summary>
 	public class Table
 	{
 		/// <summary>Provided value was not found.</summary>
@@ -30,7 +31,7 @@ namespace VPE
 		public ushort StartPozition { get; set; }
 		/// <summary>Index of this table, for searchability in a large pool of tables.</summary>
 		public uint Idx { get; set; }
-
+		/// <summary>Creation of an empty table.</summary>
 		public Table()
 		{
 
@@ -71,8 +72,8 @@ namespace VPE
 			};
 			return table;
 		}
-		/// <summary>Dá dohromady booly do 1 bytu.</summary>
-		/// <returns>Komprimované flagy.</returns>
+		/// <summary>Composes byte from flags.</summary>
+		/// <returns>Flag representing byte.</returns>
 		public byte GetFlags()
 		{
 			byte b0 = IsPaired ? (byte)1 : (byte)0;
@@ -80,17 +81,17 @@ namespace VPE
 			byte b2 = IsIncomplete ? (byte)4 : (byte)0;
 			return (byte)(b0 | b1 | b2);
 		}
-		/// <summary>Rozbalí flagy z bytu.</summary>
-		/// <param name="flags">Komprimované flagy.</param>
+		/// <summary>Unpacks flags from byte.</summary>
+		/// <param name="flags">Flag representing byte.</param>
 		public void SetFlags(byte flags)
 		{
 			IsPaired = (flags & 0b00000001) == 1;
 			HasPozition = (flags & 0b00000010) == 2;
 			IsIncomplete = (flags & 0b00000100) == 4;
 		}
-		/// <summary></summary>
-		/// <param name="Value"></param>
-		/// <returns></returns>
+		/// <summary>Finds index using given value.</summary>
+		/// <param name="Value">Which value to find?</param>
+		/// <returns>Index or error code.</returns>
 		public ushort FindIndexUsingValue (ushort Value)
 		{
 			if (MainTable.Count > 0)
@@ -109,9 +110,9 @@ namespace VPE
 				return Empty;
 			}
 		}
-		/// <summary></summary>
-		/// <param name="Index"></param>
-		/// <returns></returns>
+		/// <summary>Finds value using given index.</summary>
+		/// <param name="Index">Which index to find?</param>
+		/// <returns>Value or error code.</returns>
 		public ushort FindValueUsingIndex (ushort Index)
 		{
 			if (MainTable.Count > 0)
@@ -130,8 +131,8 @@ namespace VPE
 				return Empty;
 			}
 		}
-		/// <summary>Převede současnou tabulku do listu bytů, bere položky jako 2 byty, tzn. i více jak 256.</summary>
-		/// <returns>List bytů reprezentující tuto instanci tabulky.</returns>
+		/// <summary>Converts current instance of this class to list of bytes.</summary>
+		/// <returns>List of bytes reprezenting this instance.</returns>
 		internal List<byte> ToBytes()
 		{
 			List<byte> result = new();

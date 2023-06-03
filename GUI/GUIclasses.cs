@@ -14,6 +14,8 @@ namespace GUI
 	{
 		private string VPE_PlainStrV;
 		private string VPE_EncrypStrV;
+		private string VPE_RotPozBeforeStrV;
+		private string VPE_RotPozAfterStrV;
 		public string VPE_PlainStr
 		{
 			get
@@ -44,7 +46,36 @@ namespace GUI
 				}
 			}
 		}
-		
+		public string VPE_RotPozBeforeStr
+		{
+			get
+			{
+				return VPE_RotPozBeforeStrV;
+			}
+			set
+			{
+				if (VPE_RotPozBeforeStrV != value)
+				{
+					VPE_RotPozBeforeStrV = value;
+					OnPropertyChanged("VPE_RotPozBeforeStr");
+				}
+			}
+		}
+		public string VPE_RotPozAfterStr
+		{
+			get
+			{
+				return VPE_RotPozAfterStrV;
+			}
+			set
+			{
+				if (VPE_RotPozAfterStrV != value)
+				{
+					VPE_RotPozAfterStrV = value;
+					OnPropertyChanged("VPE_RotPozAfterStr");
+				}
+			}
+		}
 		public event PropertyChangedEventHandler PropertyChanged;
 		private void OnPropertyChanged(string info)
 		{

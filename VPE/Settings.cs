@@ -305,7 +305,6 @@ namespace VPE
 			SwitchConstC = consts[5];
 			SwitchConstD = consts[6];
 		}
-		
 	}
 	/// <summary>Defines a very large constant. Using it's factorization./summary>
 	public class PrimeDefinedConstant
