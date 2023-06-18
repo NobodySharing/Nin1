@@ -25,10 +25,8 @@ namespace VPE
 		public bool HasPozition { get; set; } = false;
 		/// <summary>Is this table filled only partially (unfilled are marked as Blank). No by default.</summary>
 		public bool IsIncomplete { get; set; } = false;
-		/// <summary>If relevant, this is the active pozition, changes during en/decryption.</summary>
-		public ushort Pozition { get; set; }
-		/// <summary>If relevant, this is the starting pozition, changes AFTER en/decryption.</summary>
-		public ushort StartPozition { get; set; }
+		/// <summary>If relevant, this is the list of pozitions, it is updated with each en/decryption. 0 is starting, last is the last used.</summary>
+		public List<ushort> Pozitions { get; set; }
 		/// <summary>Index of this table, for searchability in a large pool of tables.</summary>
 		public uint Idx { get; set; }
 		/// <summary>Creation of an empty table.</summary>
@@ -46,31 +44,22 @@ namespace VPE
 			pozition += 4;
 			SetFlags(set[pozition]);
 			pozition++;
-			Pozition = BitConverter.ToUInt16(set, pozition);
-			pozition += 2;
-			StartPozition = BitConverter.ToUInt16(set, pozition);
-			pozition += 2;
+			if (HasPozition)
+			{
+				int count = BitConverter.ToInt32(set, pozition);
+				pozition += 4;
+				Pozitions = new List<ushort>(count);
+				for (int i = 0; i < count; i++)
+				{
+					Pozitions.Add(BitConverter.ToUInt16(set, pozition));
+					pozition += 2;
+				}
+			}
 			for (ushort j = 0; j < limit; j++)
 			{
 				MainTable.Add(BitConverter.ToUInt16(set, pozition));
 				pozition += 2;
 			}
-		}
-		/// <summary>Clones this instance of table.</summary>
-		/// <returns>Clone, by value, not reference, completely independent object.</returns>
-		public Table Clone()
-		{
-			Table table = new()
-			{
-				IsPaired = IsPaired,
-				HasPozition = HasPozition,
-				IsIncomplete = IsIncomplete,
-				Pozition = Pozition,
-				StartPozition = StartPozition,
-				Idx = Idx,
-				MainTable = MainTable.ToList(), // IDK.
-			};
-			return table;
 		}
 		/// <summary>Composes byte from flags.</summary>
 		/// <returns>Flag representing byte.</returns>
@@ -138,8 +127,14 @@ namespace VPE
 			List<byte> result = new();
 			result.AddRange(BitConverter.GetBytes(Idx));
 			result.Add(GetFlags());
-			result.AddRange(BitConverter.GetBytes(Pozition));
-			result.AddRange(BitConverter.GetBytes(StartPozition));
+			if (HasPozition)
+			{
+				result.AddRange(BitConverter.GetBytes(Pozitions.Count));
+				foreach (ushort poz in Pozitions)
+				{
+					result.AddRange(BitConverter.GetBytes(poz));
+				}
+			}
 			foreach (ushort item in MainTable)
 			{
 				result.AddRange(BitConverter.GetBytes(item));

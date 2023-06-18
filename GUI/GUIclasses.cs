@@ -14,8 +14,8 @@ namespace GUI
 	{
 		private string VPE_PlainStrV;
 		private string VPE_EncrypStrV;
-		private string VPE_RotPozBeforeStrV;
-		private string VPE_RotPozAfterStrV;
+		private string VPE_RotPozStrV;
+		private string VPE_SelPozSetStrV;
 		public string VPE_PlainStr
 		{
 			get
@@ -46,33 +46,33 @@ namespace GUI
 				}
 			}
 		}
-		public string VPE_RotPozBeforeStr
+		public string VPE_RotPozStr
 		{
 			get
 			{
-				return VPE_RotPozBeforeStrV;
+				return VPE_RotPozStrV;
 			}
 			set
 			{
-				if (VPE_RotPozBeforeStrV != value)
+				if (VPE_RotPozStrV != value)
 				{
-					VPE_RotPozBeforeStrV = value;
-					OnPropertyChanged("VPE_RotPozBeforeStr");
+					VPE_RotPozStrV = value;
+					OnPropertyChanged("VPE_RotPozStr");
 				}
 			}
 		}
-		public string VPE_RotPozAfterStr
+		public string VPE_SelPozSetStr
 		{
 			get
 			{
-				return VPE_RotPozAfterStrV;
+				return VPE_SelPozSetStrV;
 			}
 			set
 			{
-				if (VPE_RotPozAfterStrV != value)
+				if (VPE_SelPozSetStrV != value)
 				{
-					VPE_RotPozAfterStrV = value;
-					OnPropertyChanged("VPE_RotPozAfterStr");
+					VPE_SelPozSetStrV = value;
+					OnPropertyChanged("VPE_SelPozSetStr");
 				}
 			}
 		}
@@ -90,6 +90,7 @@ namespace GUI
 		private string RotorGenCountStrV;
 		private string SwapGenCountStrV;
 		private string ReflGenCountStrV;
+		private string ScrsGenCountStrV;
 		private string ConstShiftStrV;
 		private string VarShiftStrV;
 		private string RandCharSpcMinStrV;
@@ -407,6 +408,35 @@ namespace GUI
 			get
 			{
 				if (ushort.TryParse(ReflGenCountStrV, out ushort num))
+				{
+					return num;
+				}
+				else
+				{
+					return null; // Neplatné číslo.
+				}
+			}
+		}
+		public string ScrsGenCountStr
+		{
+			get
+			{
+				return ScrsGenCountStrV;
+			}
+			set
+			{
+				if (ScrsGenCountStrV != value)
+				{
+					ScrsGenCountStrV = value;
+					OnPropertyChanged("ScrsGenCountStr");
+				}
+			}
+		}
+		public ushort? ScrsGenCountNum
+		{
+			get
+			{
+				if (ushort.TryParse(ScrsGenCountStrV, out ushort num))
 				{
 					return num;
 				}

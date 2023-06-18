@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Numerics;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace VPE
 {
@@ -26,14 +27,16 @@ namespace VPE
 		public string Encypt(string Text)
 		{
 			ConvertToNums(Text);
+			ScrambleCharTable(0, true);
 			AddRandomChars();
 			SwitchCharPoz(0);
 			OrderShift();
-			MultithreadedPartEnc();
+			MultithreadedPart();
 			ConstantShift();
 			VariableShift();
 			AddRandomChars();
 			SwitchCharPoz(1);
+			ScrambleCharTable(1, true);
 			return ConvertToString();
 		}
 		/// <summary>Decrypts text.</summary>
@@ -42,18 +45,45 @@ namespace VPE
 		public string Decypt(string Text)
 		{
 			ConvertToNums(Text);
+			ScrambleCharTable(1, false);
 			UnSwitchCharPoz(1);
 			RemoveRandomChars();
 			UnVariableShift();
 			UnConstantShift();
-			MultithreadedPartDec();
+			MultithreadedPart();
 			UnOrderShift();
 			UnSwitchCharPoz(0);
 			RemoveRandomChars();
+			ScrambleCharTable(0, false);
 			return ConvertToString();
 		}
+		/// <summary>Does simple char switch, designed for randomization of the char table without changing it.</summary>
+		/// <param name="stage">0 for begin, 1 for end.</param>
+		/// <param name="encrypt">True for encrypting, flase for decrypting.</param>
+		private void ScrambleCharTable(byte stage, bool encrypt)
+		{
+			Table table = stage switch
+			{
+				1 => Sett.OutputScrambler,
+				_ => Sett.InputScrambler,
+			};
+			if (encrypt)
+			{
+				for (int i = 0; i < Message.Count; i++)
+				{
+					Message[i] = table.FindValueUsingIndex(Message[i]);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < Message.Count; i++)
+				{
+					Message[i] = table.FindIndexUsingValue(Message[i]);
+				}
+			}
+		}
 		/// <summary>The main block of encrypting, which can be executed in multiple threads. Decides if that is needed.</summary>
-		private void MultithreadedPartEnc()
+		private void MultithreadedPart()
 		{
 			if (Message.Count < MultithreadingThreshold)
 			{
@@ -63,39 +93,16 @@ namespace VPE
 			}
 			else
 			{
-				ushort[][] parts = PrepareData(out Settings_Rotors[] rotors);
+				ushort[][] parts = PrepareData(out ushort[][] threadedPozs);
 				ParallelLoopResult result = Parallel.For(0, Environment.ProcessorCount, (i, state) =>
 				{
-					ForwardPassThroughTables(ref parts[i], rotors[i]);
+					PassThroughTables(ref parts[i], threadedPozs[i]);
 				});
 				if (result.IsCompleted)
 				{
 					CombineMessage(parts);
+					Sett.AddPozitions(threadedPozs[^1].ToList());
 				}
-				_ = Sett.SetPozitions(rotors.Last().GetPozitions());
-			}
-		}
-		/// <summary>The main block of decrypting, which can be executed in multiple threads. Decides if that is needed.</summary>
-		private void MultithreadedPartDec()
-		{
-			if (Message.Count < MultithreadingThreshold)
-			{
-				Swap();
-				Unscramble();
-				Unswap();
-			}
-			else
-			{
-				ushort[][] parts = PrepareData(out Settings_Rotors[] rotors);
-				ParallelLoopResult result = Parallel.For(0, Environment.ProcessorCount, (i, state) =>
-				{
-					BackwardPassThroughTables(ref parts[i], rotors[i]);
-				});
-				if (result.IsCompleted)
-				{
-					CombineMessage(parts);
-				}
-				_ = Sett.SetPozitions(rotors.Last().GetPozitions());
 			}
 		}
 		/// <summary>Divides the message to segments. Number of those is dependant on logical processor count.
@@ -104,28 +111,40 @@ namespace VPE
 		private ushort[][] DivideMessage()
 		{
 			ushort[][] parts = new ushort[Environment.ProcessorCount][];
-			int segLen = Message.Count / Environment.ProcessorCount;
-			for (int j = 0; j < (Environment.ProcessorCount - 1); j++)
+			int index = 0, segLen = Message.Count / Environment.ProcessorCount;
+			int leftover = Message.Count - (segLen * Environment.ProcessorCount);
+			for (int i = 0; i < Environment.ProcessorCount; i++)
 			{
-				parts[j] = new ushort[segLen];
-				Message.CopyTo(j * segLen, parts[j], 0, segLen);
+				if (leftover > 0)
+				{
+					parts[i] = new ushort[segLen + 1];
+					Message.CopyTo(index, parts[i], 0, segLen + 1);
+					index += segLen + 1;
+					leftover--;
+				}
+				else
+				{
+					parts[i] = new ushort[segLen];
+					Message.CopyTo(index, parts[i], 0, segLen);
+					index += segLen;
+				}
 			}
-			int lastSize = Message.Count - ((Environment.ProcessorCount - 1) * segLen);
-			ushort[] last = new ushort[lastSize];
-			Message.CopyTo((Environment.ProcessorCount - 1) * segLen, last, 0, 30);
-			parts[^1] = last;
 			return parts;
 		}
 		/// <summary>Does all the preparations for multithreaded en/decryption. Divides the message and prepares settings.</summary>
-		/// <param name="rotors">Prepared settings.</param>
+		/// <param name="pozs">Prepared pozitions.</param>
 		/// <returns>Divided message (by number of threads).</returns>
-		private ushort[][] PrepareData(out Settings_Rotors[] rotors)
+		private ushort[][] PrepareData(out ushort[][] pozs)
 		{
 			ushort[][] parts = DivideMessage();
-			rotors = Sett.CloneRotors(Environment.ProcessorCount);
-			for (int i = 1; i < Environment.ProcessorCount; i++)
+			pozs = new ushort[Environment.ProcessorCount][];
+			List<ushort> initialPozs = Sett.GetPozitions();
+			uint cumulativeLength = 0;
+			for (int i = 0; i < pozs.Length; i++)
 			{
-				rotors[i].IncrementPozitions((uint)(parts[0].Length * i));
+				pozs[i] = initialPozs.ToArray();
+				Settings.IncrementCustomPozitions(ref pozs[i], cumulativeLength);
+				cumulativeLength += (uint)pozs[i].Length;
 			}
 			return parts;
 		}
@@ -198,21 +217,12 @@ namespace VPE
 		}
 		/// <summary>Multithreaded version of passing chars through all tables of all kinds.</summary>
 		/// <param name="message">Part of the message.</param>
-		/// <param name="rotors">Rotor settings for this thread.</param>
-		private void ForwardPassThroughTables(ref ushort[] message, Settings_Rotors rotors)
+		/// <param name="threadPozs">Rotor pozitions for this thread.</param>
+		private void PassThroughTables(ref ushort[] message, ushort[] threadPozs)
 		{
 			Swap(ref message);
-			Scramble(ref message, rotors);
+			Scramble(ref message, threadPozs);
 			Unswap(ref message);
-		}
-		/// <summary>Multithreaded version of passing chars back through all tables of all kinds.</summary>
-		/// <param name="message">Part of the message.</param>
-		/// <param name="rotors">Rotor settings for this thread.</param>
-		private void BackwardPassThroughTables(ref ushort[] message, Settings_Rotors rotors)
-		{
-			Unswap(ref message);
-			Unscramble(ref message, rotors);
-			Swap(ref message);
 		}
 		/// <summary>Singlethreaded version of passing chars through all swap tables. Always all chars through 1 swap.</summary>
 		private void Swap()
@@ -309,39 +319,15 @@ namespace VPE
 		}
 		/// <summary>Multithreaded version of the main scrambling part. Scrambles chars 1 by 1, every time pass through all rotors, reflect, then pass back.</summary>
 		/// <param name="message">Part of the message.</param>
-		/// <param name="sett">Rotor settings for this thread.</param>
-		private void Scramble(ref ushort[] message, Settings_Rotors sett)
+		/// <param name="threadPozs">Rotor pozitions for this thread.</param>
+		private void Scramble(ref ushort[] message, ushort[] threadPozs)
 		{
 			for (int i = 0; i < message.Length; i++)
 			{
-				ForwardScramble(i, ref message, sett);
+				ForwardScramble(i, ref message, threadPozs);
 				Reflect(i, ref message);
-				BackwardScramble(i, ref message, sett);
-				sett.IncrementPozitions();
-			}
-		}
-		/// <summary>Singlethreaded version of the main unscrambling part. Unscrambles chars 1 by 1, every time pass through all rotors, reflect, then pass back.</summary>
-		private void Unscramble()
-		{
-			for (int i = 0; i < Message.Count; i++)
-			{
-				ForwardScramble(i);
-				Reflect(i);
-				BackwardScramble(i);
-				Sett.IncrementPozitions();
-			}
-		}
-		/// <summary>Multithreaded version of the main unscrambling part. Unscrambles chars 1 by 1, every time pass through all rotors, reflect, then pass back.</summary>
-		/// <param name="message">Part of the message.</param>
-		/// <param name="sett">Rotor settings for this thread.</param>
-		private void Unscramble(ref ushort[] message, Settings_Rotors sett)
-		{
-			for (int i = 0; i < message.Length; i++)
-			{
-				BackwardScramble(i, ref message, sett);
-				Reflect(i, ref message);
-				ForwardScramble(i, ref message, sett);
-				sett.IncrementPozitions();
+				BackwardScramble(i, ref message, threadPozs);
+				Settings.IncrementCustomPozitions(ref threadPozs, 1);
 			}
 		}
 		/// <summary>Shifts all chars by constant amount.</summary>
@@ -409,61 +395,61 @@ namespace VPE
 		/// <param name="i">Index of a char in the message.</param>
 		private void ForwardScramble(int i)
 		{
-			ushort temp = ModuloSum(Message[i], Sett.Rotors[0].Pozition); // Calculation of the input pozition as the rotor sees it.
+			ushort temp = ModuloSum(Message[i], Sett.Rotors[0].Pozitions[Sett.SelectedPozitions]); // Calculation of the input pozition as the rotor sees it.
 			temp = Sett.Rotors[0].FindValueUsingIndex(temp); // Pass through the table.
 			for (int j = 1; j < Sett.Rotors.Count; j++)
 			{
-				temp = ModuloSum(temp, Sett.Rotors[j - 1].Pozition); // Calculation of the output pozition, in absolute terms.
-				temp = ModuloSum(temp, Sett.Rotors[j].Pozition); // Calculation of the input pozition as the (next) rotor sees it.
+				temp = ModuloSum(temp, Sett.Rotors[j - 1].Pozitions[Sett.SelectedPozitions]); // Calculation of the output pozition, in absolute terms.
+				temp = ModuloSum(temp, Sett.Rotors[j].Pozitions[Sett.SelectedPozitions]); // Calculation of the input pozition as the (next) rotor sees it.
 				temp = Sett.Rotors[j].FindValueUsingIndex(temp); // Pass through the table.
 			}
-			Message[i] = ModuloSum(temp, Sett.Rotors.Last().Pozition); // Calculation of the exiting pozition, in absolute terms.
+			Message[i] = ModuloSum(temp, Sett.Rotors[^1].Pozitions[Sett.SelectedPozitions]); // Calculation of the exiting pozition, in absolute terms.
 		}
 		/// <summary>Forward pass through all rotors, multithreaded version.</summary>
 		/// <param name="i">Index of a char in the message.</param>
 		/// <param name="message">Part of the message.</param>
-		/// <param name="sett">Settings for this thread.</param>
-		private void ForwardScramble(int i, ref ushort[] message, Settings_Rotors sett)
+		/// <param name="threadPozs">Settings for this thread.</param>
+		private void ForwardScramble(int i, ref ushort[] message, ushort[] threadPozs)
 		{
-			ushort temp = ModuloSum(message[i], sett.Rotors[0].Pozition); // Calculation of the input pozition as the rotor sees it.
-			temp = sett.Rotors[0].FindValueUsingIndex(temp); // Pass through the table.
-			for (int j = 1; j < sett.Rotors.Count; j++)
+			ushort temp = ModuloSum(message[i], threadPozs[0]); // Calculation of the input pozition as the rotor sees it.
+			temp = Sett.Rotors[0].FindValueUsingIndex(temp); // Pass through the table.
+			for (int j = 1; j < threadPozs.Length; j++)
 			{
-				temp = ModuloSum(temp, sett.Rotors[j - 1].Pozition); // Calculation of the output pozition, in absolute terms.
-				temp = ModuloSum(temp, sett.Rotors[j].Pozition); // Calculation of the input pozition as the (next) rotor sees it.
-				temp = sett.Rotors[j].FindValueUsingIndex(temp); // Pass through the table.
+				temp = ModuloSum(temp, threadPozs[j - 1]); // Calculation of the output pozition, in absolute terms.
+				temp = ModuloSum(temp, threadPozs[j]); // Calculation of the input pozition as the (next) rotor sees it.
+				temp = Sett.Rotors[j].FindValueUsingIndex(temp); // Pass through the table.
 			}
-			message[i] = ModuloSum(temp, sett.Rotors.Last().Pozition); // Calculation of the exiting pozition, in absolute terms.
+			message[i] = ModuloSum(temp, threadPozs[^1]); // Calculation of the exiting pozition, in absolute terms.
 		}
 		/// <summary>Backward pass through all rotors, singlethreaded version.</summary>
 		/// <param name="i">Index of a char in the message.</param>
 		private void BackwardScramble(int i)
 		{
-			ushort temp = ModuloDiff(Message[i], Sett.Rotors.Last().Pozition);  // Calculation of the input pozition as the rotor sees it.
+			ushort temp = ModuloDiff(Message[i], Sett.Rotors[^1].Pozitions[Sett.SelectedPozitions]);  // Calculation of the input pozition as the rotor sees it.
 			temp = Sett.Rotors.Last().FindIndexUsingValue(temp); // Pass through the table.
 			for (int j = Sett.Rotors.Count - 2; j > -1; j--)
 			{
-				temp = ModuloDiff(temp, Sett.Rotors[j + 1].Pozition); // Calculation of the output pozition, in absolute terms.
-				temp = ModuloDiff(temp, Sett.Rotors[j].Pozition); // Calculation of the input pozition as the (next) rotor sees it.
+				temp = ModuloDiff(temp, Sett.Rotors[j + 1].Pozitions[Sett.SelectedPozitions]); // Calculation of the output pozition, in absolute terms.
+				temp = ModuloDiff(temp, Sett.Rotors[j].Pozitions[Sett.SelectedPozitions]); // Calculation of the input pozition as the (next) rotor sees it.
 				temp = Sett.Rotors[j].FindIndexUsingValue(temp); // Pass through the table.
 			}
-			Message[i] = ModuloDiff(temp, Sett.Rotors[0].Pozition); // Calculation of the exiting pozition, in absolute terms.
+			Message[i] = ModuloDiff(temp, Sett.Rotors[0].Pozitions[Sett.SelectedPozitions]); // Calculation of the exiting pozition, in absolute terms.
 		}
 		/// <summary>Backward pass through all rotors, multithreaded version.</summary>
 		/// <param name="i">Index of a char in the message.</param>
 		/// <param name="message">Part of the message.</param>
-		/// <param name="sett">Settings for this thread.</param>
-		private void BackwardScramble(int i, ref ushort[] message, Settings_Rotors sett)
+		/// <param name="threadPozs">Settings for this thread.</param>
+		private void BackwardScramble(int i, ref ushort[] message, ushort[] threadPozs)
 		{
-			ushort temp = ModuloDiff(message[i], sett.Rotors.Last().Pozition);  // Calculation of the input pozition as the rotor sees it.
-			temp = sett.Rotors.Last().FindIndexUsingValue(temp); // Pass through the table.
-			for (int j = sett.Rotors.Count - 2; j > -1; j--)
+			ushort temp = ModuloDiff(message[i], threadPozs[^1]);  // Calculation of the input pozition as the rotor sees it.
+			temp = Sett.Rotors[^1].FindIndexUsingValue(temp); // Pass through the table.
+			for (int j = threadPozs.Length - 2; j > -1; j--)
 			{
-				temp = ModuloDiff(temp, sett.Rotors[j + 1].Pozition); // Calculation of the output pozition, in absolute terms.
-				temp = ModuloDiff(temp, sett.Rotors[j].Pozition); // Calculation of the input pozition as the (next) rotor sees it.
-				temp = sett.Rotors[j].FindIndexUsingValue(temp); // Pass through the table.
+				temp = ModuloDiff(temp, threadPozs[j + 1]); // Calculation of the output pozition, in absolute terms.
+				temp = ModuloDiff(temp, threadPozs[j]); // Calculation of the input pozition as the (next) rotor sees it.
+				temp = Sett.Rotors[j].FindIndexUsingValue(temp); // Pass through the table.
 			}
-			message[i] = ModuloDiff(temp, sett.Rotors[0].Pozition); // Calculation of the exiting pozition, in absolute terms.
+			message[i] = ModuloDiff(temp, threadPozs[0]); // Calculation of the exiting pozition, in absolute terms.
 		}
 		/// <summary>Reflects given value. By design of the reflector, it's the same method for both directions. Singlethreaded version.</summary>
 		/// <param name="i">Index of a char in the message.</param>
@@ -484,7 +470,7 @@ namespace VPE
 			BigInteger seed0 = 1;
 			foreach (Table rotor in Sett.Rotors)
 			{
-				seed0 *= rotor.Pozition;
+				seed0 *= rotor.Pozitions[Sett.SelectedPozitions];
 			}
 			seed0 %= (DateTime.MaxValue.Ticks - DateTime.MinValue.Ticks); 
 			long seed1 = DateTime.MinValue.Ticks + (long)seed0;

@@ -18,7 +18,7 @@ namespace VPE
 			UpdateSeed(Seed);
 		}
 		/// <summary>Generates complete instance of Settings class.</summary>
-		/// <param name="idxs">Set of indexies. 0: rotors, 1: swaps, 2: refls, 3: setts.</param>
+		/// <param name="idxs">Set of indexies. 0: rotors, 1: swaps, 2: refls, 3: scramblers, 4: setts.</param>
 		/// <returns>Settings.</returns>
 		public Settings GenerateSetts(uint[] idxs)
 		{
@@ -28,7 +28,7 @@ namespace VPE
 			Settings settings = new()
 			{
 				Name = DateTime.Now.ToString("u") + " (automatically generated)",
-				Idx = idxs[3],
+				Idx = idxs[4],
 				Reflector = GeneratePairs(idxs[2]),
 				RandCharConstA = ABM[0],
 				RandCharConstB = ABM[1],
@@ -44,7 +44,7 @@ namespace VPE
 			for (int i = 0; i < count; i++)
 			{
 				Table t = GenerateTable((uint)(idxs[0] + i));
-				t.Pozition = GenerateNum();
+				t.Pozitions.Add(GenerateNum());
 				settings.Rotors.Add(t);
 			}
 			count = R.Next(6, 14);
@@ -180,6 +180,19 @@ namespace VPE
 			}
 			T.MainTable = temp.ToList();
 			return T;
+		}
+		/// <summary>Generates full non-paired table without pozitions.</summary>
+		/// <param name="index">Index of this table.</param>
+		/// <returns>Table.</returns>
+		public Table GEnerateTableWithoutPoz(uint index)
+		{
+			Table t = new()
+			{
+				Idx = index,
+				HasPozition = false,
+			};
+
+			return t;
 		}
 		/// <summary>Vygeneruje náhodné číslo od 0 do Codepage.Limit.</summary>
 		/// <returns>Náhodné číslo v limitu.</returns>

@@ -30,6 +30,8 @@ namespace GUI
 		internal List<C_UC_Rotor> DataFromGUI_Rotors = new();
 		internal List<C_VPE_ComboBox> DataFromGUI_Swaps = new();
 		internal C_VPE_ComboBox DataFromGUI_Refl = new();
+		internal C_VPE_ComboBox DataFromGUI_InScr = new();
+		internal C_VPE_ComboBox DataFromGUI_OutScr = new();
 		internal C_VPE_ComboBox DataFromGUI_SettSel = new();
 		#endregion
 		#region Private constants for file filtering
@@ -68,11 +70,19 @@ namespace GUI
 				TL.Swaps.Add(Generator.GeneratePairsWithSkips((ushort)TL.Swaps.Count, Generator.GenerateDoubleInRange(9d / 16d, 950d / 1024d)));
 			}
 		}
+
+		public void GenerateScramblers(uint count = 4)
+		{
+			Generator.UpdateSeed(DateTime.Now.Ticks);
+			for (uint i = 0; i < count; i++)
+			{
+				TL.Rotors.Add(Generator.GEnerateTableWithoutPoz((ushort)TL.Scramblers.Count));
+			}
+		}
 		/// <summary>Generates complete settings, adds them to library and sets the GUI accordingly.</summary>
 		public void GenerateComplete()
 		{
-			ActiveSett = Generator.GenerateSetts(new uint[] { (uint)TL.Rotors.Count, (uint)TL.Swaps.Count, (uint)TL.Reflectors.Count, (uint)SL.Library.Count });
-			ActiveSett.UpdateStartPozitions();
+			ActiveSett = Generator.GenerateSetts(new uint[] { (uint)TL.Rotors.Count, (uint)TL.Swaps.Count, (uint)TL.Reflectors.Count, (uint)TL.Scramblers.Count, (uint)SL.Library.Count });
 			AddSettsToLib();
 			UpdateSettingsSelector();
 		}
@@ -90,7 +100,7 @@ namespace GUI
 				swaps.Add(swap.SelectedNum.Value);
 			}
 			ActiveSett = TL.Select(rotors, swaps, DataFromGUI_Refl.SelectedNum.Value);
-			ActiveSett.ChangePozitions(pozs);
+			ActiveSett.AddPozitions(pozs);
 			ActiveSett.Name = DataFromGUI_Sett.NameStr;
 			ActiveSett.ConstShift = DataFromGUI_Sett.ConstShiftNum.Value;
 			ActiveSett.VarShift = DataFromGUI_Sett.VarShiftNum.Value;
@@ -182,7 +192,6 @@ namespace GUI
 		public void SettGen()
 		{
 			ActiveSett = Generator.GenerateSetts(new uint[] { (uint)TL.Rotors.Count, (uint)TL.Swaps.Count, (uint)TL.Reflectors.Count, (uint)SL.Library.Count });
-			ActiveSett.UpdateStartPozitions();
 			AddSettsToLib();
 		}
 		/// <summary>Sets the active settings using what was selected in settings selector.</summary>
@@ -232,7 +241,7 @@ namespace GUI
 			for (int i = 0; i < ActiveSett.Rotors.Count; i++)
 			{
 				DataFromGUI_Rotors[i].RotorsStrs = rotors;
-				DataFromGUI_Rotors[i].PozitionStr = ActiveSett.Rotors[i].Pozition.ToString();
+				DataFromGUI_Rotors[i].PozitionStr = ActiveSett.Rotors[i].Pozitions[ActiveSett.SelectedPozitions].ToString();
 				DataFromGUI_Rotors[i].SelectedRIdx = (int)ActiveSett.Rotors[i].Idx;
 				DataFromGUI_Rotors[i].SelectedRStr = ActiveSett.Rotors[i].Idx.ToString();
 			}
@@ -311,6 +320,11 @@ namespace GUI
 			}
 		}
 
+		public void UpdateScramblerSelectors()
+		{
+
+		}
+
 		public void UpdateSettingsSelector()
 		{
 			List<string> names = new();
@@ -328,17 +342,9 @@ namespace GUI
 			UpdateSettingsSelector();
 		}
 
-		public void ResetRotPoz()
-		{
-			foreach(Table rotor in ActiveSett.Rotors)
-			{
-				rotor.Pozition = rotor.StartPozition;
-			}
-		}
-
 		public void SaveSettings()
 		{
-			FileHandling.Save(ActiveSett, SaveFile(VPES_filter));
+			FileHandling.SaveOrUpdate(ActiveSett, SaveFile(VPES_filter));
 		}
 
 		public void LoadSettings(bool? OverrideOverwrite = null)

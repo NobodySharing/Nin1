@@ -27,6 +27,8 @@ namespace GUI
 			DataContext = VPE.DataFromGUI_Sett;
 			CB_SettLib.DataContext = VPE.DataFromGUI_SettSel;
 			CB_Reflector.DataContext = VPE.DataFromGUI_Refl;
+			CB_InScr.DataContext = VPE.DataFromGUI_InScr;
+			CB_OutScr.DataContext = VPE.DataFromGUI_OutScr;
 			if (VPE.ActiveSett is not null)
 			{
 				DisplayActiveSettInGUI();
@@ -69,6 +71,15 @@ namespace GUI
 			{
 				VPE.GenerateSwaps(VPE.DataFromGUI_Sett.SwapGenCountNum.Value);
 				VPE.UpdateSwapSelector();
+			}
+		}
+
+		private void B_GenScrs_Click(object sender, RoutedEventArgs e)
+		{
+			if (VPE.DataFromGUI_Sett.ScrsGenCountNum is not null)
+			{
+				VPE.GenerateScramblers(VPE.DataFromGUI_Sett.ScrsGenCountNum.Value);
+				VPE.UpdateScramblerSelectors();
 			}
 		}
 

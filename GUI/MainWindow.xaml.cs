@@ -90,7 +90,30 @@ namespace GUI
 			VPESettWin.Show();
 		}
 
-		private void MI_VPE_RotPozReset_Click(object sender, RoutedEventArgs e) => VPE.ResetRotPoz();
+		private void B_VPE_RotPozBack_Click(object sender, RoutedEventArgs e)
+		{
+
+		}
+
+		private void B_VPE_RotPozForw_Click(object sender, RoutedEventArgs e)
+		{
+
+		}
+
+		private void B_VPE_UseSelRotPoz_Click(object sender, RoutedEventArgs e)
+		{
+
+		}
+
+		public void GetRotorPozs(int which = -2)
+		{
+			DataFromGUI.VPE_RotPozStr = VPE.ActiveSett.GetPozitionsString(which);
+		}
+
+		public void SetRotorPozs()
+		{
+
+		}
 		#endregion
 
 		#region NeueDT

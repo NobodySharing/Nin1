@@ -22,9 +22,8 @@
 				</Grid.ColumnDefinitions>
 				<Grid.RowDefinitions>
 					<RowDefinition Height="22 px"/>
-					<RowDefinition Height="22 px"/>
-					<RowDefinition Height="22 px"/>
-					<RowDefinition Height="22 px"/>
+					<RowDefinition Height="55 px"/>
+					<RowDefinition Height="20 px"/>
 					<RowDefinition Height="1*"/>
 				</Grid.RowDefinitions>
 				<Menu Grid.Row="0" Grid.ColumnSpan="3" Height="22">
@@ -40,27 +39,34 @@
 						<MenuItem Header="_Open and use settings" Click="MI_VPE_QuickSettOpen_Click"/>
 						<MenuItem Header="_Save currently used settings to a file" Click="MI_VPE_QuickSettSave_Click"/>
 					</MenuItem>
-					<MenuItem  Header="_Rotor pozitions">
-						<CheckBox Content="_Update starting rotor pozitions after using"/>
-						<MenuItem Header="_Reset rotor pozition counters" Click="MI_VPE_RotPozReset_Click"/>
-					</MenuItem>
 					<MenuItem Header="_Encryption">
 						<MenuItem Header="_Encrypt" Click="MI_VPE_Encrypt_Click"/>
 						<MenuItem Header="_Decrypt" Click="MI_VPE_Decrypt_Click"/>
 					</MenuItem>
 				</Menu>
-				<DockPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" >
-					<TextBlock Text="Rotor pozitions before usage:" VerticalAlignment="Center"/>
-					<TextBox x:Name="TB_VPE_RotPozBefore" Margin="5, 0, 5, 0" Text="{Binding Path=VPE_RotPozBeforeStr, Mode=TwoWay}"/>
-				</DockPanel>
-				<DockPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
-					<TextBlock Text="Rotor pozitions after usage:" VerticalAlignment="Center"/>
-					<TextBox x:Name="TB_VPE_RotPozAfter" Margin="5, 0, 5, 0" Text="{Binding Path=VPE_RotPozAfterStr, Mode=TwoWay}"/>
-				</DockPanel>
-				<TextBlock Grid.Row="3" Grid.Column="0" Text="Plain text" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-				<TextBlock Grid.Row="3" Grid.Column="2" Text="Encrypted text" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-				<TextBox x:Name="TB_VPE_Left" Grid.Column="0" Grid.Row="4" Margin="2" Text="{Binding Path=VPE_PlainStr, Mode=TwoWay}" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"/>
-				<TextBox x:Name="TB_VPE_Right" Grid.Column="2" Grid.Row="4" Margin="2" Text="{Binding Path=VPE_EncrypStr, Mode=TwoWay}" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True"/>
+				<Grid Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="3">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="96 px"/>
+						<ColumnDefinition Width="1*"/>
+						<ColumnDefinition Width="32 px"/>
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="1*"/>
+						<RowDefinition Height="1*"/>
+					</Grid.RowDefinitions>
+					<TextBlock Text="Rotor pozitions:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="2"/>
+					<DockPanel Grid.Row="1" Grid.Column="0" >
+						<Button Name="B_VPE_RotPozBack" Content="←" Padding="4, 2, 4, 4" Margin="2, 2, 1, 2" Click="B_VPE_RotPozBack_Click"/>
+						<Button Name="B_VPE_RotPozForw" Content="→" Padding="4, 2, 4, 4" Margin="1, 2, 1, 2" Click="B_VPE_RotPozForw_Click"/>
+						<TextBox x:Name="TB_VPE_RotPozIdx" Margin="1, 2, 2, 2" MinWidth="4" FontFamily="Bahnschrift" Text="{Binding Path=VPE_SelPozSetStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+					</DockPanel>
+					<TextBox x:Name="TB_VPE_RotPoz" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Margin="2, 2, 2, 2" Text="{Binding Path=VPE_RotPozStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" FontSize="11"/>
+					<Button x:Name="B_VPE_UseSelRotPoz" Content="Use" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Click="B_VPE_UseSelRotPoz_Click"/>
+				</Grid>
+				<TextBlock Grid.Row="2" Grid.Column="0" Text="Plain text" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+				<TextBlock Grid.Row="2" Grid.Column="2" Text="Encrypted text" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+				<TextBox x:Name="TB_VPE_Left" Grid.Column="0" Grid.Row="4" Margin="2" Text="{Binding Path=VPE_PlainStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" FontFamily="Lucida Sans Unicode"/>
+				<TextBox x:Name="TB_VPE_Right" Grid.Column="2" Grid.Row="4" Margin="2" Text="{Binding Path=VPE_EncrypStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" FontFamily="Lucida Sans Unicode"/>
 			</Grid>
 		</TabItem>
 		<TabItem x:Name="TI_NDT" Header="New date–time">

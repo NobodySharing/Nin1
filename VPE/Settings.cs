@@ -3,16 +3,16 @@ using System.Text;
 using System.Collections.Generic;
 using System.Numerics;
 using Common;
-using System.Windows.Media;
+using System.Linq;
 
 namespace VPE
 {
-	/// <summary>Základní sdílená funkcionalita pro nastavení</summary>
+	/// <summary>Shared basic funkcionality for settings classes.</summary>
 	public class Settings_Base
 	{
-		/// <summary>Převede list tabulek na pole bytů. 2 bytové položky.</summary>
-		/// <param name="tables">List tabulek.</param>
-		/// <returns>List bytů představující list tabulek.</returns>
+		/// <summary>Converts tables to byte array.</summary>
+		/// <param name="tables">List of tables.</param>
+		/// <returns>List of bytes representing list of tables.</returns>
 		internal static List<byte> TablesToBytes(List<Table> tables)
 		{
 			List<byte> result = new();
@@ -22,12 +22,12 @@ namespace VPE
 			}
 			return result;
 		}
-		/// <summary>Dekóduje tabulky z bytů (s 2 bytovými položkami), posouvá pozici v sadě bytů.</summary>
-		/// <param name="set">Sada bytů na dekódování.</param>
-		/// <param name="pozition">Pozice v sadě.</param>
-		/// <param name="tableCount">Počet tabulek.</param>
-		/// <param name="limit">Počet položek v tabulce.</param>
-		/// <returns>Sada tabulek.</returns>
+		/// <summary>Decodes the tables from byte array. Shifts the poziton.</summary>
+		/// <param name="set">Byte array to decode.</param>
+		/// <param name="pozition">Pozition in the array.</param>
+		/// <param name="tableCount">Tables count.</param>
+		/// <param name="limit">Table items count. Usulally the size of the codepage.</param>
+		/// <returns>Set of tables.</returns>
 		internal static List<Table> TablesFromBytes(byte[] set, ref int pozition, int tableCount, ushort limit)
 		{
 			List<Table> result = new ();
@@ -38,23 +38,173 @@ namespace VPE
 			return result;
 		}
 	}
-	/// <summary>Rotor part of the settings class. Contains only lists of tables. Designed for multithreaded encryption.</summary>
-	public class Settings_Rotors : Settings_Base
+	/// <summary>Main class for storing and working with settings data for the encryption algorithm.</summary>
+	public class Settings : Settings_Base
 	{
 		/// <summary>All rotors (and their pozitons). Lowest index is the lowest order. It rotates every char.</summary>
 		public List<Table> Rotors { get; private set; } = new();
-		/// <summary>Increments pozitional numbers of all rotors.</summary>
-		public void IncrementPozitions()
+		/// <summary>All swaps (plugboard).</summary>
+		public List<Table> Swaps { get; private set; } = new();
+		/// <summary>Single reflector.</summary>
+		public Table Reflector { get; set; }
+		/// <summary>Table used for scrambling the codepage in the input stage.</summary>
+		public Table InputScrambler { get; set; }
+		/// <summary>Table used for scrambling the codepage in the output stage.</summary>
+		public Table OutputScrambler { get; set; }
+		/// <summary>Constant for fixed shift.</summary>
+		public uint ConstShift { get; set; }
+		/// <summary>Constant for variable shift.</summary>
+		public uint VarShift { get; set; }
+		/// <summary>Minimal length of space between inserted random chars.</summary>
+		public ushort RandCharSpcMin { get; set; }
+		/// <summary>Maximal length of space between inserted random chars.</summary>
+		public ushort RandCharSpcMax { get; set; }
+		/// <summary>Constant A for generator of random numbers, equation y = (ax + b) % m. For calculation of the length of space between inserted random chars.</summary>
+		public PrimeDefinedConstant RandCharConstA { get; set; }
+		/// <summary>Constant B for generator of random numbers, equation y = (ax + b) % m. For calculation of the length of space between inserted random chars.</summary>
+		public PrimeDefinedConstant RandCharConstB { get; set; }
+		/// <summary>Constant M for generator of random numbers, equation y = (ax + b) % m. For calculation of the length of space between inserted random chars.</summary>
+		public PrimeDefinedConstant RandCharConstM { get; set; }
+		/// <summary>A constant for table creation for character switching. Part of the first pair.</summary>
+		public PrimeDefinedConstant SwitchConstA { get; set; }
+		/// <summary>B constant for table creation for character switching. Part of the first pair.</summary>
+		public PrimeDefinedConstant SwitchConstB { get; set; }
+		/// <summary>C constant for table creation for character switching. Part of the second pair.</summary>
+		public PrimeDefinedConstant SwitchConstC { get; set; }
+		/// <summary>D constant for table creation for character switching. Part of the second pair.</summary>
+		public PrimeDefinedConstant SwitchConstD { get; set; }
+		/// <summary>Settings name.</summary>
+		public string Name { get; set; }
+		/// <summary>Index of this settings.</summary>
+		public uint Idx { get; set; }
+		/// <summary>Index of selected set of pozitions (for rotors).</summary>
+		public int SelectedPozitions { get; set; }
+		/// <summary>Smallest size of this class instance. Approximated.</summary>
+		private const int MinSize = 1024;
+		public Settings ()
 		{
-			Rotors[0].Pozition++;
+
+		}
+		/// <summary>Creates a new instance of this class based on loaded data.</summary>
+		/// <param name="file">Data from a file storing this class.</param>
+		public Settings (byte[] file)
+		{
+			int pozition = 0;
+			FromBytes (file, ref pozition);
+		}
+		/// <summary>Creates a new instance of this class based on loaded data. For mass data loading.</summary>
+		/// <param name="file">Data from (part of) a file storing this class.</param>
+		/// <param name="pozition">Pozition in the file.</param>
+		public Settings(byte[] file, ref int pozition)
+		{
+			FromBytes(file, ref pozition);
+		}
+		/// <summary>Adds set of rotor pozitions.</summary>
+		/// <param name="pozitions">List of pozitions. Needs to be the same count as rotors count.</param>
+		/// <returns>False if error.</returns>
+		public bool AddPozitions(List<ushort> pozitions)
+		{
+			if (pozitions is null)
+			{
+				return false;
+			}
+			if (pozitions.Count != Rotors.Count)
+			{
+				return false;
+			}
+			for (int i = 0; i < pozitions.Count; i++)
+			{
+				Rotors[i].Pozitions.Add(pozitions[i]);
+			}
+			return true;
+		}
+		/// <summary>Gets specified pozition set from all rotors.</summary>
+		/// <param name="which">Index of pozitions to get. -1 means the last one, -2 for the active set.</param>
+		/// <returns>Pozition set.</returns>
+		public List<ushort> GetPozitions(int which = -2)
+		{
+			int pozIdx;
+			List<ushort> result = new();
+			if (which < -2)
+			{
+				return result;
+			}
+			else if (which == -2)
+			{
+				pozIdx = SelectedPozitions;
+			}
+			else if (which == -1)
+			{
+				pozIdx = Rotors[0].Pozitions.Count - 1;
+			}
+			else
+			{
+				pozIdx = which;
+			}
+			foreach (Table t in Rotors)
+			{
+				result.Add(t.Pozitions[pozIdx]);
+			}
+			return result;
+		}
+		/// <summary>Removes specified pozition set from all rotors.</summary>
+		/// <param name="which">Index of pozitions to remove. -1 means the last one, -2 for the active set.</param>
+		/// <returns>If it was successful.</returns>
+		public bool RemovePozitions(int which = -2)
+		{
+			int pozIdx;
+			if (which < -2)
+			{
+				return false;
+			}
+			else if (which == -2)
+			{
+				pozIdx = SelectedPozitions;
+			}
+			else if (which == -1)
+			{
+				pozIdx = Rotors[0].Pozitions.Count - 1;
+			}
+			else
+			{
+				pozIdx = which;
+			}
+			foreach (Table t in Rotors)
+			{
+				t.Pozitions.RemoveAt(pozIdx);
+			}
+			return true;
+		}
+		/// <summary>Increments last pozitional numbers of all rotors.</summary>
+		/// <param name="which">Which set of pozitional numbers to increment. -1 for the last ones, -2 for the active set.</param>
+		public void IncrementPozitions(int which = -2)
+		{
+			int pozIdx;
+			if (which < -2)
+			{
+				return;
+			}
+			else if (which == -2)
+			{
+				pozIdx = SelectedPozitions;
+			}
+			else if (which == -1)
+			{
+				pozIdx = Rotors[0].Pozitions.Count - 1;
+			}
+			else
+			{
+				pozIdx = which;
+			}
+			Rotors[0].Pozitions[pozIdx]++;
 			for (int i = 0; i < Rotors.Count; i++)
 			{
-				if (Rotors[i].Pozition >= Codepage.Limit)
+				if (Rotors[i].Pozitions[pozIdx] >= Codepage.Limit)
 				{
-					Rotors[i].Pozition = 0;
+					Rotors[i].Pozitions[pozIdx] = 0;
 					if (i < (Rotors.Count - 1))
 					{
-						Rotors[i + 1].Pozition++;
+						Rotors[i + 1].Pozitions[pozIdx]++;
 					}
 				}
 				else
@@ -63,15 +213,33 @@ namespace VPE
 				}
 			}
 		}
-		/// <summary>Increments rotor pozitions by specified amount.</summary>
+		/// <summary>Increments last rotor pozitional numbers by specified amount.</summary>
 		/// <param name="num">By how much to increment.</param>
-		public void IncrementPozitions(uint num)
+		/// <param name="which">Which set of pozitional numbers to increment. -1 for the last ones, -2 for the active set.</param>
+		public void IncrementPozitions(uint num, int which = -2)
 		{
+			int pozIdx;
+			if (which < -2)
+			{
+				return;
+			}
+			else if (which == -2)
+			{
+				pozIdx = SelectedPozitions;
+			}
+			else if (which == -1)
+			{
+				pozIdx = Rotors[0].Pozitions.Count - 1;
+			}
+			else
+			{
+				pozIdx = which;
+			}
 			foreach (Table t in Rotors)
 			{
-				num += t.Pozition;
-				t.Pozition = (ushort)(num % Codepage.Limit);
-				num -= t.Pozition;
+				num += t.Pozitions[pozIdx];
+				t.Pozitions[pozIdx] = (ushort)(num % Codepage.Limit);
+				num -= t.Pozitions[pozIdx];
 				if (num > 0)
 				{
 					num /= Codepage.Limit;
@@ -82,154 +250,112 @@ namespace VPE
 				}
 			}
 		}
-		/// <summary></summary>
-		/// <returns></returns>
-		public List<ushort> GetPozitions()
+		/// <summary>Increments custom pozitional numbers by specified amount.</summary>
+		/// <param name="pozs">Custom pozitional numbers.</param>
+		/// <param name="num">By how much to increment.</param>
+		public static void IncrementCustomPozitions(ref ushort[] pozs, uint num = 1)
 		{
-			List<ushort> result = new();
-			foreach (Table t in Rotors)
+			for (int i = 0; i < pozs.Length; i++)
 			{
-				result.Add(t.Pozition);
-			}
-			return result;
-		}
-		/// <summary></summary>
-		/// <param name="pozitions"></param>
-		/// <returns></returns>
-		public bool SetPozitions (List<ushort> pozitions)
-		{
-			if (pozitions == null)
-			{
-				return false;
-			}
-			if (pozitions.Count != Rotors.Count)
-			{
-				return false;
-			}
-			for(int i = 0; i < pozitions.Count; i++)
-			{
-				Rotors[i].Pozition = pozitions[i];
-			}
-			return true;
-		}
-		/// <summary>Clones all rotors specified number of times.</summary>
-		/// <param name="copyCount">How many clones to create.</param>
-		/// <returns>Clones.</returns>
-		public Settings_Rotors[] CloneRotors(int copyCount)
-		{
-			Settings_Rotors[] result = new Settings_Rotors[copyCount];
-			for (int i = 0; i < copyCount; i++)
-			{
-				result[i] = CloneRotors();
-			}
-			return result;
-		}
-		/// <summary>Clones this class instance.</summary>
-		/// <returns>Clone.</returns>
-		private Settings_Rotors CloneRotors()
-		{
-			Table[] rotors = new Table[Rotors.Count];
-			for (int i = 0; i < Rotors.Count; i++)
-			{
-				rotors[i] = Rotors[i].Clone();
-			}
-			Settings_Rotors result = new();
-			result.Rotors.AddRange(rotors);
-			return result;
-		}
-	}
-	/// <summary>Main class for storing and working with settings data for the encryption algorithm.</summary>
-	public class Settings : Settings_Rotors
-	{
-		/// <summary>Všechny swapy (plugboard).</summary>
-		public List<Table> Swaps { get; private set; } = new();
-		/// <summary>Jediný reflektor.</summary>
-		public Table Reflector { get; set; }
-		/// <summary>Konstanta pro pevný posun.</summary>
-		public uint ConstShift { get; set; }
-		/// <summary>Konstanta pro proměnný posun.</summary>
-		public uint VarShift { get; set; }
-		/// <summary>Minimální velikost mezery mezi vloženými náhodnými znaky.</summary>
-		public ushort RandCharSpcMin { get; set; }
-		/// <summary>Maximální velikost mezery mezi vloženými náhodnými znaky.</summary>
-		public ushort RandCharSpcMax { get; set; }
-		/// <summary>Konstanta A generátoru náhodných čísel rovnice y = (ax + b) % m. Pro výpočet délky mezery mezi přidanými náhodnými znaky.</summary>
-		public PrimeDefinedConstant RandCharConstA { get; set; }
-		/// <summary>Konstanta B generátoru náhodných čísel rovnice y = (ax + b) % m. Pro výpočet délky mezery mezi přidanými náhodnými znaky.</summary>
-		public PrimeDefinedConstant RandCharConstB { get; set; }
-		/// <summary>Konstanta M generátoru náhodných čísel rovnice y = (ax + b) % m. Pro výpočet délky mezery mezi přidanými náhodnými znaky.</summary>
-		public PrimeDefinedConstant RandCharConstM { get; set; }
-		/// <summary>A constant for table creation for character switching. Part of the first pair.</summary>
-		public PrimeDefinedConstant SwitchConstA { get; set; }
-		/// <summary>B constant for table creation for character switching. Part of the first pair.</summary>
-		public PrimeDefinedConstant SwitchConstB { get; set; }
-		/// <summary>C constant for table creation for character switching. Part of the second pair.</summary>
-		public PrimeDefinedConstant SwitchConstC { get; set; }
-		/// <summary>D constant for table creation for character switching. Part of the second pair.</summary>
-		public PrimeDefinedConstant SwitchConstD { get; set; }
-		/// <summary>Jméno nastavení.</summary>
-		public string Name { get; set; }
-		/// <summary>Index nastavení.</summary>
-		public uint Idx { get; set; }
-		/// <summary>Smallest size of this class instance. Approximated.</summary>
-		private const int MinSize = 1024;
-		public Settings ()
-		{
-
-		}
-		/// <summary>Vytvoří novou instanci třídy na základě načtených dat.</summary>
-		/// <param name="file">Data ze souboru, co ukládá tuto třídu.</param>
-		public Settings (byte[] file)
-		{
-			int pozition = 0;
-			FromBytes (file, ref pozition);
-		}
-		/// <summary>Vytvoří novou instanci třídy na základě načtených dat. Pro načtení mnoha instancí třídy.</summary>
-		/// <param name="file">Data ze souboru, co ukládá tuto třídu.</param>
-		/// <param name="pozition">Pozice v souboru.</param>
-		public Settings(byte[] file, ref int pozition)
-		{
-			FromBytes(file, ref pozition);
-		}
-		/// <summary>Updates starting rotor pozitions to current pozitions.</summary>
-		public void UpdateStartPozitions()
-		{
-			foreach (Table t in Rotors)
-			{
-				t.StartPozition = t.Pozition;
-			}
-		}
-		/// <summary>Aktualizuje pozice rotorů na specifikované.</summary>
-		/// <param name="pozitions">Seznam pozic. Měl by být stejný jak počet rotorů.</param>
-		/// <param name="includeStart">Zahrnout i startovní pozice?</param>
-		/// <returns>False pokud počet pozic je jiný než počet rotorů.</returns>
-		public bool ChangePozitions(List<ushort> pozitions, bool includeStart = false)
-		{
-			if (pozitions is null)
-			{
-				return false;
-			}
-			if (pozitions.Count != Rotors.Count)
-			{
-				return false;
-			}
-			if (includeStart)
-			{
-				for (int i = 0; i < pozitions.Count; i++)
+				num += pozs[i];
+				pozs[i] = (ushort)(num % Codepage.Limit);
+				num -= pozs[i];
+				if (num > 0)
 				{
-					Rotors[i].Pozition = Rotors[i].StartPozition = pozitions[i];
+					num /= Codepage.Limit;
 				}
+				else
+				{
+					break;
+				}
+			}
+		}
+		/// <summary>Gets specified pozition set as a string from all rotors.</summary>
+		/// <param name="which">Index of pozitions to get. -1 means the last one.</param>
+		/// <returns>Pozition set as a string, comma separated. Empty string if error.</returns>
+		public string GetPozitionsString(int which = -2)
+		{
+			int pozIdx;
+			if (which < -2)
+			{
+				return "";
+			}
+			else if (which == -2)
+			{
+				pozIdx = SelectedPozitions;
+			}
+			else if (which == -1)
+			{
+				pozIdx = Rotors[0].Pozitions.Count - 1;
 			}
 			else
 			{
-				for (int i = 0; i < pozitions.Count; i++)
+				pozIdx = which;
+			}
+			List<ushort> pozs = GetPozitions(pozIdx);
+			StringBuilder sb = new();
+			sb = sb.Append(pozs[0]);
+			for (int i = 1; i < pozs.Count; i++)
+			{
+				sb.Append(", ");
+				sb.Append(pozs[i]);
+			}
+			return sb.ToString();
+		}
+		/// <summary>Adds set of rotor pozitions given as a string.</summary>
+		/// <param name="pozs">Comma separated string of valid rotor pozitions containing the same number of pozitions as the number of rotors.</param>
+		/// <returns>False if error.</returns>
+		public bool AddPozitionsUsingString(string pozs)
+		{
+			if (pozs == null)
+			{
+				return false;
+			}
+			if (pozs.Length == 0)
+			{
+				return false;
+			}
+			string[] numsAsTexts = pozs.Split(',');
+			List<ushort> nums = new();
+			foreach (string s in numsAsTexts)
+			{
+				if (s.Length == 0)
 				{
-					Rotors[i].Pozition = pozitions[i];
+					continue;
+				}
+				else
+				{
+					if (ushort.TryParse(s.Trim(), out ushort num))
+					{
+						if (num >= Codepage.Limit)
+						{
+							return false;
+						}
+						else
+						{
+							nums.Add(num);
+						}
+					}
+					else
+					{
+						continue;
+					}
+				}
+			}
+			if (nums.Count != Rotors.Count)
+			{
+				return false;
+			}
+			else
+			{
+				for (int i = 0; i < Rotors.Count; i++)
+				{
+					Rotors[i].Pozitions.Add(nums[i]);
 				}
 			}
 			return true;
 		}
-		/// <summary>Převede celou instanci třídy na pole bytů.</summary>
+		/// <summary>Converts this instance to byte array.</summary>
 		public byte[] ToBytes ()
 		{
 			List<byte> result = new(65536);
@@ -242,6 +368,8 @@ namespace VPE
 			result.AddRange(BitConverter.GetBytes(Swaps.Count));
 			result.AddRange(TablesToBytes(Swaps));
 			result.AddRange(Reflector.ToBytes());
+			result.AddRange(InputScrambler.ToBytes());
+			result.AddRange(OutputScrambler.ToBytes());
 			result.AddRange(BitConverter.GetBytes(ConstShift));
 			result.AddRange(BitConverter.GetBytes(VarShift));
 			result.AddRange(BitConverter.GetBytes(RandCharSpcMin));
@@ -255,9 +383,9 @@ namespace VPE
 			result.AddRange(SwitchConstD.ToBytes());
 			return result.ToArray();
 		}
-		/// <summary>Dekóduje bytové pole na instanci této třídy.</summary>
-		/// <param name="file">Bytové pole.</param>
-		/// <param name="pozition">Pozice v souboru.</param>
+		/// <summary>Converts byte array to instance of this class.</summary>
+		/// <param name="file">Byte array.</param>
+		/// <param name="pozition">Starting pozition in array.</param>
 		private void FromBytes(byte[] file, ref int pozition)
 		{
 			if (file == null)
@@ -283,6 +411,8 @@ namespace VPE
 			pozition += 4;
 			Swaps.AddRange(TablesFromBytes(file, ref pozition, tables, limit));
 			Reflector = new Table (file, ref pozition, limit);
+			InputScrambler = new Table (file, ref pozition, limit);
+			OutputScrambler = new Table(file, ref pozition, limit);
 			ConstShift = BitConverter.ToUInt32(file, pozition);
 			pozition += 4;
 			VarShift = BitConverter.ToUInt32(file, pozition);
@@ -369,14 +499,18 @@ namespace VPE
 			}
 		}
 	}
-	/// <summary>Ukládá množiny tabulek.</summary>
+	/// <summary>Stores sets of tables.</summary>
 	public class TableLibrary : Settings_Base
 	{
-		/// <summary>All rotors (and their pozitons). Lowest index is the lowest order. It rotates every char.</summary>
+		/// <summary>All rotors.</summary>
 		public List<Table> Rotors { get; private set; } = new();
+		/// <summary>All reflectors.</summary>
 		public List<Table> Reflectors { get; private set; } = new();
+		/// <summary>All swaps (plugboards).</summary>
 		public List<Table> Swaps { get; private set; } = new();
-
+		/// <summary>All scramblers.</summary>
+		public List<Table> Scramblers { get; private set; } = new();
+		/// <summary>Creates an empty instance of Table library class.</summary>
 		public TableLibrary ()
 		{
 
@@ -393,7 +527,7 @@ namespace VPE
 			{
 				return;
 			}
-			int pozition = 1;
+			int pozition = 0;
 			ushort lim = BitConverter.ToUInt16(file, pozition);
 			pozition += 2;
 			int tableCount = BitConverter.ToInt32(file, pozition);
@@ -406,12 +540,11 @@ namespace VPE
 			pozition += 4;
 			Swaps.AddRange(TablesFromBytes(file, ref pozition, tableCount, lim));
 		}
-
+		/// <summary>Converts this instance to byte array.</summary>
+		/// <returns>Byte array representing this instance.</returns>
 		public byte[] ToBytes()
 		{
 			List<byte> result = new(65536);
-			bool size = Codepage.Limit <= 256;
-			result.Add(size ? (byte)0 : (byte)1); // Pseudoverzovací číslo: pokud tam je maximálně 256 znaků, budu ukládat čísla z tabulek jako byte, pokud jich je víc, bude to jako ushort.
 			result.AddRange(BitConverter.GetBytes(Codepage.Limit));
 			result.AddRange(BitConverter.GetBytes(Rotors.Count));
 			result.AddRange(TablesToBytes(Rotors));
@@ -419,9 +552,13 @@ namespace VPE
 			result.AddRange(TablesToBytes(Reflectors));
 			result.AddRange(BitConverter.GetBytes(Swaps.Count));
 			result.AddRange(TablesToBytes(Swaps));
+			result.AddRange(BitConverter.GetBytes(Scramblers.Count));
+			result.AddRange(TablesToBytes(Scramblers));
 			return result.ToArray();
 		}
-
+		/// <summary>Gets the IDs of all tables in a selection.</summary>
+		/// <param name="what">Which tables to get IDs from?</param>
+		/// <returns>List of IDs.</returns>
 		public static List<string> GetIDs(List<Table> what)
 		{
 			List<string> result = new();
@@ -431,7 +568,8 @@ namespace VPE
 			}
 			return result;
 		}
-
+		/// <summary>Merges 2 TLs together by appending new one to this one.</summary>
+		/// <param name="newTables">TL to add.</param>
 		public void Merge(TableLibrary newTables)
 		{
 			if (newTables is null)
@@ -453,17 +591,25 @@ namespace VPE
 				reflector.Idx = (uint)Reflectors.Count;
 				Rotors.Add(reflector);
 			}
+			foreach (Table scrambler in newTables.Scramblers)
+			{
+				scrambler.Idx = (uint)Scramblers.Count;
+				Scramblers.Add(scrambler);
+			}
 		}
 		/// <summary>Creates Settings class based on tables selection.</summary>
 		/// <param name="rotors">Which rotors to use?</param>
 		/// <param name="swaps">Which swaps to use?</param>
 		/// <param name="refl">Which reflector to use?</param>
-		/// <returns></returns>
-		public Settings Select (List<ushort> rotors, List<ushort> swaps, int refl)
+		/// <param name="scramblers">Which scramblers to use? Set of 2 nums exactly.</param>
+		/// <returns>Settings class with all the tables filled. The rest is not!</returns>
+		public Settings Select (List<ushort> rotors, List<ushort> swaps, int refl, ushort[] scramblers)
 		{
 			Settings s = new()
 			{
 				Reflector = Reflectors[refl],
+				InputScrambler = Scramblers[scramblers[0]],
+				OutputScrambler = Scramblers[scramblers[1]],
 			};
 			foreach (ushort i in rotors)
 			{
@@ -476,16 +622,17 @@ namespace VPE
 			return s;
 		}
 	}
-	/// <summary>Knihovna nastavení. Slouží k uchovávání množiny nastavení.</summary>
+	/// <summary>Settings library, for storing a set of settings.</summary>
 	public class SettingsLibrary : Settings_Base
 	{
+		/// <summary>Settings library.</summary>
 		public List<Settings> Library { get; private set; } = new();
-
+		/// <summary>Creates a new empty settings library.</summary>
 		public SettingsLibrary()
 		{
 
 		}
-
+		/// <summary>Crates a settings library from a file.</summary>
 		public SettingsLibrary(byte[] file)
 		{
 			int pozition = 0;
@@ -495,7 +642,7 @@ namespace VPE
 				Library.Add(s);
 			}
 		}
-		/// <summary>Znovu zindexuje všechny nastavení.</summary>
+		/// <summary>Reindexes all the settings contained here.</summary>
 		public void ReIndexSetts ()
 		{
 			for (int i = 0; i < Library.Count; i++)
@@ -503,7 +650,7 @@ namespace VPE
 				Library[i].Idx = Convert.ToUInt32(i);
 			}
 		}
-		/// <summary>Převede celou instanci třídy na bytové pole.</summary>
+		/// <summary>Converts this instance to a byte array.</summary>
 		public byte[] ToBytes()
 		{
 			List<byte> result = new(262144);

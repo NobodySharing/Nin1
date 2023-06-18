@@ -44,16 +44,28 @@ namespace VPE
 				// ToDo: everyhting.
 			}
 		}
-		/// <summary>Saves an instance of Settings class.</summary>
+		/// <summary>Saves an instance of settings class. Creates a new file or deletes existing and writes a new one.</summary>
 		/// <param name="what">Settings class.</param>
-		/// <param name="where">Path to a file to be created.</param>
-		public static void Save(Settings what, string where)
+		/// <param name="where">Path to a file.</param>
+		public static void SaveOrUpdate(Settings what, string where)
 		{
-			if (where.EndsWith(FileExtS))
+			FileInfo fi = new(where);
+			if (fi.Exists)
 			{
+				File.Delete(where);
 				File.WriteAllBytes(where, what.ToBytes());
 			}
 			else
+			{
+				if (where.EndsWith(FileExtS))
+				{
+					File.WriteAllBytes(where, what.ToBytes());
+				}
+				else
+				{
+
+				}
+			}
 			{
 				//DirectoryInfo di = new(where);
 				// ToDo: everyhting.
