@@ -28,6 +28,7 @@ namespace VPE
 		{
 			ConvertToNums(Text);
 			ScrambleCharTable(0, true);
+			Differentiate();
 			AddRandomChars();
 			SwitchCharPoz(0);
 			OrderShift();
@@ -46,6 +47,7 @@ namespace VPE
 		{
 			ConvertToNums(Text);
 			ScrambleCharTable(1, false);
+			Undifferentiate();
 			UnSwitchCharPoz(1);
 			RemoveRandomChars();
 			UnVariableShift();
@@ -80,6 +82,30 @@ namespace VPE
 				{
 					Message[i] = table.FindIndexUsingValue(Message[i]);
 				}
+			}
+		}
+		/// <summary></summary>
+		private void Differentiate()
+		{
+			for (int i = 1; i < Message.Count; i++)
+			{
+				Message[i] = ModuloDiff(Message[i - 1], Message[i]);
+			}
+			for (int i = Message.Count - 2; i >= 0; i--)
+			{
+				Message[i] = ModuloDiff(Message[i + 1], Message[i]);
+			}
+		}
+		/// <summary></summary>
+		private void Undifferentiate()
+		{
+			for (int i = Message.Count - 2; i >= 0; i--)
+			{
+				Message[i] = ModuloDiff(Message[i + 1], Message[i]);
+			}
+			for (int i = 1; i < Message.Count; i++)
+			{
+				Message[i] = ModuloDiff(Message[i - 1], Message[i]);
 			}
 		}
 		/// <summary>The main block of encrypting, which can be executed in multiple threads. Decides if that is needed.</summary>

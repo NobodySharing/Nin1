@@ -92,17 +92,32 @@ namespace GUI
 
 		private void B_VPE_RotPozBack_Click(object sender, RoutedEventArgs e)
 		{
-
+			VPE.SelectedPozs--;
+			DataFromGUI.VPE_SelPozSetStr = VPE.GetPozsStrings();
 		}
 
 		private void B_VPE_RotPozForw_Click(object sender, RoutedEventArgs e)
 		{
-
+			VPE.SelectedPozs++;
+			DataFromGUI.VPE_SelPozSetStr = VPE.GetPozsStrings();
 		}
 
 		private void B_VPE_UseSelRotPoz_Click(object sender, RoutedEventArgs e)
 		{
-
+			if (DataFromGUI.VPE_SelPozSetStr is not null)
+			{
+				if (DataFromGUI.VPE_SelPozSetStr != "")
+				{
+					if (int.TryParse(DataFromGUI.VPE_SelPozSetStr, out int idx))
+					{
+						if (idx >= -2 && idx < VPE.ActiveSett.GetRotorPozitionsCount)
+						{
+							VPE.ActiveSett.SelectedPozitions = idx;
+							DataFromGUI.VPE_SelPozSetStr = VPE.ActiveSett.GetPozitionsString(idx);
+						}
+					}
+				}
+			}
 		}
 
 		public void GetRotorPozs(int which = -2)

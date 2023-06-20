@@ -12,6 +12,7 @@ using VPE;
 using Factorizator;
 using NeueDT;
 using DTcalc;
+using System.Security.Policy;
 
 namespace GUI
 {
@@ -24,6 +25,7 @@ namespace GUI
 		public Settings ActiveSett;
 		public Crypto C;
 		public bool Overwrite = false;
+		public int SelectedPozs = 0;
 		#endregion
 		#region Classes for binding
 		internal C_VPE_Sett DataFromGUI_Sett = new();
@@ -76,13 +78,14 @@ namespace GUI
 			Generator.UpdateSeed(DateTime.Now.Ticks);
 			for (uint i = 0; i < count; i++)
 			{
-				TL.Rotors.Add(Generator.GEnerateTableWithoutPoz((ushort)TL.Scramblers.Count));
+				TL.Rotors.Add(Generator.GenerateTableWithoutPoz((ushort)TL.Scramblers.Count));
 			}
 		}
 		/// <summary>Generates complete settings, adds them to library and sets the GUI accordingly.</summary>
 		public void GenerateComplete()
 		{
-			ActiveSett = Generator.GenerateSetts(new uint[] { (uint)TL.Rotors.Count, (uint)TL.Swaps.Count, (uint)TL.Reflectors.Count, (uint)TL.Scramblers.Count, (uint)SL.Library.Count });
+			string name = DataFromGUI_Sett.NameStr ?? "";
+			ActiveSett = Generator.GenerateSetts(new uint[] { (uint)TL.Rotors.Count, (uint)TL.Swaps.Count, (uint)TL.Reflectors.Count, (uint)TL.Scramblers.Count, (uint)SL.Library.Count }, name);
 			AddSettsToLib();
 			UpdateSettingsSelector();
 		}
@@ -191,7 +194,8 @@ namespace GUI
 
 		public void SettGen()
 		{
-			ActiveSett = Generator.GenerateSetts(new uint[] { (uint)TL.Rotors.Count, (uint)TL.Swaps.Count, (uint)TL.Reflectors.Count, (uint)SL.Library.Count });
+			string name = DataFromGUI_Sett.NameStr ?? "";
+			ActiveSett = Generator.GenerateSetts(new uint[] { (uint)TL.Rotors.Count, (uint)TL.Swaps.Count, (uint)TL.Reflectors.Count, (uint)SL.Library.Count }, name);
 			AddSettsToLib();
 		}
 		/// <summary>Sets the active settings using what was selected in settings selector.</summary>
@@ -322,7 +326,13 @@ namespace GUI
 
 		public void UpdateScramblerSelectors()
 		{
-
+			List<string> scramblersNums = new();
+			foreach (Table scrambler in TL.Scramblers)
+			{
+				scramblersNums.Add(scrambler.Idx.ToString());
+			}
+			DataFromGUI_InScr.ItemsStrs = scramblersNums;
+			DataFromGUI_OutScr.ItemsStrs = scramblersNums;
 		}
 
 		public void UpdateSettingsSelector()
@@ -334,6 +344,18 @@ namespace GUI
 			}
 			DataFromGUI_SettSel.ItemsStrs.Clear();
 			DataFromGUI_SettSel.ItemsStrs = names;
+		}
+
+		public string GetPozsStrings(int idx = -3)
+		{
+			if (ActiveSett is not null)
+			{
+				return ActiveSett.GetPozitionsString(idx == -3 ? SelectedPozs : idx);
+			}
+			else
+			{
+				return "";
+			}
 		}
 
 		public void RenameSelSett()

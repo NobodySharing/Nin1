@@ -79,6 +79,14 @@ namespace VPE
 		public uint Idx { get; set; }
 		/// <summary>Index of selected set of pozitions (for rotors).</summary>
 		public int SelectedPozitions { get; set; }
+		/// <summary>Gets how many pozitions sets rotors have. All rotors should have the same.</summary>
+		public int GetRotorPozitionsCount
+		{
+			get
+			{
+				return Rotors[0].Pozitions.Count;
+			}
+		}
 		/// <summary>Smallest size of this class instance. Approximated.</summary>
 		private const int MinSize = 1024;
 		public Settings ()
@@ -271,7 +279,7 @@ namespace VPE
 			}
 		}
 		/// <summary>Gets specified pozition set as a string from all rotors.</summary>
-		/// <param name="which">Index of pozitions to get. -1 means the last one.</param>
+		/// <param name="which">Index of pozitions to get. -1 means the last one. -2 for selected ones.</param>
 		/// <returns>Pozition set as a string, comma separated. Empty string if error.</returns>
 		public string GetPozitionsString(int which = -2)
 		{

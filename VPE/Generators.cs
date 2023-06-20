@@ -20,14 +20,14 @@ namespace VPE
 		/// <summary>Generates complete instance of Settings class.</summary>
 		/// <param name="idxs">Set of indexies. 0: rotors, 1: swaps, 2: refls, 3: scramblers, 4: setts.</param>
 		/// <returns>Settings.</returns>
-		public Settings GenerateSetts(uint[] idxs)
+		public Settings GenerateSetts(uint[] idxs, string name = "")
 		{
 			PrimeDefinedConstant[] ABM = GenerateABM();
 			PrimeDefinedConstant[] ABCD = GenerateABCD();
 			ushort[] spaces = GenerateSpaceMinMax();
 			Settings settings = new()
 			{
-				Name = DateTime.Now.ToString("u") + " (automatically generated)",
+				Name = name == "" ? DateTime.Now.ToString("u") + " (automatically generated)" : name,
 				Idx = idxs[4],
 				Reflector = GeneratePairs(idxs[2]),
 				RandCharConstA = ABM[0],
@@ -44,7 +44,6 @@ namespace VPE
 			for (int i = 0; i < count; i++)
 			{
 				Table t = GenerateTable((uint)(idxs[0] + i));
-				t.Pozitions.Add(GenerateNum());
 				settings.Rotors.Add(t);
 			}
 			count = R.Next(6, 14);
@@ -74,42 +73,19 @@ namespace VPE
 			int remainder = (int)(ms % int.MaxValue);
 			R = new Random(remainder);
 		}
-		/// <summary>Vygeneruje tabulku. Pro rotory.</summary>
-		/// <param name="index">Index tabulky, použit jako pseudonázev.</param>
-		/// <returns>Výsledná tabulka.</returns>
+		/// <summary>Generates full non-paired table with pozitions.</summary>
+		/// <param name="index">Index of this table.</param>
+		/// <returns>Table. Rotor.</returns>
 		public Table GenerateTable(uint index)
 		{
-			Table T = new()
-			{
-				Idx = index,
-				HasPozition = true,
-			};
-			List<ushort> Remains = new();
-			for (ushort u = 0; u < Limit; u++)
-			{
-				Remains.Add(u);
-			}
-			int RandIndex;
-			ushort Selected;
-			for (int i = 0; i < Limit; i++)
-			{
-				if (i < Limit - 2)
-				{
-					RandIndex = R.Next(Remains.Count);
-				}
-				else
-				{
-					RandIndex = 0;
-				}
-				Selected = Remains[RandIndex];
-				T.MainTable.Add(Selected);
-				Remains.Remove(Selected);
-			}
+			Table T = GenerateTableWithoutPoz(index);
+			T.HasPozition = true;
+			T.Pozitions.Add(GenerateNum());
 			return T;
 		}
 		/// <summary>Vygeneruje párovou tabulku, na reflektory.</summary>
-		/// <param name="index">Index tabulky, použit jako pseudonázev.</param>
-		/// <returns>Výsledná tabulka.</returns>
+		/// <param name="index">Index of this table.</param>
+		/// <returns>Table. Reflector.</returns>
 		public Table GeneratePairs(uint index)
 		{
 			Table T = new()
@@ -140,9 +116,9 @@ namespace VPE
 			return T;
 		}
 		/// <summary>Vygeneruje párovou tabulku, kde nejsou všechny hodnoty. Na swapy.</summary>
-		/// <param name="index">Index tabulky, použit jako pseudonázev.</param>
+		/// <param name="index">Index of this table.</param>
 		/// <param name="fillPortion">Jaký podíl záměn má být vyplněn? Nevyplněné položky nebudou zaměňovány.</param>
-		/// <returns>Výsledná tabulka.</returns>
+		/// <returns>Table. Swap.</returns>
 		public Table GeneratePairsWithSkips(uint index, double fillPortion = 0.65234375)
 		{
 			Table T = new()
@@ -183,15 +159,37 @@ namespace VPE
 		}
 		/// <summary>Generates full non-paired table without pozitions.</summary>
 		/// <param name="index">Index of this table.</param>
-		/// <returns>Table.</returns>
-		public Table GEnerateTableWithoutPoz(uint index)
+		/// <returns>Table. Scrambler.</returns>
+		public Table GenerateTableWithoutPoz(uint index)
 		{
 			Table t = new()
 			{
 				Idx = index,
 				HasPozition = false,
+				IsPaired = false,
+				IsIncomplete = false,
 			};
-
+			List<ushort> Remains = new();
+			for (ushort u = 0; u < Limit; u++)
+			{
+				Remains.Add(u);
+			}
+			int RandIndex;
+			ushort Selected;
+			for (int i = 0; i < Limit; i++)
+			{
+				if (i < Limit - 2)
+				{
+					RandIndex = R.Next(Remains.Count);
+				}
+				else
+				{
+					RandIndex = 0;
+				}
+				Selected = Remains[RandIndex];
+				t.MainTable.Add(Selected);
+				Remains.Remove(Selected);
+			}
 			return t;
 		}
 		/// <summary>Vygeneruje náhodné číslo od 0 do Codepage.Limit.</summary>
