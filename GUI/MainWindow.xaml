@@ -58,15 +58,15 @@
 					<DockPanel Grid.Row="1" Grid.Column="0" >
 						<Button Name="B_VPE_RotPozBack" Content="←" Padding="4, 2, 4, 4" Margin="2, 2, 1, 2" Click="B_VPE_RotPozBack_Click"/>
 						<Button Name="B_VPE_RotPozForw" Content="→" Padding="4, 2, 4, 4" Margin="1, 2, 1, 2" Click="B_VPE_RotPozForw_Click"/>
-						<TextBox x:Name="TB_VPE_RotPozIdx" Margin="1, 2, 2, 2" MinWidth="4" FontFamily="Bahnschrift" Text="{Binding Path=VPE_SelPozSetStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+						<TextBox x:Name="TB_VPE_RotPozIdx" Margin="1, 2, 2, 2" MinWidth="4" FontFamily="Bahnschrift" Text="{Binding Path=VPE_SelPozSetStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="16"/>
 					</DockPanel>
-					<TextBox x:Name="TB_VPE_RotPoz" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Margin="2, 2, 2, 2" Text="{Binding Path=VPE_RotPozStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" FontSize="11"/>
-					<Button x:Name="B_VPE_UseSelRotPoz" Content="Use" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Click="B_VPE_UseSelRotPoz_Click"/>
+					<TextBox x:Name="TB_VPE_RotPoz" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Margin="2, 2, 2, 2" Text="{Binding Path=VPE_RotPozStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" FontFamily="Lucida Console"/>
+					<Button x:Name="B_VPE_UseSelRotPoz" Content="Use" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Click="B_VPE_UseSelPozSet_Click"/>
 				</Grid>
 				<TextBlock Grid.Row="2" Grid.Column="0" Text="Plain text" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 				<TextBlock Grid.Row="2" Grid.Column="2" Text="Encrypted text" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-				<TextBox x:Name="TB_VPE_Left" Grid.Column="0" Grid.Row="4" Margin="2" Text="{Binding Path=VPE_PlainStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" FontFamily="Lucida Sans Unicode"/>
-				<TextBox x:Name="TB_VPE_Right" Grid.Column="2" Grid.Row="4" Margin="2" Text="{Binding Path=VPE_EncrypStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" FontFamily="Lucida Sans Unicode"/>
+				<TextBox x:Name="TB_VPE_Left" Grid.Column="0" Grid.Row="4" Margin="2" Text="{Binding Path=VPE_PlainStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" FontFamily="Lucida Sans Unicode" FontSize="14"/>
+				<TextBox x:Name="TB_VPE_Right" Grid.Column="2" Grid.Row="4" Margin="2" Text="{Binding Path=VPE_EncrypStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" FontFamily="Lucida Sans Unicode" FontSize="14"/>
 			</Grid>
 		</TabItem>
 		<TabItem x:Name="TI_NDT" Header="New date–time">

@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using Microsoft.Win32;
 using System.Windows.Media;
 using System.Collections.ObjectModel;
+using System.Security.Policy;
 
 using VPE;
 using Factorizator;
 using NeueDT;
 using DTcalc;
-using System.Security.Policy;
 
 namespace GUI
 {
@@ -125,6 +125,7 @@ namespace GUI
 			SynchronizeSwapDataForGUI();
 			SynchronizeRotorDataForGUI();
 			SynchronizeReflectorDataForGUI();
+			SynchronizeScramblerDataForGUI();
 		}
 
 		public void UpdateActiveSettsFromGUI()
@@ -190,13 +191,6 @@ namespace GUI
 		public static void SaveMsgFile(string text)
 		{
 			FileHandling.SaveText(SaveFile(TXT_filter), text);
-		}
-
-		public void SettGen()
-		{
-			string name = DataFromGUI_Sett.NameStr ?? "";
-			ActiveSett = Generator.GenerateSetts(new uint[] { (uint)TL.Rotors.Count, (uint)TL.Swaps.Count, (uint)TL.Reflectors.Count, (uint)SL.Library.Count }, name);
-			AddSettsToLib();
 		}
 		/// <summary>Sets the active settings using what was selected in settings selector.</summary>
 		public void SetUsingSelSettName()
@@ -283,6 +277,15 @@ namespace GUI
 			List<string> refls = TableLibrary.GetIDs(TL.Reflectors);
 			DataFromGUI_Refl.ItemsStrs = refls;
 			DataFromGUI_Refl.SelectedStr = ActiveSett.Reflector.Idx.ToString();
+		}
+
+		public void SynchronizeScramblerDataForGUI()
+		{
+			List<string> scrs = TableLibrary.GetIDs(TL.Scramblers);
+			DataFromGUI_InScr.ItemsStrs = scrs;
+			DataFromGUI_InScr.SelectedStr = ActiveSett.InputScrambler.Idx.ToString();
+			DataFromGUI_OutScr.ItemsStrs = scrs;
+			DataFromGUI_OutScr.SelectedStr = ActiveSett.OutputScrambler.Idx.ToString();
 		}
 
 		public void UpdateRotorSelectors()
@@ -476,6 +479,8 @@ namespace GUI
 			TL.Reflectors.Add(ActiveSett.Reflector);
 			TL.Rotors.AddRange(ActiveSett.Rotors);
 			TL.Swaps.AddRange(ActiveSett.Swaps);
+			TL.Scramblers.Add(ActiveSett.InputScrambler);
+			TL.Scramblers.Add(ActiveSett.OutputScrambler);
 			DataFromGUI_SettSel.ItemsStrs.Add(ActiveSett.Name);
 		}
 		/// <summary>Adds supplied settings to library.</summary>

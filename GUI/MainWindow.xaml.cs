@@ -78,7 +78,7 @@ namespace GUI
 
 		private void MI_VPE_SaveUneMsgFile_Click(object sender, RoutedEventArgs e) => VPE_VM.SaveMsgFile(DataFromGUI.VPE_PlainStr);
 
-		private void MI_VPE_QuickSettGen_Click(object sender, RoutedEventArgs e) => VPE.SettGen();
+		private void MI_VPE_QuickSettGen_Click(object sender, RoutedEventArgs e) => VPE.GenerateComplete();
 
 		private void MI_VPE_QuickSettSave_Click(object sender, RoutedEventArgs e) => VPE.SaveSettings();
 
@@ -92,17 +92,33 @@ namespace GUI
 
 		private void B_VPE_RotPozBack_Click(object sender, RoutedEventArgs e)
 		{
-			VPE.SelectedPozs--;
-			DataFromGUI.VPE_SelPozSetStr = VPE.GetPozsStrings();
+			if (VPE.SelectedPozs == 0)
+			{
+				VPE.SelectedPozs = VPE.ActiveSett.GetRotorPozitionsCount - 1;
+			}
+			else
+			{
+				VPE.SelectedPozs--;
+			}
+			DataFromGUI.VPE_SelPozSetStr = VPE.SelectedPozs.ToString();
+			DisplayRotorPozs();
 		}
 
 		private void B_VPE_RotPozForw_Click(object sender, RoutedEventArgs e)
 		{
-			VPE.SelectedPozs++;
-			DataFromGUI.VPE_SelPozSetStr = VPE.GetPozsStrings();
+			if (VPE.SelectedPozs == VPE.ActiveSett.GetRotorPozitionsCount - 1)
+			{
+				VPE.SelectedPozs = 0;
+			}
+			else
+			{
+				VPE.SelectedPozs++;
+			}
+			DataFromGUI.VPE_SelPozSetStr = VPE.SelectedPozs.ToString();
+			DisplayRotorPozs();
 		}
 
-		private void B_VPE_UseSelRotPoz_Click(object sender, RoutedEventArgs e)
+		private void B_VPE_UseSelPozSet_Click(object sender, RoutedEventArgs e)
 		{
 			if (DataFromGUI.VPE_SelPozSetStr is not null)
 			{
@@ -112,17 +128,17 @@ namespace GUI
 					{
 						if (idx >= -2 && idx < VPE.ActiveSett.GetRotorPozitionsCount)
 						{
-							VPE.ActiveSett.SelectedPozitions = idx;
-							DataFromGUI.VPE_SelPozSetStr = VPE.ActiveSett.GetPozitionsString(idx);
+							VPE.ActiveSett.SelectedPozitions = VPE.SelectedPozs = idx;
+							DisplayRotorPozs();
 						}
 					}
 				}
 			}
 		}
 
-		public void GetRotorPozs(int which = -2)
+		public void DisplayRotorPozs(int which = -3)
 		{
-			DataFromGUI.VPE_RotPozStr = VPE.ActiveSett.GetPozitionsString(which);
+			DataFromGUI.VPE_RotPozStr = VPE.GetPozsStrings(which);
 		}
 
 		public void SetRotorPozs()

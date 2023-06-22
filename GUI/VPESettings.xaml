@@ -5,7 +5,7 @@
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:local="clr-namespace:GUI"
 		mc:Ignorable="d"
-		Title="VPE Settings composer" Height="800" Width="1280">
+		Title="VPE Settings composer" Height="860" Width="1280">
 	<Window.Resources>
 		<local:C_VPE_Sett x:Key="DataFromGUI"/>
 		<local:C_VPE_ComboBox x:Key="DataFromGUI_ComboBox"/>
@@ -81,7 +81,7 @@
 				<RowDefinition Height="4*"/>
 				<RowDefinition Height="3*"/>
 				<RowDefinition Height="3*"/>
-				<RowDefinition Height="21*"/>
+				<RowDefinition Height="20*"/>
 			</Grid.RowDefinitions>
 			<GroupBox Grid.Row="0" Header="Reflector and scramblers">
 				<StackPanel x:Name="SP_Refls">

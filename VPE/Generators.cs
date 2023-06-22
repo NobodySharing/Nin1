@@ -30,6 +30,8 @@ namespace VPE
 				Name = name == "" ? DateTime.Now.ToString("u") + " (automatically generated)" : name,
 				Idx = idxs[4],
 				Reflector = GeneratePairs(idxs[2]),
+				InputScrambler = GenerateTableWithoutPoz(idxs[3]),
+				OutputScrambler = GenerateTableWithoutPoz(idxs[3] + 1),
 				RandCharConstA = ABM[0],
 				RandCharConstB = ABM[1],
 				RandCharConstM = ABM[2],
@@ -40,13 +42,13 @@ namespace VPE
 				RandCharSpcMin = spaces[0],
 				RandCharSpcMax = spaces[1],
 			};
-			int count = R.Next(12, 42);
+			int count = R.Next(16, 48);
 			for (int i = 0; i < count; i++)
 			{
 				Table t = GenerateTable((uint)(idxs[0] + i));
 				settings.Rotors.Add(t);
 			}
-			count = R.Next(6, 14);
+			count = R.Next(8, 16);
 			for (int i = 0; i < count; i++)
 			{
 				Table t = GeneratePairsWithSkips((uint)(idxs[1] + i), GenerateDoubleInRange(9d / 16d, 950d / 1024d));

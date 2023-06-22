@@ -26,7 +26,7 @@ namespace VPE
 		/// <summary>Is this table filled only partially (unfilled are marked as Blank). No by default.</summary>
 		public bool IsIncomplete { get; set; } = false;
 		/// <summary>If relevant, this is the list of pozitions, it is updated with each en/decryption. 0 is starting, last is the last used.</summary>
-		public List<ushort> Pozitions { get; set; }
+		public List<ushort> Pozitions { get; set; } = new();
 		/// <summary>Index of this table, for searchability in a large pool of tables.</summary>
 		public uint Idx { get; set; }
 		/// <summary>Creation of an empty table.</summary>
