@@ -18,7 +18,6 @@ using Common;
 
 namespace GUI
 {
-	public delegate void SubmitVPESett();
 	public partial class MainWindow : Window
 	{
 		
@@ -36,7 +35,6 @@ namespace GUI
 		#region VPE
 		private VPE_VM VPE = new();
 		VPESettingsComp VPESettWin;
-		public event SubmitVPESett Submit;
 		private void MI_VPE_Encrypt_Click(object sender, RoutedEventArgs e)
 		{
 			if (VPE.ActiveSett is not null)
@@ -93,9 +91,15 @@ namespace GUI
 		{
 			VPESettWin = new(ref VPE);
 			VPESettWin.Show();
+			VPESettWin.VPESubmitSett += VPESettWin_VPESubmitSett;
 		}
 
-		private void B_VPE_RotPozBack_Click(object sender, RoutedEventArgs e)
+		private void VPESettWin_VPESubmitSett()
+		{
+			DisplayRotorPozs(VPE.SelectedPozs);
+		}
+
+		private void B_VPE_RotPozMinus_Click(object sender, RoutedEventArgs e)
 		{
 			if (VPE.SelectedPozs == 0)
 			{
@@ -105,11 +109,10 @@ namespace GUI
 			{
 				VPE.SelectedPozs--;
 			}
-			DataFromGUI.VPE_SelPozSetStr = VPE.SelectedPozs.ToString();
-			DisplayRotorPozs();
+			DisplayRotorPozs(VPE.SelectedPozs);
 		}
 
-		private void B_VPE_RotPozForw_Click(object sender, RoutedEventArgs e)
+		private void B_VPE_RotPozPlus_Click(object sender, RoutedEventArgs e)
 		{
 			if (VPE.SelectedPozs == VPE.ActiveSett.GetLastRotorPozitionsIdx)
 			{
@@ -119,17 +122,16 @@ namespace GUI
 			{
 				VPE.SelectedPozs++;
 			}
-			DataFromGUI.VPE_SelPozSetStr = VPE.SelectedPozs.ToString();
-			DisplayRotorPozs();
+			DisplayRotorPozs(VPE.SelectedPozs);
 		}
 
 		private void B_VPE_UseSelPozSet_Click(object sender, RoutedEventArgs e)
 		{
-			if (DataFromGUI.VPE_SelPozSetStr is not null)
+			if (DataFromGUI.VPE_RotPozIdxStr is not null)
 			{
-				if (DataFromGUI.VPE_SelPozSetStr != "")
+				if (DataFromGUI.VPE_RotPozIdxStr != "")
 				{
-					if (int.TryParse(DataFromGUI.VPE_SelPozSetStr, out int idx))
+					if (int.TryParse(DataFromGUI.VPE_RotPozIdxStr, out int idx))
 					{
 						if (idx >= -2 && idx <= VPE.ActiveSett.GetLastRotorPozitionsIdx)
 						{
@@ -141,33 +143,33 @@ namespace GUI
 			}
 		}
 
+		private void B_VPE_RemSelRotPoz_Click(object sender, RoutedEventArgs e)
+		{
+
+		}
+
 		public void DisplayRotorPozs(int which = -2)
 		{
 			DataFromGUI.VPE_RotPozStr = VPE.GetPozsStrings(which);
 			if (which < -2)
 			{
-				DataFromGUI.VPE_SelPozSetStr = "";
+				DataFromGUI.VPE_RotPozIdxStr = "";
 			}
 			else if (which == -2)
 			{
-				DataFromGUI.VPE_SelPozSetStr = (VPE.ActiveSett.SelectedPozitions).ToString();
+				DataFromGUI.VPE_RotPozIdxStr = (VPE.ActiveSett.SelectedPozitions).ToString();
 			}
 			else if (which == -1)
 			{
-				DataFromGUI.VPE_SelPozSetStr = (VPE.ActiveSett.GetLastRotorPozitionsIdx).ToString();
+				DataFromGUI.VPE_RotPozIdxStr = (VPE.ActiveSett.GetLastRotorPozitionsIdx).ToString();
 			}
 			else
 			{
-				DataFromGUI.VPE_SelPozSetStr = which.ToString();
+				DataFromGUI.VPE_RotPozIdxStr = which.ToString();
 			}
 		}
 
-		protected virtual void OnSubmitVPESett()
-		{
-			Submit?.Invoke();
-		}
-
-		public void SetRotorPozs()
+		public void AddRotorPozs()
 		{
 			VPE.ActiveSett.AddPozitionsUsingString(DataFromGUI.VPE_RotPozStr);
 		}

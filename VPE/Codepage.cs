@@ -5,7 +5,8 @@ namespace VPE
 {
 	public static class Codepage
 	{
-		public static readonly List <string> CharSet = new()
+		/// <summary>Array of allowed chars, the codepage. The basis of everything. Char count MUST be divisible by 2, for paired tables.</summary>
+		public static readonly string[] CharSet =
 		{
 			" ", // Ordinary space
 			"A", // Uppercase latin letters, with diacritics.
@@ -453,7 +454,6 @@ namespace VPE
 			"↕",
 			"•",
 			"○",
-			"◦",
 			"✓",
 			"✗",
 			"♫",
@@ -489,7 +489,7 @@ namespace VPE
 			"\t", // Tab char.
 			"\r\n", // New line. Done like this by design.
 		};
-		private static readonly ushort LimitV = Convert.ToUInt16(CharSet.Count);
+		private static readonly ushort LimitV = Convert.ToUInt16(CharSet.Length);
 		/// <summary>Gets the number of chars in the codepage. Currently 480.</summary>
 		public static ushort Limit
 		{

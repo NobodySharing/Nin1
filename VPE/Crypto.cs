@@ -12,7 +12,7 @@ namespace VPE
 	public class Crypto
 	{
 		private readonly Settings Sett;
-		private const int MultithreadingThreshold = 16384; // Threshold for message length. Longer messages will get processed multithreadly.
+		private const int MultithreadingThreshold = 32768; // Threshold for message length. Longer messages will get processed multithreadingly.
 		/// <summary>Set of numbers representing the message. My working memory.</summary>
 		private List<ushort> Message;
 		/// <summary>Initializes a new instance.</summary>
@@ -26,6 +26,7 @@ namespace VPE
 		/// <returns>Encrypted text.</returns>
 		public string Encypt(string Text)
 		{
+			Sett.DuplicateAndSetToActivePozitions(Sett.SelectedPozitions);
 			ConvertToNums(Text);
 			ScrambleCharTable(0, true);
 			Differentiate();
@@ -45,6 +46,7 @@ namespace VPE
 		/// <returns>Decrypted text.</returns>
 		public string Decypt(string Text)
 		{
+			Sett.DuplicateAndSetToActivePozitions(Sett.SelectedPozitions);
 			ConvertToNums(Text);
 			ScrambleCharTable(1, false);
 			Undifferentiate();
@@ -84,7 +86,7 @@ namespace VPE
 				}
 			}
 		}
-		/// <summary></summary>
+		/// <summary>Does the differentiation. Forward and then backward.</summary>
 		private void Differentiate()
 		{
 			for (int i = 1; i < Message.Count; i++)
@@ -96,7 +98,7 @@ namespace VPE
 				Message[i] = ModuloDiff(Message[i + 1], Message[i]);
 			}
 		}
-		/// <summary></summary>
+		/// <summary>Undoes the differentiation.</summary>
 		private void Undifferentiate()
 		{
 			for (int i = Message.Count - 2; i >= 0; i--)
@@ -184,47 +186,47 @@ namespace VPE
 				Message.AddRange(part);
 			}
 		}
-		/// <summary>Zkonvertuje textovou zprávu na číselnou reprezentaci podle tabulky znaků.</summary>
-		/// <param name="Text">Textová zpráva.</param>
+		/// <summary>Converts text message to set of numbers using the codepage.</summary>
+		/// <param name="Text">Text message.</param>
 		private void ConvertToNums(string Text)
 		{
 			Message = new(Text.Length);
 			for (int i = 0; i < Text.Length; i++)
 			{
-				char C = Text[i]; // Současný znak bokem.
-				char N = i == (Text.Length - 1)? '\0' : Text[i + 1]; // Následující znak. Pokud jsem na konci, dávám \0, jako znamení toho stavu.
-				if (C == '\r')
+				char Ch = Text[i];
+				char N = i == (Text.Length - 1)? '\0' : Text[i + 1];
+				if (Ch == '\r')
 				{
 					if ((N == '\n') || (N == '\0'))
 					{
-						Message.Add((ushort)Codepage.CharSet.IndexOf("\r\n"));
+						Message.Add((ushort)Array.IndexOf(Codepage.CharSet, "\r\n"));
 						i++;
 						continue;
 					}
 					else
 					{
-						Message.Add((ushort)Codepage.CharSet.IndexOf("\r\n"));
+						Message.Add((ushort)Array.IndexOf(Codepage.CharSet, "\r\n"));
 						continue;
 					}
 				}
-				else if (C == '\n')
+				else if (Ch == '\n')
 				{
-					Message.Add((ushort)Codepage.CharSet.IndexOf("\r\n"));
+					Message.Add((ushort)Array.IndexOf(Codepage.CharSet, "\r\n"));
 					continue;
 				}
-				int index = Codepage.CharSet.IndexOf(Convert.ToString(C));
+				int index = Array.IndexOf(Codepage.CharSet, Convert.ToString(Ch));
 				if (index >= 0)
 				{
 					Message.Add((ushort)index);
 				}
 				else
-				{ // Pokud znak neznám, přeskakuji ho.
+				{
 					continue;
 				}
 			}
 		}
-		/// <summary>Převede sadu čísel na text.</summary>
-		/// <returns>Text.</returns>
+		/// <summary>Converts set of numbers to text message using the codepage.</summary>
+		/// <returns>Text message.</returns>
 		private string ConvertToString()
 		{
 			StringBuilder SB = new();

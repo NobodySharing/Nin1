@@ -104,7 +104,7 @@ namespace GUI
 				swaps.Add(swap.SelectedNum.Value);
 			}
 			ActiveSett = TL.Select(rotors, swaps, DataFromGUI_Refl.SelectedNum.Value, new ushort[] { DataFromGUI_InScr.SelectedNum.Value, DataFromGUI_OutScr.SelectedNum.Value });
-			ActiveSett.AddPozitions(pozs);
+			_ = ActiveSett.AddPozitions(pozs);
 			ActiveSett.Name = DataFromGUI_Sett.NameStr;
 			ActiveSett.ConstShift = DataFromGUI_Sett.ConstShiftNum.Value;
 			ActiveSett.VarShift = DataFromGUI_Sett.VarShiftNum.Value;

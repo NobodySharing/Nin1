@@ -4,7 +4,7 @@
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:local="clr-namespace:GUI"
-		mc:Ignorable="d"
+		mc:Ignorable="d" WindowStartupLocation="CenterOwner"
 		Title="VPE Settings composer" Height="860" Width="1280">
 	<Window.Resources>
 		<local:C_VPE_Sett x:Key="DataFromGUI"/>

@@ -107,6 +107,32 @@ namespace VPE
 		{
 			FromBytes(file, ref pozition);
 		}
+		/// <summary>Duplicates selected pozition set and set this duplicite pozition set as active (selected).</summary>
+		/// <param name="which">Which pozition set to duplicate and activate? -1 means the last one, -2 for the active set.</param>
+		public void DuplicateAndSetToActivePozitions(int which = -2)
+		{
+			int pozIdx;
+			if (which < -2)
+			{
+				return;
+			}
+			else if (which == -2)
+			{
+				pozIdx = SelectedPozitions;
+			}
+			else if (which == -1)
+			{
+				pozIdx = GetLastRotorPozitionsIdx;
+			}
+			else
+			{
+				pozIdx = which;
+			}
+			foreach (Table rotor in Rotors)
+			{
+				rotor.Pozitions.Add(rotor.Pozitions[pozIdx]);
+			}
+		}
 		/// <summary>Adds set of rotor pozitions.</summary>
 		/// <param name="pozitions">List of pozitions. Needs to be the same count as rotors count.</param>
 		/// <returns>False if error.</returns>
@@ -120,11 +146,28 @@ namespace VPE
 			{
 				return false;
 			}
+			if (DoesContainPozitions(pozitions))
+			{
+				return true;
+			}
 			for (int i = 0; i < pozitions.Count; i++)
 			{
 				Rotors[i].Pozitions.Add(pozitions[i]);
 			}
 			return true;
+		}
+		/// <summary>Check, if the supplied pozition set is already among existing rotor pozitions.</summary>
+		/// <param name="pozitions">Pozition set to check.</param>
+		/// <returns>Presence of supplied pozition set among existing rotor pozitions.</returns>
+		private bool DoesContainPozitions(List<ushort> pozitions)
+		{
+			bool result = true;
+			for(int i = 0; i <= GetLastRotorPozitionsIdx; i++)
+			{
+				List<ushort> existing = GetPozitions(i);
+				result |= existing == pozitions;
+			}
+			return result;
 		}
 		/// <summary>Gets specified pozition set from all rotors.</summary>
 		/// <param name="which">Index of pozitions to get. -1 means the last one, -2 for the active set.</param>
@@ -303,7 +346,7 @@ namespace VPE
 			List<ushort> pozs = GetPozitions(pozIdx);
 			StringBuilder sb = new();
 			sb = sb.Append(pozs[^1]);
-			for (int i = GetLastRotorPozitionsIdx - 1; i > -1; i--)
+			for (int i = pozs.Count - 2; i > -1; i--)
 			{
 				sb.Append(", ");
 				sb.Append(pozs[i]);

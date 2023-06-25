@@ -16,9 +16,11 @@ using VPE;
 
 namespace GUI
 {
+	public delegate void SubmitVPESett();
 	public partial class VPESettingsComp : Window
 	{
 		private readonly VPE_VM VPE;
+		public event SubmitVPESett VPESubmitSett;
 		private const ushort RotorsMax = 50, SwapsMax = 25; // Maximum count of rotors and swaps.
 		public VPESettingsComp (ref VPE_VM VModel)
 		{
@@ -29,6 +31,7 @@ namespace GUI
 			CB_Reflector.DataContext = VPE.DataFromGUI_Refl;
 			CB_InScr.DataContext = VPE.DataFromGUI_InScr;
 			CB_OutScr.DataContext = VPE.DataFromGUI_OutScr;
+			
 			if (VPE.ActiveSett is not null)
 			{
 				DisplayActiveSettInGUI();
@@ -39,11 +42,12 @@ namespace GUI
 				InitialSwapsPopulation(5);
 			}
 		}
-		#region GUI eventy
+		#region GUI events
 		private void B_Submit_Click (object sender, RoutedEventArgs e)
 		{
 			VPE.ChangeActiveSettsFromGUI();
 			VPE.UpdateSettingsSelector();
+			OnSubmitVPESett();
 			Close();
 		}
 
@@ -202,7 +206,7 @@ namespace GUI
 			VPE.RenameSelSett();
 		}
 		#endregion
-		#region 
+		#region Private utility methods 
 		private void DisplayActiveSettInGUI()
 		{
 			VPE.DisplaySettsInGUI(VPE.ActiveSett);
@@ -332,5 +336,11 @@ namespace GUI
 			}
 		}
 		#endregion
+
+
+		public virtual void OnSubmitVPESett()
+		{
+			VPESubmitSett?.Invoke();
+		}
 	}
 }

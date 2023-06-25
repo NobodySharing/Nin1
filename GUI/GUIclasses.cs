@@ -15,7 +15,7 @@ namespace GUI
 		private string VPE_PlainStrV;
 		private string VPE_EncrypStrV;
 		private string VPE_RotPozStrV;
-		private string VPE_SelPozSetStrV;
+		private string VPE_RotPozIdxStrV;
 		public string VPE_PlainStr
 		{
 			get
@@ -61,18 +61,18 @@ namespace GUI
 				}
 			}
 		}
-		public string VPE_SelPozSetStr
+		public string VPE_RotPozIdxStr
 		{
 			get
 			{
-				return VPE_SelPozSetStrV;
+				return VPE_RotPozIdxStrV;
 			}
 			set
 			{
-				if (VPE_SelPozSetStrV != value)
+				if (VPE_RotPozIdxStrV != value)
 				{
-					VPE_SelPozSetStrV = value;
-					OnPropertyChanged("VPE_SelPozSetStr");
+					VPE_RotPozIdxStrV = value;
+					OnPropertyChanged("VPE_RotPozIdxStr");
 				}
 			}
 		}
