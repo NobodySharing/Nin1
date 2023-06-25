@@ -88,6 +88,7 @@ namespace GUI
 			ActiveSett = Generator.GenerateSetts(new uint[] { (uint)TL.Rotors.Count, (uint)TL.Swaps.Count, (uint)TL.Reflectors.Count, (uint)TL.Scramblers.Count, (uint)SL.Library.Count }, name);
 			AddSettsToLib();
 			UpdateSettingsSelector();
+			DataFromGUI_SettSel.SelectedStr = ActiveSett.Name;
 		}
 		/// <summary>Sets active settings using what is in GUI.</summary>
 		public void ChangeActiveSettsFromGUI()
@@ -349,11 +350,11 @@ namespace GUI
 			DataFromGUI_SettSel.ItemsStrs = names;
 		}
 
-		public string GetPozsStrings(int idx = -3)
+		public string GetPozsStrings(int idx = -2)
 		{
 			if (ActiveSett is not null)
 			{
-				return ActiveSett.GetPozitionsString(idx == -3 ? SelectedPozs : idx);
+				return ActiveSett.GetPozitionsString(idx);
 			}
 			else
 			{
@@ -490,6 +491,8 @@ namespace GUI
 			TL.Reflectors.Add(s.Reflector);
 			TL.Rotors.AddRange(s.Rotors);
 			TL.Swaps.AddRange(s.Swaps);
+			TL.Scramblers.Add(s.InputScrambler);
+			TL.Scramblers.Add(s.OutputScrambler);
 		}
 
 		private static PrimeDefinedConstant CopyPDCDataFromGUI(ObservableCollection<C_PDC> gui)

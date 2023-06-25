@@ -58,7 +58,7 @@
 					<DockPanel Grid.Row="1" Grid.Column="0" >
 						<Button Name="B_VPE_RotPozBack" Content="←" Padding="4, 2, 4, 4" Margin="2, 2, 1, 2" Click="B_VPE_RotPozBack_Click"/>
 						<Button Name="B_VPE_RotPozForw" Content="→" Padding="4, 2, 4, 4" Margin="1, 2, 1, 2" Click="B_VPE_RotPozForw_Click"/>
-						<TextBox x:Name="TB_VPE_RotPozIdx" Margin="1, 2, 2, 2" MinWidth="4" FontFamily="Bahnschrift" Text="{Binding Path=VPE_SelPozSetStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="16"/>
+						<TextBox x:Name="TB_VPE_RotPozIdx" Margin="1, 2, 2, 2" FontFamily="Bahnschrift" FontSize="16" Text="{Binding Path=VPE_SelPozSetStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 					</DockPanel>
 					<TextBox x:Name="TB_VPE_RotPoz" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Margin="2, 2, 2, 2" Text="{Binding Path=VPE_RotPozStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" FontFamily="Lucida Console"/>
 					<Button x:Name="B_VPE_UseSelRotPoz" Content="Use" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Click="B_VPE_UseSelPozSet_Click"/>

@@ -18,6 +18,7 @@ using Common;
 
 namespace GUI
 {
+	public delegate void SubmitVPESett();
 	public partial class MainWindow : Window
 	{
 		
@@ -35,21 +36,21 @@ namespace GUI
 		#region VPE
 		private VPE_VM VPE = new();
 		VPESettingsComp VPESettWin;
-
+		public event SubmitVPESett Submit;
 		private void MI_VPE_Encrypt_Click(object sender, RoutedEventArgs e)
 		{
-			if(VPE.ActiveSett is not null)
+			if (VPE.ActiveSett is not null)
 			{
 				DataFromGUI.VPE_EncrypStr = VPE.Encrypt(DataFromGUI.VPE_PlainStr);
+				DisplayRotorPozs(VPE.ActiveSett.SelectedPozitions);
 			}
 			else
 			{
-				string caption = "Error";
+				string caption = "No encryption settings";
 				string messageBoxText = "I am unable to encrypt your text. No encryption settings were selected.";
 				MessageBoxButton button = MessageBoxButton.OK;
 				MessageBoxImage icon = MessageBoxImage.Error;
-				MessageBoxResult result;
-				result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.OK);
+				_ = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.OK);
 			}
 		}
 
@@ -58,15 +59,15 @@ namespace GUI
 			if (VPE.ActiveSett is not null)
 			{
 				DataFromGUI.VPE_PlainStr = VPE.Decrypt(DataFromGUI.VPE_EncrypStr);
+				DisplayRotorPozs(VPE.ActiveSett.SelectedPozitions);
 			}
 			else
 			{
-				string caption = "Error";
+				string caption = "No decryption settings";
 				string messageBoxText = "I am unable to decrypt your text. No decryption settings were selected.";
 				MessageBoxButton button = MessageBoxButton.OK;
 				MessageBoxImage icon = MessageBoxImage.Error;
-				MessageBoxResult result;
-				result = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.OK);
+				_ = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.OK);
 			}
 		}
 
@@ -78,7 +79,11 @@ namespace GUI
 
 		private void MI_VPE_SaveUneMsgFile_Click(object sender, RoutedEventArgs e) => VPE_VM.SaveMsgFile(DataFromGUI.VPE_PlainStr);
 
-		private void MI_VPE_QuickSettGen_Click(object sender, RoutedEventArgs e) => VPE.GenerateComplete();
+		private void MI_VPE_QuickSettGen_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.GenerateComplete();
+			DisplayRotorPozs(VPE.ActiveSett.SelectedPozitions);
+		}
 
 		private void MI_VPE_QuickSettSave_Click(object sender, RoutedEventArgs e) => VPE.SaveSettings();
 
@@ -94,7 +99,7 @@ namespace GUI
 		{
 			if (VPE.SelectedPozs == 0)
 			{
-				VPE.SelectedPozs = VPE.ActiveSett.GetRotorPozitionsCount - 1;
+				VPE.SelectedPozs = VPE.ActiveSett.GetLastRotorPozitionsIdx;
 			}
 			else
 			{
@@ -106,7 +111,7 @@ namespace GUI
 
 		private void B_VPE_RotPozForw_Click(object sender, RoutedEventArgs e)
 		{
-			if (VPE.SelectedPozs == VPE.ActiveSett.GetRotorPozitionsCount - 1)
+			if (VPE.SelectedPozs == VPE.ActiveSett.GetLastRotorPozitionsIdx)
 			{
 				VPE.SelectedPozs = 0;
 			}
@@ -126,7 +131,7 @@ namespace GUI
 				{
 					if (int.TryParse(DataFromGUI.VPE_SelPozSetStr, out int idx))
 					{
-						if (idx >= -2 && idx < VPE.ActiveSett.GetRotorPozitionsCount)
+						if (idx >= -2 && idx <= VPE.ActiveSett.GetLastRotorPozitionsIdx)
 						{
 							VPE.ActiveSett.SelectedPozitions = VPE.SelectedPozs = idx;
 							DisplayRotorPozs();
@@ -136,14 +141,35 @@ namespace GUI
 			}
 		}
 
-		public void DisplayRotorPozs(int which = -3)
+		public void DisplayRotorPozs(int which = -2)
 		{
 			DataFromGUI.VPE_RotPozStr = VPE.GetPozsStrings(which);
+			if (which < -2)
+			{
+				DataFromGUI.VPE_SelPozSetStr = "";
+			}
+			else if (which == -2)
+			{
+				DataFromGUI.VPE_SelPozSetStr = (VPE.ActiveSett.SelectedPozitions).ToString();
+			}
+			else if (which == -1)
+			{
+				DataFromGUI.VPE_SelPozSetStr = (VPE.ActiveSett.GetLastRotorPozitionsIdx).ToString();
+			}
+			else
+			{
+				DataFromGUI.VPE_SelPozSetStr = which.ToString();
+			}
+		}
+
+		protected virtual void OnSubmitVPESett()
+		{
+			Submit?.Invoke();
 		}
 
 		public void SetRotorPozs()
 		{
-
+			VPE.ActiveSett.AddPozitionsUsingString(DataFromGUI.VPE_RotPozStr);
 		}
 		#endregion
 

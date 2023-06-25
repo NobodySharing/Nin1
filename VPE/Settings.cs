@@ -79,12 +79,12 @@ namespace VPE
 		public uint Idx { get; set; }
 		/// <summary>Index of selected set of pozitions (for rotors).</summary>
 		public int SelectedPozitions { get; set; }
-		/// <summary>Gets how many pozitions sets rotors have. All rotors should have the same.</summary>
-		public int GetRotorPozitionsCount
+		/// <summary>Gets the index of last pozition set rotors have. All rotors should have the same.</summary>
+		public int GetLastRotorPozitionsIdx
 		{
 			get
 			{
-				return Rotors[0].Pozitions.Count;
+				return Rotors[0].Pozitions.Count - 1;
 			}
 		}
 		/// <summary>Smallest size of this class instance. Approximated.</summary>
@@ -143,7 +143,7 @@ namespace VPE
 			}
 			else if (which == -1)
 			{
-				pozIdx = Rotors[0].Pozitions.Count - 1;
+				pozIdx = GetLastRotorPozitionsIdx;
 			}
 			else
 			{
@@ -171,7 +171,7 @@ namespace VPE
 			}
 			else if (which == -1)
 			{
-				pozIdx = Rotors[0].Pozitions.Count - 1;
+				pozIdx = GetLastRotorPozitionsIdx;
 			}
 			else
 			{
@@ -294,7 +294,7 @@ namespace VPE
 			}
 			else if (which == -1)
 			{
-				pozIdx = Rotors[0].Pozitions.Count - 1;
+				pozIdx = GetLastRotorPozitionsIdx;
 			}
 			else
 			{
@@ -302,8 +302,8 @@ namespace VPE
 			}
 			List<ushort> pozs = GetPozitions(pozIdx);
 			StringBuilder sb = new();
-			sb = sb.Append(pozs[0]);
-			for (int i = 1; i < pozs.Count; i++)
+			sb = sb.Append(pozs[^1]);
+			for (int i = GetLastRotorPozitionsIdx - 1; i > -1; i--)
 			{
 				sb.Append(", ");
 				sb.Append(pozs[i]);
@@ -419,7 +419,7 @@ namespace VPE
 			pozition += 4;
 			Swaps.AddRange(TablesFromBytes(file, ref pozition, tables, limit));
 			Reflector = new Table (file, ref pozition, limit);
-			InputScrambler = new Table (file, ref pozition, limit);
+			InputScrambler = new Table(file, ref pozition, limit);
 			OutputScrambler = new Table(file, ref pozition, limit);
 			ConstShift = BitConverter.ToUInt32(file, pozition);
 			pozition += 4;
@@ -644,9 +644,11 @@ namespace VPE
 		public SettingsLibrary(byte[] file)
 		{
 			int pozition = 0;
-			while (pozition <= file.Length)
+			int count = BitConverter.ToInt32(file, pozition);
+			pozition += 4;
+			for (int i = 0; i < count; i++)
 			{
-				Settings s = new (file, ref pozition);
+				Settings s = new(file, ref pozition);
 				Library.Add(s);
 			}
 		}
@@ -662,6 +664,7 @@ namespace VPE
 		public byte[] ToBytes()
 		{
 			List<byte> result = new(262144);
+			result.AddRange(BitConverter.GetBytes(Library.Count));
 			foreach (Settings s in Library)
 			{
 				result.AddRange(s.ToBytes());
