@@ -152,7 +152,7 @@ namespace VPE
 			}
 			for (int i = 0; i < pozitions.Count; i++)
 			{
-				Rotors[i].Pozitions.Add(pozitions[i]);
+				Rotors[i].Pozitions.Add((ushort)(pozitions[i] % Codepage.Limit)); // Just to be sure that I'm in the correct range.
 			}
 			return true;
 		}

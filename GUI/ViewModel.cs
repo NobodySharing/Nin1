@@ -28,6 +28,7 @@ namespace GUI
 		public int SelectedPozs = 0;
 		#endregion
 		#region Classes for binding
+		internal C_VPE_MainWin DataFromGUI_MainWin = new(); // This does nothing yet.
 		internal C_VPE_Sett DataFromGUI_Sett = new();
 		internal List<C_UC_Rotor> DataFromGUI_Rotors = new();
 		internal List<C_VPE_ComboBox> DataFromGUI_Swaps = new();
@@ -360,6 +361,36 @@ namespace GUI
 			{
 				return "";
 			}
+		}
+
+		public bool AddPozFromString(string pozsStr)
+		{
+			if (pozsStr == null)
+			{
+				return false;
+			}
+			if (pozsStr == "")
+			{
+				return false;
+			}
+			string[] chopped = pozsStr.Split(',');
+			if (chopped.Length != ActiveSett.Rotors.Count)
+			{
+				return false;
+			}
+			List<ushort> pozsNums = new();
+			foreach(string part in chopped)
+			{
+				if (ushort.TryParse(part, out ushort num))
+				{
+					pozsNums.Add(num);
+				}
+				else
+				{
+					return false;
+				}
+			}
+			return ActiveSett.AddPozitions(pozsNums);
 		}
 
 		public void RenameSelSett()

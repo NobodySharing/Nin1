@@ -37,6 +37,7 @@ namespace VPE
 			ConstantShift();
 			VariableShift();
 			AddRandomChars();
+			Differentiate();
 			SwitchCharPoz(1);
 			ScrambleCharTable(1, true);
 			return ConvertToString();
@@ -49,8 +50,8 @@ namespace VPE
 			Sett.DuplicateAndSetToActivePozitions(Sett.SelectedPozitions);
 			ConvertToNums(Text);
 			ScrambleCharTable(1, false);
-			Undifferentiate();
 			UnSwitchCharPoz(1);
+			Undifferentiate();
 			RemoveRandomChars();
 			UnVariableShift();
 			UnConstantShift();
@@ -58,6 +59,7 @@ namespace VPE
 			UnOrderShift();
 			UnSwitchCharPoz(0);
 			RemoveRandomChars();
+			Undifferentiate();
 			ScrambleCharTable(0, false);
 			return ConvertToString();
 		}
@@ -101,13 +103,16 @@ namespace VPE
 		/// <summary>Undoes the differentiation.</summary>
 		private void Undifferentiate()
 		{
+			ushort[] temps = new ushort[Message.Count];
+			temps[^1] = Message[^1];
 			for (int i = Message.Count - 2; i >= 0; i--)
 			{
-				Message[i] = ModuloDiff(Message[i + 1], Message[i]);
+				temps[i] = ModuloDiff(Message[i + 1], Message[i]);
 			}
+			Message[0] = temps[0];
 			for (int i = 1; i < Message.Count; i++)
 			{
-				Message[i] = ModuloDiff(Message[i - 1], Message[i]);
+				Message[i] = ModuloDiff(temps[i - 1], temps[i]);
 			}
 		}
 		/// <summary>The main block of encrypting, which can be executed in multiple threads. Decides if that is needed.</summary>
@@ -607,7 +612,7 @@ namespace VPE
 		/// <param name="A">A number.</param>
 		/// <param name="B">B number.</param>
 		/// <returns>Sumation modulated to 0 to Codepage.Limit - 1.</returns>
-		private ushort ModuloSum (ushort A, ushort B)
+		private static ushort ModuloSum (ushort A, ushort B)
 		{
 			return (ushort)((A + B) % Codepage.Limit);
 		}
@@ -615,7 +620,7 @@ namespace VPE
 		/// <param name="A">A number. It matters which is it.</param>
 		/// <param name="B">B number. It matters which is it.</param>
 		/// <returns>Differentiation modulated to 0 to Codepage.Limit - 1.</returns>
-		private ushort ModuloDiff(ushort A, ushort B)
+		private static ushort ModuloDiff(ushort A, ushort B)
 		{
 			return (ushort)((A - B + Codepage.Limit) % Codepage.Limit);
 		}

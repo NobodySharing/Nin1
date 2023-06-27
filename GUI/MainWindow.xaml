@@ -61,7 +61,7 @@
 						<TextBox x:Name="TB_VPE_RotPozIdx" Margin="1, 2, 2, 2" FontFamily="Bahnschrift" FontSize="16" Text="{Binding Path=VPE_RotPozIdxStr, Mode=TwoWay}"/>
 					</DockPanel>
 					<TextBox x:Name="TB_VPE_RotPoz" Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Margin="2, 2, 2, 2" Text="{Binding Path=VPE_RotPozStr, Mode=TwoWay}" TextWrapping="Wrap" FontFamily="Lucida Console"/>
-					<Button x:Name="B_VPE_UseSelRotPoz" Content="Use" Grid.Column="2" Grid.Row="0" Margin="1" Click="B_VPE_UseSelPozSet_Click"/>
+					<Button x:Name="B_VPE_UseCustRotPoz" Content="Use" Grid.Column="2" Grid.Row="0" Margin="1" Click="B_VPE_UseCustPozSet_Click"/>
 					<Button x:Name="B_VPE_RemSelRotPoz" Content="Remove" Grid.Column="2" Grid.Row="1" Margin="1" Click="B_VPE_RemSelRotPoz_Click"/>
 				</Grid>
 				<TextBlock Grid.Row="2" Grid.Column="0" Text="Plain text" HorizontalAlignment="Center" VerticalAlignment="Center"/>

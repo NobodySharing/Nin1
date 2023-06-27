@@ -22,7 +22,7 @@ namespace GUI
 	{
 		
 		#region Common
-		private readonly C_VPE_MainWin DataFromGUI = new();
+		private readonly C_VPE_MainWin DataFromGUI = new(); // ToDo: Put this in VPE's VM.
 		//private readonly PersistentStorage PS = new(); // ToDo: Implement.
 
 		public MainWindow()
@@ -109,6 +109,7 @@ namespace GUI
 			{
 				VPE.SelectedPozs--;
 			}
+			VPE.ActiveSett.SelectedPozitions = VPE.SelectedPozs;
 			DisplayRotorPozs(VPE.SelectedPozs);
 		}
 
@@ -122,22 +123,20 @@ namespace GUI
 			{
 				VPE.SelectedPozs++;
 			}
+			VPE.ActiveSett.SelectedPozitions = VPE.SelectedPozs;
 			DisplayRotorPozs(VPE.SelectedPozs);
 		}
 
-		private void B_VPE_UseSelPozSet_Click(object sender, RoutedEventArgs e)
+		private void B_VPE_UseCustPozSet_Click(object sender, RoutedEventArgs e)
 		{
-			if (DataFromGUI.VPE_RotPozIdxStr is not null)
+			if (DataFromGUI.VPE_RotPozStr is not null)
 			{
-				if (DataFromGUI.VPE_RotPozIdxStr != "")
+				if (DataFromGUI.VPE_RotPozStr != "")
 				{
-					if (int.TryParse(DataFromGUI.VPE_RotPozIdxStr, out int idx))
+					if (VPE.AddPozFromString(DataFromGUI.VPE_RotPozStr))
 					{
-						if (idx >= -2 && idx <= VPE.ActiveSett.GetLastRotorPozitionsIdx)
-						{
-							VPE.ActiveSett.SelectedPozitions = VPE.SelectedPozs = idx;
-							DisplayRotorPozs();
-						}
+						DisplayRotorPozs(-1);
+						VPE.SelectedPozs = VPE.ActiveSett.SelectedPozitions = VPE.ActiveSett.GetLastRotorPozitionsIdx;
 					}
 				}
 			}
@@ -145,10 +144,13 @@ namespace GUI
 
 		private void B_VPE_RemSelRotPoz_Click(object sender, RoutedEventArgs e)
 		{
-
+			if (VPE.ActiveSett.GetLastRotorPozitionsIdx > 0)
+			{
+				VPE.ActiveSett.RemovePozitions(VPE.SelectedPozs);
+			}
 		}
 
-		public void DisplayRotorPozs(int which = -2)
+		private void DisplayRotorPozs(int which = -2)
 		{
 			DataFromGUI.VPE_RotPozStr = VPE.GetPozsStrings(which);
 			if (which < -2)
@@ -169,7 +171,7 @@ namespace GUI
 			}
 		}
 
-		public void AddRotorPozs()
+		private void AddRotorPozs()
 		{
 			VPE.ActiveSett.AddPozitionsUsingString(DataFromGUI.VPE_RotPozStr);
 		}
