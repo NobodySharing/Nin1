@@ -406,7 +406,20 @@ namespace GUI
 
 		public void LoadSettings(bool? OverrideOverwrite = null)
 		{
-			FileHandling.Load(OpenFile(VPES_filter), out Settings s);
+			string path = OpenFile(VPES_filter);
+			if (path == null)
+			{
+				return;
+			}
+			if (path == "")
+			{
+				return;
+			}
+			if (path == Invalid_File)
+			{
+				return;
+			}
+			FileHandling.Load(path, out Settings s);
 			if (OverrideOverwrite is not null)
 			{
 				if (OverrideOverwrite.Value)
@@ -434,11 +447,24 @@ namespace GUI
 
 		public void LoadSettingsLib()
 		{
+			string path = OpenFile(VPESL_filter);
+			if (path == null)
+			{
+				return;
+			}
+			if (path == "")
+			{
+				return;
+			}
+			if (path == Invalid_File)
+			{
+				return;
+			}
 			if (Overwrite)
 			{
 				SL.Library.Clear();
 			}
-			FileHandling.Load(OpenFile(VPESL_filter), out SettingsLibrary sl);
+			FileHandling.Load(path, out SettingsLibrary sl);
 			foreach (Settings s in sl.Library)
 			{
 				AddSettsToLib(s);
@@ -452,13 +478,26 @@ namespace GUI
 
 		public void LoadTableLib()
 		{
+			string path = OpenFile(VPETL_filter);
+			if (path == null)
+			{
+				return;
+			}
+			if (path == "")
+			{
+				return;
+			}
+			if (path == Invalid_File)
+			{
+				return;
+			}
+			FileHandling.Load(path, out TableLibrary tl);
 			if (Overwrite)
 			{
 				TL.Reflectors.Clear();
 				TL.Swaps.Clear();
 				TL.Rotors.Clear();
 			}
-			FileHandling.Load(OpenFile(VPETL_filter), out TableLibrary tl);
 			TL.Reflectors.AddRange(tl.Reflectors);
 			TL.Swaps.AddRange(tl.Swaps);
 			TL.Rotors.AddRange(tl.Rotors);

@@ -9,7 +9,7 @@ namespace VPE
 {
 	public static class FileHandling
 	{
-		public const string FileExtSL = ".vpesl"; // Very primitive encryption setiings library.
+		public const string FileExtSL = ".vpesl"; // Very primitive encryption settings library.
 		public const string FileExtTL = ".vpetl"; // Very primitive encryption table library.
 		public const string FileExtS = ".vpes"; // Very primitive encryption settings.
 		public const string FileExtTXT = ".txt";

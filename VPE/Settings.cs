@@ -132,6 +132,7 @@ namespace VPE
 			{
 				rotor.Pozitions.Add(rotor.Pozitions[pozIdx]);
 			}
+			SelectedPozitions = GetLastRotorPozitionsIdx;
 		}
 		/// <summary>Adds set of rotor pozitions.</summary>
 		/// <param name="pozitions">List of pozitions. Needs to be the same count as rotors count.</param>
