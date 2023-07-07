@@ -24,7 +24,6 @@ namespace GUI
 		public TableLibrary TL = new();
 		public Settings ActiveSett;
 		public Crypto C;
-		public bool Overwrite = false;
 		public int SelectedPozs = 0;
 		#endregion
 		#region Classes for binding
@@ -47,7 +46,7 @@ namespace GUI
 
 		#region Public methods
 		
-		public void GenerateRotors(uint count = 20)
+		public void GenerateRotors(uint count = 40)
 		{
 			Generator.UpdateSeed(DateTime.Now.Ticks);
 			for (uint i = 0; i < count; i++)
@@ -65,7 +64,7 @@ namespace GUI
 			}
 		}
 
-		public void GenerateSwaps(uint count = 10)
+		public void GenerateSwaps(uint count = 20)
 		{
 			Generator.UpdateSeed(DateTime.Now.Ticks);
 			for (uint i = 0; i < count; i++)
@@ -74,7 +73,7 @@ namespace GUI
 			}
 		}
 
-		public void GenerateScramblers(uint count = 4)
+		public void GenerateScramblers(uint count = 10)
 		{
 			Generator.UpdateSeed(DateTime.Now.Ticks);
 			for (uint i = 0; i < count; i++)
@@ -401,10 +400,10 @@ namespace GUI
 
 		public void SaveSettings()
 		{
-			FileHandling.SaveOrUpdate(ActiveSett, SaveFile(VPES_filter));
+			FileHandling.Save(ActiveSett, SaveFile(VPES_filter));
 		}
 
-		public void LoadSettings(bool? OverrideOverwrite = null)
+		public void LoadSettings()
 		{
 			string path = OpenFile(VPES_filter);
 			if (path == null)
@@ -420,24 +419,13 @@ namespace GUI
 				return;
 			}
 			FileHandling.Load(path, out Settings s);
-			if (OverrideOverwrite is not null)
-			{
-				if (OverrideOverwrite.Value)
-				{
-					ActiveSett = s;
-					DisplaySettsInGUI(s);
-				}
-			}
-			else
-			{
-				if (Overwrite)
-				{
-					ActiveSett = s;
-					DisplaySettsInGUI(s);
-				}
-			}
 			AddSettsToLib(s);
 			UpdateSettingsSelector();
+		}
+
+		public void UpdateSettings()
+		{
+
 		}
 
 		public void SaveSettingsLib()
@@ -460,15 +448,16 @@ namespace GUI
 			{
 				return;
 			}
-			if (Overwrite)
-			{
-				SL.Library.Clear();
-			}
 			FileHandling.Load(path, out SettingsLibrary sl);
 			foreach (Settings s in sl.Library)
 			{
 				AddSettsToLib(s);
 			}
+		}
+
+		public void UpdateSettingsLib()
+		{
+
 		}
 
 		public void SaveTableLib()
@@ -492,21 +481,21 @@ namespace GUI
 				return;
 			}
 			FileHandling.Load(path, out TableLibrary tl);
-			if (Overwrite)
-			{
-				TL.Reflectors.Clear();
-				TL.Swaps.Clear();
-				TL.Rotors.Clear();
-			}
 			TL.Reflectors.AddRange(tl.Reflectors);
 			TL.Swaps.AddRange(tl.Swaps);
 			TL.Rotors.AddRange(tl.Rotors);
+			TL.Scramblers.AddRange(tl.Scramblers);
+		}
+
+		public void UpdateTableLib()
+		{
+
 		}
 		#endregion
 
 		#region Private methods
 		/// <summary>Zobrazí dialog otevření souboru a vrátí cestu k němu.</summary>
-		/// <param name="ext">Extensiona.</param>
+		/// <param name="ext">Extension.</param>
 		/// <returns>Cesta k souboru.</returns>
 		private static string OpenFile(string ext)
 		{
@@ -525,7 +514,7 @@ namespace GUI
 			return Invalid_File;
 		}
 		/// <summary>Zobrazí dialog uložení souboru a vrátí cestu k němu.</summary>
-		/// <param name="ext">Extensiona.</param>
+		/// <param name="ext">Extension.</param>
 		/// <returns>Cesta k souboru.</returns>
 		private static string SaveFile(string ext)
 		{

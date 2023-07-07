@@ -253,7 +253,6 @@
 			</Grid.RowDefinitions>
 			<GroupBox Grid.Row="0" Header="Settings storage">
 				<StackPanel Orientation="Vertical">
-					<CheckBox x:Name="ChB_Overwrite" Content="Overwrite current data after load" Margin="2" Click="ChB_Overwrite_Click"/>
 					<Button x:Name="B_SaveSett" Content="Save current settings to a file" Margin="2" Click="B_SaveSett_Click"/>
 					<Button x:Name="B_LoadSett" Content="Load settings from a file" Margin="2" Click="B_LoadSett_Click"/>
 					<Button x:Name="B_SaveSettLib" Content="Save current settings library to a file" Margin="2" Click="B_SaveSettLib_Click"/>

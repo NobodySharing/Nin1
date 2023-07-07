@@ -2,24 +2,29 @@
 
 namespace Common
 {
-	public class PersistentStorage
+	public class PersistentStorageManager
 	{
 		private const string MyDirName = "Nin1";
 		private const string ConfigFileName = "Config.txt";
 		private string DefaultConfigFileContent =
-			"VPE:\r\n" +
+			"[VPE]\r\n" +
+			"\tAutoload Table Library=\r\n" +
+			"\tAutoload Settings Library=\r\n" +
+			"\tSelect Settings=\r\n" +
+			"[Neue date-time]\r\n" +
 			" \r\n" +
-			
-			"Password generator:\r\n" +
+			"[Date-time calculator]\r\n" +
 			" \r\n" +
-			
-			"Date-time calculator:\r\n" +
+			"[Factorizator]\r\n" +
+			" \r\n" +
+			"[Password generator]\r\n" +
+			" \r\n" +
+			"[Map downloader]\r\n" +
 			" \r\n";
+		private readonly DirectoryInfo MyDir; // Path to folder with config file.
+		private readonly FileInfo MyConfig; // Path to config file directly.
 
-		private readonly DirectoryInfo MyDir; // Cesta ke složce s konfigurákem.
-		private readonly FileInfo MyConfig; // Cesta ke konfiguráku.
-
-		public PersistentStorage()
+		public PersistentStorageManager()
 		{
 			string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + MyDirName + "\\";
 			MyDir = new(path);
@@ -52,15 +57,22 @@ namespace Common
 			MyConfig.Create().Close();
 			File.WriteAllText(MyConfig.FullName, DefaultConfigFileContent);
 		}
-		/*
-		internal string ReadConfig()
+		
+		internal PersistentStorage ReadConfig()
 		{
 
 		}
 
-		internal void WriteConfig()
+		internal void WriteConfig(PersistentStorage ps)
 		{
 
-		}*/
+		}
+	}
+
+	public class PersistentStorage
+	{
+		string PathsToSettLib;
+		string PathsToTableLib;
+		int ActiveSett;
 	}
 }

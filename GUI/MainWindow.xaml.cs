@@ -23,7 +23,7 @@ namespace GUI
 		
 		#region Common
 		private readonly C_VPE_MainWin DataFromGUI = new(); // ToDo: Put this in VPE's VM.
-		//private readonly PersistentStorage PS = new(); // ToDo: Implement.
+		private readonly PersistentStorageManager PS = new(); // ToDo: Implement.
 
 		public MainWindow()
 		{
@@ -85,7 +85,7 @@ namespace GUI
 
 		private void MI_VPE_QuickSettSave_Click(object sender, RoutedEventArgs e) => VPE.SaveSettings();
 
-		private void MI_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e) => VPE.LoadSettings(true);
+		private void MI_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e) => VPE.LoadSettings();
 		
 		private void MI_VPE_SettingsComp_Click(object sender, RoutedEventArgs e)
 		{

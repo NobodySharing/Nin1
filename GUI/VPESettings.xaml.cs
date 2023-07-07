@@ -179,11 +179,6 @@ namespace GUI
 			DisplayActiveSettInGUI();
 		}
 
-		private void ChB_Overwrite_Click(object sender, RoutedEventArgs e)
-		{
-			VPE.Overwrite = !VPE.Overwrite;
-		}
-
 		private void CB_SettLib_SelChanged(object sender, SelectionChangedEventArgs e)
 		{
 			VPE.SetUsingSelSettName();
@@ -206,7 +201,7 @@ namespace GUI
 			VPE.RenameSelSett();
 		}
 		#endregion
-		#region Private utility methods 
+		#region Private utility methods
 		private void DisplayActiveSettInGUI()
 		{
 			VPE.DisplaySettsInGUI(VPE.ActiveSett);

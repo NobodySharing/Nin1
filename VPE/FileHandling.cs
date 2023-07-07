@@ -19,57 +19,21 @@ namespace VPE
 		/// <param name="where">Path to a file to be created.</param>
 		public static void Save(SettingsLibrary what, string where)
 		{
-			if(where.EndsWith(FileExtSL))
-			{
-				File.WriteAllBytes(where, what.ToBytes());
-			}
-			else
-			{
-				//DirectoryInfo di = new(where);
-				// ToDo: everyhting.
-			}
+			File.WriteAllBytes(where, what.ToBytes());
 		}
 		/// <summary>Saves an instance of TableLibrary class.</summary>
 		/// <param name="what">TableLibrary class.</param>
 		/// <param name="where">Path to a file to be created.</param>
 		public static void Save(TableLibrary what, string where)
 		{
-			if (where.EndsWith(FileExtTL))
-			{
-				File.WriteAllBytes(where, what.ToBytes());
-			}
-			else
-			{
-				//DirectoryInfo di = new(where);
-				// ToDo: everyhting.
-			}
+			File.WriteAllBytes(where, what.ToBytes());
 		}
-		/// <summary>Saves an instance of settings class. Creates a new file or deletes existing and writes a new one.</summary>
+		/// <summary>Saves an instance of settings class.</summary>
 		/// <param name="what">Settings class.</param>
 		/// <param name="where">Path to a file.</param>
-		public static void SaveOrUpdate(Settings what, string where)
+		public static void Save(Settings what, string where)
 		{
-			FileInfo fi = new(where);
-			if (fi.Exists)
-			{
-				File.Delete(where);
-				File.WriteAllBytes(where, what.ToBytes());
-			}
-			else
-			{
-				if (where.EndsWith(FileExtS))
-				{
-					File.WriteAllBytes(where, what.ToBytes());
-				}
-				else
-				{
-
-				}
-			}
-			{
-				//DirectoryInfo di = new(where);
-				// ToDo: everyhting.
-			}
+			File.WriteAllBytes(where, what.ToBytes());
 		}
 		/// <summary>Loads SettingsLibrary from a location.</summary>
 		/// <param name="filename">Path to SettingsLibrary.</param>
