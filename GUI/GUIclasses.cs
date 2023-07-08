@@ -10,7 +10,7 @@ using System.Collections.ObjectModel;
 namespace GUI
 {
 	#region Main win
-	public class C_VPE_MainWin : INotifyPropertyChanged
+	public class C_MainWin : INotifyPropertyChanged
 	{
 		private string VPE_PlainStrV;
 		private string VPE_EncrypStrV;
@@ -846,6 +846,6 @@ namespace GUI
 	#region Factorizator
 	#endregion
 
-	#region Mapy.cz downloader
+	#region Maps downloader
 	#endregion
 }

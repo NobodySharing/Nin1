@@ -27,6 +27,16 @@ namespace Common
 		internal string PathToMessages;
 	}
 
+	internal class ConfigNeueDT
+	{
+
+	}
+
+	internal class ConfigDTCalc
+	{
+
+	}
+
 	internal class ConfigFactorizator
 	{
 
@@ -37,7 +47,7 @@ namespace Common
 
 	}
 
-	internal class ConfigMapyCzDown
+	internal class ConfigMapDown
 	{
 
 	}

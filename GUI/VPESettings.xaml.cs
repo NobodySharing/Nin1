@@ -64,7 +64,7 @@ namespace GUI
 		{
 			if (VPE.DataFromGUI_Sett.ReflGenCountNum is not null)
 			{
-				VPE.GenerateReflector(VPE.DataFromGUI_Sett.ReflGenCountNum.Value);
+				VPE.GenerateReflectors(VPE.DataFromGUI_Sett.ReflGenCountNum.Value);
 				VPE.UpdateReflSelector();
 			}	
 		}

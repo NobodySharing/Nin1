@@ -111,22 +111,10 @@ namespace VPE
 		/// <param name="which">Which pozition set to duplicate and activate? -1 means the last one, -2 for the active set.</param>
 		public void DuplicateAndSetToActivePozitions(int which = -2)
 		{
-			int pozIdx;
-			if (which < -2)
+			int pozIdx = PozitionTranslator(which);
+			if (pozIdx == -3)
 			{
 				return;
-			}
-			else if (which == -2)
-			{
-				pozIdx = SelectedPozitions;
-			}
-			else if (which == -1)
-			{
-				pozIdx = GetLastRotorPozitionsIdx;
-			}
-			else
-			{
-				pozIdx = which;
 			}
 			foreach (Table rotor in Rotors)
 			{
@@ -175,23 +163,11 @@ namespace VPE
 		/// <returns>Pozition set.</returns>
 		public List<ushort> GetPozitions(int which = -2)
 		{
-			int pozIdx;
 			List<ushort> result = new();
-			if (which < -2)
+			int pozIdx = PozitionTranslator(which);
+			if (pozIdx == -3)
 			{
 				return result;
-			}
-			else if (which == -2)
-			{
-				pozIdx = SelectedPozitions;
-			}
-			else if (which == -1)
-			{
-				pozIdx = GetLastRotorPozitionsIdx;
-			}
-			else
-			{
-				pozIdx = which;
 			}
 			foreach (Table t in Rotors)
 			{
@@ -204,22 +180,10 @@ namespace VPE
 		/// <returns>If it was successful.</returns>
 		public bool RemovePozitions(int which = -2)
 		{
-			int pozIdx;
-			if (which < -2)
+			int pozIdx = PozitionTranslator(which);
+			if (pozIdx == -3)
 			{
 				return false;
-			}
-			else if (which == -2)
-			{
-				pozIdx = SelectedPozitions;
-			}
-			else if (which == -1)
-			{
-				pozIdx = GetLastRotorPozitionsIdx;
-			}
-			else
-			{
-				pozIdx = which;
 			}
 			foreach (Table t in Rotors)
 			{
@@ -231,22 +195,10 @@ namespace VPE
 		/// <param name="which">Which set of pozitional numbers to increment. -1 for the last ones, -2 for the active set.</param>
 		public void IncrementPozitions(int which = -2)
 		{
-			int pozIdx;
-			if (which < -2)
+			int pozIdx = PozitionTranslator(which);
+			if (pozIdx == -3)
 			{
 				return;
-			}
-			else if (which == -2)
-			{
-				pozIdx = SelectedPozitions;
-			}
-			else if (which == -1)
-			{
-				pozIdx = Rotors[0].Pozitions.Count - 1;
-			}
-			else
-			{
-				pozIdx = which;
 			}
 			Rotors[0].Pozitions[pozIdx]++;
 			for (int i = 0; i < Rotors.Count; i++)
@@ -270,22 +222,10 @@ namespace VPE
 		/// <param name="which">Which set of pozitional numbers to increment. -1 for the last ones, -2 for the active set.</param>
 		public void IncrementPozitions(uint num, int which = -2)
 		{
-			int pozIdx;
-			if (which < -2)
+			int pozIdx = PozitionTranslator(which);
+			if (pozIdx == -3)
 			{
 				return;
-			}
-			else if (which == -2)
-			{
-				pozIdx = SelectedPozitions;
-			}
-			else if (which == -1)
-			{
-				pozIdx = Rotors[0].Pozitions.Count - 1;
-			}
-			else
-			{
-				pozIdx = which;
 			}
 			foreach (Table t in Rotors)
 			{
@@ -327,22 +267,10 @@ namespace VPE
 		/// <returns>Pozition set as a string, comma separated. Empty string if error.</returns>
 		public string GetPozitionsString(int which = -2)
 		{
-			int pozIdx;
-			if (which < -2)
+			int pozIdx = PozitionTranslator(which);
+			if (pozIdx == -3)
 			{
 				return "";
-			}
-			else if (which == -2)
-			{
-				pozIdx = SelectedPozitions;
-			}
-			else if (which == -1)
-			{
-				pozIdx = GetLastRotorPozitionsIdx;
-			}
-			else
-			{
-				pozIdx = which;
 			}
 			List<ushort> pozs = GetPozitions(pozIdx);
 			StringBuilder sb = new();
@@ -406,6 +334,47 @@ namespace VPE
 				}
 			}
 			return true;
+		}
+		/// <summary>Calculates absolute pozition.</summary>
+		/// <param name="which">Which position set to calculate? -1 means the last one. -2 for selected ones.</param>
+		/// <returns>Absolute pozition, usually really big number. For 50 rotors, it's (up to) 138 digits.</returns>
+		public BigInteger GetPozitionMagnitude(int which = -2)
+		{
+			BigInteger result = 1;
+			int pozIdx = PozitionTranslator(which);
+			if (pozIdx == -3)
+			{
+				return -1;
+			}
+			for (int i = Rotors.Count, j = 0; i > -1; i--, j++)
+			{
+				result += Rotors[i].Pozitions[pozIdx] * BigInteger.Pow(Codepage.Limit, j);
+			}
+			return result;
+		}
+		/// <summary>Translates special pozition set number to actual one.</summary>
+		/// <param name="which">Pozition set number to translate.</param>
+		/// <returns>-3 if error, otherwise non-negative number of pozition set.</returns>
+		private int PozitionTranslator (int which)
+		{
+			int pozIdx;
+			if (which < -2)
+			{
+				return -3;
+			}
+			else if (which == -2)
+			{
+				pozIdx = SelectedPozitions;
+			}
+			else if (which == -1)
+			{
+				pozIdx = Rotors[0].Pozitions.Count - 1;
+			}
+			else
+			{
+				pozIdx = which;
+			}
+			return pozIdx;
 		}
 		/// <summary>Converts this instance to byte array.</summary>
 		public byte[] ToBytes ()
@@ -679,6 +648,8 @@ namespace VPE
 	{
 		/// <summary>Settings library.</summary>
 		public List<Settings> Library { get; private set; } = new();
+		/// <summary>Index of the last active settings.</summary>
+		public int LastActive { get; set; }
 		/// <summary>Creates a new empty settings library.</summary>
 		public SettingsLibrary()
 		{
@@ -695,6 +666,7 @@ namespace VPE
 				Settings s = new(file, ref pozition);
 				Library.Add(s);
 			}
+			LastActive = BitConverter.ToInt32(file, pozition);
 		}
 		/// <summary>Reindexes all the settings contained here.</summary>
 		public void ReIndexSetts ()
@@ -707,12 +679,13 @@ namespace VPE
 		/// <summary>Converts this instance to a byte array.</summary>
 		public byte[] ToBytes()
 		{
-			List<byte> result = new(262144);
+			List<byte> result = new(524288);
 			result.AddRange(BitConverter.GetBytes(Library.Count));
 			foreach (Settings s in Library)
 			{
 				result.AddRange(s.ToBytes());
 			}
+			result.AddRange(BitConverter.GetBytes(LastActive));
 			return result.ToArray();
 		}
 	}

@@ -13,13 +13,31 @@ using VPE;
 using Factorizator;
 using NeueDT;
 using DTcalc;
+using Common;
 
 namespace GUI
 {
+	public class Common_VM
+	{
+		#region Variables
+		private readonly PersistentStorageManager PSM = new();
+		public PersistentStorage PS;
+		#endregion
+		#region Classes for binding
+		internal C_MainWin DataFromGUI_MainWin = new();
+		#endregion
+		#region Public methods
+		public void LoadConfig()
+		{
+			PS = PSM.ReadConfig();
+		}
+		#endregion
+	}
+
 	public class VPE_VM
 	{
 		#region Variables
-		private readonly Generators Generator = new(Codepage.Limit, DateTime.Now.Ticks);
+		private readonly Generators Generator = new();
 		public SettingsLibrary SL = new();
 		public TableLibrary TL = new();
 		public Settings ActiveSett;
@@ -27,7 +45,6 @@ namespace GUI
 		public int SelectedPozs = 0;
 		#endregion
 		#region Classes for binding
-		internal C_VPE_MainWin DataFromGUI_MainWin = new(); // This does nothing yet.
 		internal C_VPE_Sett DataFromGUI_Sett = new();
 		internal List<C_UC_Rotor> DataFromGUI_Rotors = new();
 		internal List<C_VPE_ComboBox> DataFromGUI_Swaps = new();
@@ -45,37 +62,42 @@ namespace GUI
 		#endregion
 
 		#region Public methods
-		
+		#region Generators
+		/// <summary>Generates rotors.</summary>
+		/// <param name="count">How many of them?</param>
 		public void GenerateRotors(uint count = 40)
 		{
-			Generator.UpdateSeed(DateTime.Now.Ticks);
+			Generator.UpdateSeed();
 			for (uint i = 0; i < count; i++)
 			{
 				TL.Rotors.Add(Generator.GenerateTable((ushort)TL.Rotors.Count));
 			}
 		}
-
-		public void GenerateReflector(uint count = 5)
+		/// <summary>Generates reflectors.</summary>
+		/// <param name="count">How many of them?</param>
+		public void GenerateReflectors(uint count = 5)
 		{
-			Generator.UpdateSeed(DateTime.Now.Ticks);
+			Generator.UpdateSeed();
 			for (uint i = 0; i < count; i++)
 			{
 				TL.Reflectors.Add(Generator.GeneratePairs((ushort)TL.Reflectors.Count));
 			}
 		}
-
+		/// <summary>Generates swaps.</summary>
+		/// <param name="count">How many of them?</param>
 		public void GenerateSwaps(uint count = 20)
 		{
-			Generator.UpdateSeed(DateTime.Now.Ticks);
+			Generator.UpdateSeed();
 			for (uint i = 0; i < count; i++)
 			{
 				TL.Swaps.Add(Generator.GeneratePairsWithSkips((ushort)TL.Swaps.Count, Generator.GenerateDoubleInRange(9d / 16d, 950d / 1024d)));
 			}
 		}
-
+		/// <summary>Generates scramblers.</summary>
+		/// <param name="count">How many of them?</param>
 		public void GenerateScramblers(uint count = 10)
 		{
-			Generator.UpdateSeed(DateTime.Now.Ticks);
+			Generator.UpdateSeed();
 			for (uint i = 0; i < count; i++)
 			{
 				TL.Rotors.Add(Generator.GenerateTableWithoutPoz((ushort)TL.Scramblers.Count));
@@ -90,6 +112,42 @@ namespace GUI
 			UpdateSettingsSelector();
 			DataFromGUI_SettSel.SelectedStr = ActiveSett.Name;
 		}
+		/// <summary></summary>
+		/// <param name="MinFrom"></param>
+		/// <param name="MinTo"></param>
+		/// <param name="MaxFrom"></param>
+		/// <param name="MaxTo"></param>
+		public void GenerateSpaceMinMax(ushort MinFrom = 2, ushort MinTo = 8, ushort MaxFrom = 10, ushort MaxTo = 20)
+		{
+			ushort[] space = Generator.GenerateSpaceMinMax(MinFrom, MinTo, MaxFrom, MaxTo);
+			DataFromGUI_Sett.RandCharSpcMinStr = space[0].ToString();
+			DataFromGUI_Sett.RandCharSpcMaxStr = space[1].ToString();
+		}
+		/// <summary></summary>
+		public void GenerateABMConsts()
+		{
+			PrimeDefinedConstant[] consts = Generator.GenerateABM();
+			DataFromGUI_Sett.RandCharGenAStr = consts[0].ToString();
+			DataFromGUI_Sett.RandCharGenBStr = consts[1].ToString();
+			DataFromGUI_Sett.RandCharGenMStr = consts[2].ToString();
+			DataFromGUI_Sett.RandCharA = C_VPE_Sett.FillDataGridClass(consts[0]);
+			DataFromGUI_Sett.RandCharB = C_VPE_Sett.FillDataGridClass(consts[1]);
+			DataFromGUI_Sett.RandCharM = C_VPE_Sett.FillDataGridClass(consts[2]);
+		}
+		/// <summary></summary>
+		public void GenerateABCDConsts()
+		{
+			PrimeDefinedConstant[] consts = Generator.GenerateABCD();
+			DataFromGUI_Sett.SwitchAStr = consts[0].ToString();
+			DataFromGUI_Sett.SwitchBStr = consts[1].ToString();
+			DataFromGUI_Sett.SwitchCStr = consts[2].ToString();
+			DataFromGUI_Sett.SwitchDStr = consts[3].ToString();
+			DataFromGUI_Sett.SwitchA = C_VPE_Sett.FillDataGridClass(consts[0]);
+			DataFromGUI_Sett.SwitchB = C_VPE_Sett.FillDataGridClass(consts[1]);
+			DataFromGUI_Sett.SwitchC = C_VPE_Sett.FillDataGridClass(consts[2]);
+			DataFromGUI_Sett.SwitchD = C_VPE_Sett.FillDataGridClass(consts[3]);
+		}
+		#endregion
 		/// <summary>Sets active settings using what is in GUI.</summary>
 		public void ChangeActiveSettsFromGUI()
 		{
@@ -137,39 +195,8 @@ namespace GUI
 
 		public ushort GenerateRandNum()
 		{
-			Generator.UpdateSeed(DateTime.Now.Ticks);
+			Generator.UpdateSeed();
 			return Generator.GenerateNum();
-		}
-
-		public void GenerateSpaceMinMax(ushort MinFrom = 2, ushort MinTo = 8, ushort MaxFrom = 10, ushort MaxTo = 20)
-		{
-			ushort[] space = Generator.GenerateSpaceMinMax(MinFrom, MinTo, MaxFrom, MaxTo);
-			DataFromGUI_Sett.RandCharSpcMinStr = space[0].ToString();
-			DataFromGUI_Sett.RandCharSpcMaxStr = space[1].ToString();
-		}
-
-		public void GenerateABMConsts()
-		{
-			PrimeDefinedConstant[] consts = Generator.GenerateABM();
-			DataFromGUI_Sett.RandCharGenAStr = consts[0].ToString();
-			DataFromGUI_Sett.RandCharGenBStr = consts[1].ToString();
-			DataFromGUI_Sett.RandCharGenMStr = consts[2].ToString();
-			DataFromGUI_Sett.RandCharA = C_VPE_Sett.FillDataGridClass(consts[0]);
-			DataFromGUI_Sett.RandCharB = C_VPE_Sett.FillDataGridClass(consts[1]);
-			DataFromGUI_Sett.RandCharM = C_VPE_Sett.FillDataGridClass(consts[2]);
-		}
-
-		public void GenerateABCDConsts()
-		{
-			PrimeDefinedConstant[] consts = Generator.GenerateABCD();
-			DataFromGUI_Sett.SwitchAStr = consts[0].ToString();
-			DataFromGUI_Sett.SwitchBStr = consts[1].ToString();
-			DataFromGUI_Sett.SwitchCStr = consts[2].ToString();
-			DataFromGUI_Sett.SwitchDStr = consts[3].ToString();
-			DataFromGUI_Sett.SwitchA = C_VPE_Sett.FillDataGridClass(consts[0]);
-			DataFromGUI_Sett.SwitchB = C_VPE_Sett.FillDataGridClass(consts[1]);
-			DataFromGUI_Sett.SwitchC = C_VPE_Sett.FillDataGridClass(consts[2]);
-			DataFromGUI_Sett.SwitchD = C_VPE_Sett.FillDataGridClass(consts[3]);
 		}
 
 		public string Encrypt(string inText)
@@ -578,6 +605,16 @@ namespace GUI
 	}
 
 	public class Fact_VM
+	{
+
+	}
+
+	public class PSWD_VM
+	{
+
+	}
+
+	public class Maps_VM
 	{
 
 	}

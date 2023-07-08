@@ -5,17 +5,16 @@ using Common;
 
 namespace VPE
 {
+	/// <summary>Class for RNG, Codepage.Limit is used heavily here.</summary>
 	public class Generators
 	{
 		private Random R;
-		private readonly ushort Limit;
-		/// <summary>Vytvoří novou instanci generátoru.</summary>
-		/// <param name="Lim">Maximální hodnota (excluding!), po k</param>
-		/// <param name="Seed">Seed pro vytvoření náhodného generátoru.</param>
-		public Generators(ushort Lim, long Seed = 0)
+		/// <summary>Creates a new instance of the generator.</summary>
+		/// <param name="Lim">Maximal value (excluding!), up to which numbers can be generated.</param>
+		/// <param name="Seed">Seed for this instance of RNG.</param>
+		public Generators(int? seed = null)
 		{
-			Limit = Lim;
-			UpdateSeed(Seed);
+			UpdateSeed(seed);
 		}
 		/// <summary>Generates complete instance of Settings class.</summary>
 		/// <param name="idxs">Set of indexies. 0: rotors, 1: swaps, 2: refls, 3: scramblers, 4: setts.</param>
@@ -58,22 +57,12 @@ namespace VPE
 			settings.VarShift = GenerateNum();
 			return settings;
 		}
-		/// <summary>Aktualizuje seed generátoru čísel.</summary>
-		/// <param name="NewSeed">Seed, nepovinný. Pokud nezadán, bere se podle současného času.</param>
-		public void UpdateSeed(long NewSeed = 0)
+		/// <summary>Updates the seed of RNG.</summary>
+		/// <param name="NewSeed">Seed, nod mandatory. If not given, takes the current time.</param>
+		public void UpdateSeed(int? seed = null)
 		{
-			DateTime Now;
-			if (NewSeed == 0)
-			{
-				Now = DateTime.Now;
-			}
-			else
-			{
-				Now = DateTime.FromBinary(NewSeed);
-			}
-			ulong ms = (ulong)(Now.Millisecond + Now.Second * 1000 + Now.Minute * 60000) + (ulong)(Now.Hour * 3600000) + (ulong)((Now.DayOfYear - 1) * 86400000) + (ulong)(Now.Year * 365.25 * 86400000);
-			int remainder = (int)(ms % int.MaxValue);
-			R = new Random(remainder);
+			seed ??= (int)(DateTime.Now.Ticks / int.MaxValue);
+			R = new Random(seed.Value);
 		}
 		/// <summary>Generates full non-paired table with pozitions.</summary>
 		/// <param name="index">Index of this table.</param>
@@ -85,7 +74,7 @@ namespace VPE
 			T.Pozitions.Add(GenerateNum());
 			return T;
 		}
-		/// <summary>Vygeneruje párovou tabulku, na reflektory.</summary>
+		/// <summary>Generates full paired table, for reflectors.</summary>
 		/// <param name="index">Index of this table.</param>
 		/// <returns>Table. Reflector.</returns>
 		public Table GeneratePairs(uint index)
@@ -97,7 +86,7 @@ namespace VPE
 			};
 			ushort[] Temp = new ushort[Codepage.Limit];
 			List<ushort> Remains = new();
-			for (ushort u = 0; u < Limit; u++)
+			for (ushort u = 0; u < Codepage.Limit; u++)
 			{
 				Remains.Add(u);
 			}
@@ -117,9 +106,9 @@ namespace VPE
 			T.MainTable = Temp.ToList();
 			return T;
 		}
-		/// <summary>Vygeneruje párovou tabulku, kde nejsou všechny hodnoty. Na swapy.</summary>
+		/// <summary>Generates partially filled paired table. For swaps.</summary>
 		/// <param name="index">Index of this table.</param>
-		/// <param name="fillPortion">Jaký podíl záměn má být vyplněn? Nevyplněné položky nebudou zaměňovány.</param>
+		/// <param name="fillPortion">What ratio should be filled? Non-filled will get special numxber indicating their non-fill-ness.</param>
 		/// <returns>Table. Swap.</returns>
 		public Table GeneratePairsWithSkips(uint index, double fillPortion = 0.65234375)
 		{
@@ -131,7 +120,7 @@ namespace VPE
 			};
 			ushort[] temp = new ushort[Codepage.Limit];
 			List<ushort> remains = new();
-			for (ushort u = 0; u < Limit; u++)
+			for (ushort u = 0; u < Codepage.Limit; u++)
 			{
 				remains.Add(u);
 			}
@@ -172,15 +161,15 @@ namespace VPE
 				IsIncomplete = false,
 			};
 			List<ushort> Remains = new();
-			for (ushort u = 0; u < Limit; u++)
+			for (ushort u = 0; u < Codepage.Limit; u++)
 			{
 				Remains.Add(u);
 			}
 			int RandIndex;
 			ushort Selected;
-			for (int i = 0; i < Limit; i++)
+			for (int i = 0; i < Codepage.Limit; i++)
 			{
-				if (i < Limit - 2)
+				if (i < Codepage.Limit - 2)
 				{
 					RandIndex = R.Next(Remains.Count);
 				}
@@ -194,13 +183,16 @@ namespace VPE
 			}
 			return t;
 		}
-		/// <summary>Vygeneruje náhodné číslo od 0 do Codepage.Limit.</summary>
-		/// <returns>Náhodné číslo v limitu.</returns>
+		/// <summary>Generates random number from 0 to Codepage.Limit, excluding.</summary>
+		/// <returns>Random number in bounds.</returns>
 		public ushort GenerateNum()
 		{
-			return Convert.ToUInt16(R.Next(Limit));
+			return Convert.ToUInt16(R.Next(Codepage.Limit));
 		}
-
+		/// <summary>Generates decimal number in provided bounds.</summary>
+		/// <param name="from">Lower bound, including.</param>
+		/// <param name="to">Upper bound, excluding.</param>
+		/// <returns>Decimal number.</returns>
 		public double GenerateDoubleInRange(double from, double to)
 		{
 			if (from > to)
@@ -211,8 +203,8 @@ namespace VPE
 			double rand = R.NextDouble();
 			return from + rand * range;
 		}
-		/// <summary>Vygeneruje konstanty A, B a M pro generátor délky mezer mezi náhodnými znaky.</summary>
-		/// <returns>Pole: A, B a M.</returns>
+		/// <summary>Generates constants A, B a M for calculation of the space between 2 rand chars. Generating these constants follows special rules.</summary>
+		/// <returns>Array: A, B, M.</returns>
 		public PrimeDefinedConstant[] GenerateABM()
 		{
 			PrimeDefinedConstant[] result = new PrimeDefinedConstant[3];
@@ -251,7 +243,9 @@ namespace VPE
 			}
 			return result;
 		}
-
+		/// <summary>Gets a number based on size of provided number's translation to prime digits. For exponents.</summary>
+		/// <param name="num">Number, index on the prime list.</param>
+		/// <returns>Max exponent.</returns>
 		private static int GetSizeBasedMax(int num)
 		{
 			return num switch
@@ -265,7 +259,8 @@ namespace VPE
 				_ => 0,
 			};
 		}
-
+		/// <summary>Generates the A, B, C, D constants.</summary>
+		/// <returns>Array of PDC, A, B, C, D in order.</returns>
 		public PrimeDefinedConstant[] GenerateABCD()
 		{
 			PrimeDefinedConstant[] result = new PrimeDefinedConstant[4];
@@ -282,7 +277,12 @@ namespace VPE
 			}
 			return result;
 		}
-
+		/// <summary>Generates min and max length of space, both based on given bounds.</summary>
+		/// <param name="MinFrom">Lower bound of minumum, including.</param>
+		/// <param name="MinTo">Upper bound of minumum, excluding.</param>
+		/// <param name="MaxFrom">Lower bound of maximum, including.</param>
+		/// <param name="MaxTo">Upper bound of maximum, excluding.</param>
+		/// <returns>Min and max length of space (between random chars), in array.</returns>
 		public ushort[] GenerateSpaceMinMax(ushort MinFrom = 2, ushort MinTo = 8, ushort MaxFrom = 10, ushort MaxTo = 20)
 		{
 			return new ushort[2] { (ushort)R.Next(MinFrom, MinTo), (ushort)R.Next(MaxFrom, MaxTo) };

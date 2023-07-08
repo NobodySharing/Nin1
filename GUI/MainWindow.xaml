@@ -7,7 +7,7 @@
 		mc:Ignorable="d"
 		Title="N in 1" Height="1000" Width="1500">
 	<Window.Resources>
-		<local:C_VPE_MainWin x:Key="DataFromGUI"/>
+		<local:C_MainWin x:Key="DataFromGUI"/>
 	</Window.Resources>
 	<Window.DataContext>
 		<Binding Source="{StaticResource DataFromGUI}"/>
@@ -110,7 +110,7 @@
 				</Grid.RowDefinitions>
 			</Grid>
 		</TabItem>
-		<TabItem x:Name="TI_MapDown" Header="Mapy.cz downloader">
+		<TabItem x:Name="TI_MapDown" Header="Maps downloader">
 			<Grid>
 				<Grid.ColumnDefinitions>
 

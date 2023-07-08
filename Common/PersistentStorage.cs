@@ -6,37 +6,19 @@ namespace Common
 	{
 		private const string MyDirName = "Nin1";
 		private const string ConfigFileName = "Config.txt";
-		private string DefaultConfigFileContent =
-			"[VPE]\r\n" +
-			"\tAutoload Table Library=\r\n" +
-			"\tAutoload Settings Library=\r\n" +
-			"\tSelect Settings=\r\n" +
-			"[Neue date-time]\r\n" +
-			" \r\n" +
-			"[Date-time calculator]\r\n" +
-			" \r\n" +
-			"[Factorizator]\r\n" +
-			" \r\n" +
-			"[Password generator]\r\n" +
-			" \r\n" +
-			"[Map downloader]\r\n" +
-			" \r\n";
-		private readonly DirectoryInfo MyDir; // Path to folder with config file.
-		private readonly FileInfo MyConfig; // Path to config file directly.
+		private readonly FileInfo ConfigFile; // Path to config file directly.
 
 		public PersistentStorageManager()
 		{
-			string path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + MyDirName + "\\";
-			MyDir = new(path);
-			MyConfig = new(path + ConfigFileName);
-			CheckOrCreateMyFolderAndConfig();
+			ConfigFile = new(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + MyDirName + "\\" + ConfigFileName);
+			CheckOrCreateMyConfig();
 		}
-
-		public void CheckOrCreateMyFolderAndConfig()
+		/// <summary></summary>
+		public void CheckOrCreateMyConfig()
 		{
-			if (MyDir.Exists)
+			if (ConfigFile.Exists)
 			{
-				if (MyConfig.Exists)
+				if (ConfigFile.Exists)
 				{
 					return;
 				}
@@ -47,23 +29,45 @@ namespace Common
 			}
 			else
 			{
-				MyDir.Create();
+				ConfigFile.Create();
 				CreateBasicConfig();
 			}
 		}
 
 		private void CreateBasicConfig()
 		{
-			MyConfig.Create().Close();
-			File.WriteAllText(MyConfig.FullName, DefaultConfigFileContent);
+			System.Text.StringBuilder sb = new();
+			sb.Append("[Common]\r\n");
+			sb.Append("\tIsDefault=true\r\n");
+			sb.Append("[VPE]\r\n");
+			sb.Append("\tAutoload Table Library=\r\n");
+			sb.Append("\tAutoload Settings Library=\r\n");
+			sb.Append("\tSelect Settings=\r\n");
+			sb.Append("[Neue date-time]\r\n");
+			sb.Append(" \r\n");
+			sb.Append("[Date-time calculator]\r\n");
+			sb.Append(" \r\n");
+			sb.Append("[Factorizator]\r\n");
+			sb.Append(" \r\n");
+			sb.Append("[Password generator]\r\n");
+			sb.Append(" \r\n");
+			sb.Append("[Map downloader]\r\n");
+			sb.Append(" \r\n");
+			File.WriteAllText(ConfigFile.FullName, sb.ToString());
 		}
 		
-		internal PersistentStorage ReadConfig()
+		public PersistentStorage ReadConfig()
 		{
+			PersistentStorage ps = new();
+			if (ConfigFile.Exists)
+			{
+				string[] content = File.ReadAllLines(ConfigFile.FullName);
 
+			}
+			return ps;
 		}
 
-		internal void WriteConfig(PersistentStorage ps)
+		public void WriteConfig(PersistentStorage ps)
 		{
 
 		}
@@ -71,8 +75,13 @@ namespace Common
 
 	public class PersistentStorage
 	{
-		string PathsToSettLib;
-		string PathsToTableLib;
-		int ActiveSett;
+		#region Common
+		bool IsDefault = true;
+		#endregion
+		#region VPE
+		string PathsToSettLib = "";
+		string PathsToTableLib = "";
+		int ActiveSett = -1;
+		#endregion
 	}
 }

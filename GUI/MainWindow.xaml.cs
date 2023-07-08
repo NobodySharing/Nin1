@@ -20,15 +20,13 @@ namespace GUI
 {
 	public partial class MainWindow : Window
 	{
-		
 		#region Common
-		private readonly C_VPE_MainWin DataFromGUI = new(); // ToDo: Put this in VPE's VM.
-		private readonly PersistentStorageManager PS = new(); // ToDo: Implement.
-
+		private readonly Common_VM Cmn = new();
 		public MainWindow()
 		{
 			InitializeComponent();
-			DataContext = DataFromGUI;
+			DataContext = Cmn.DataFromGUI_MainWin;
+			
 		}
 		#endregion
 
@@ -39,7 +37,7 @@ namespace GUI
 		{
 			if (VPE.ActiveSett is not null)
 			{
-				DataFromGUI.VPE_EncrypStr = VPE.Encrypt(DataFromGUI.VPE_PlainStr);
+				Cmn.DataFromGUI_MainWin.VPE_EncrypStr = VPE.Encrypt(Cmn.DataFromGUI_MainWin.VPE_PlainStr);
 				DisplayRotorPozs(VPE.ActiveSett.SelectedPozitions);
 			}
 			else
@@ -56,7 +54,7 @@ namespace GUI
 		{
 			if (VPE.ActiveSett is not null)
 			{
-				DataFromGUI.VPE_PlainStr = VPE.Decrypt(DataFromGUI.VPE_EncrypStr);
+				Cmn.DataFromGUI_MainWin.VPE_PlainStr = VPE.Decrypt(Cmn.DataFromGUI_MainWin.VPE_EncrypStr);
 				DisplayRotorPozs(VPE.ActiveSett.SelectedPozitions);
 			}
 			else
@@ -69,13 +67,13 @@ namespace GUI
 			}
 		}
 
-		private void MI_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_PlainStr = VPE_VM.OpenMsgFile();
+		private void MI_VPE_OpenUneMsgFile_Click(object sender, RoutedEventArgs e) => Cmn.DataFromGUI_MainWin.VPE_PlainStr = VPE_VM.OpenMsgFile();
 
-		private void MI_VPE_OpenEncMsgFile_Click(object sender, RoutedEventArgs e) => DataFromGUI.VPE_EncrypStr = VPE_VM.OpenMsgFile();
+		private void MI_VPE_OpenEncMsgFile_Click(object sender, RoutedEventArgs e) => Cmn.DataFromGUI_MainWin.VPE_EncrypStr = VPE_VM.OpenMsgFile();
 
-		private void MI_VPE_SaveEncMsgFile_Click(object sender, RoutedEventArgs e) => VPE_VM.SaveMsgFile(DataFromGUI.VPE_EncrypStr);
+		private void MI_VPE_SaveEncMsgFile_Click(object sender, RoutedEventArgs e) => VPE_VM.SaveMsgFile(Cmn.DataFromGUI_MainWin.VPE_EncrypStr);
 
-		private void MI_VPE_SaveUneMsgFile_Click(object sender, RoutedEventArgs e) => VPE_VM.SaveMsgFile(DataFromGUI.VPE_PlainStr);
+		private void MI_VPE_SaveUneMsgFile_Click(object sender, RoutedEventArgs e) => VPE_VM.SaveMsgFile(Cmn.DataFromGUI_MainWin.VPE_PlainStr);
 
 		private void MI_VPE_QuickSettGen_Click(object sender, RoutedEventArgs e)
 		{
@@ -129,11 +127,11 @@ namespace GUI
 
 		private void B_VPE_UseCustPozSet_Click(object sender, RoutedEventArgs e)
 		{
-			if (DataFromGUI.VPE_RotPozStr is not null)
+			if (Cmn.DataFromGUI_MainWin.VPE_RotPozStr is not null)
 			{
-				if (DataFromGUI.VPE_RotPozStr != "")
+				if (Cmn.DataFromGUI_MainWin.VPE_RotPozStr != "")
 				{
-					if (VPE.AddPozFromString(DataFromGUI.VPE_RotPozStr))
+					if (VPE.AddPozFromString(Cmn.DataFromGUI_MainWin.VPE_RotPozStr))
 					{
 						DisplayRotorPozs(-1);
 						VPE.SelectedPozs = VPE.ActiveSett.SelectedPozitions = VPE.ActiveSett.GetLastRotorPozitionsIdx;
@@ -152,28 +150,28 @@ namespace GUI
 
 		private void DisplayRotorPozs(int which = -2)
 		{
-			DataFromGUI.VPE_RotPozStr = VPE.GetPozsStrings(which);
+			Cmn.DataFromGUI_MainWin.VPE_RotPozStr = VPE.GetPozsStrings(which);
 			if (which < -2)
 			{
-				DataFromGUI.VPE_RotPozIdxStr = "";
+				Cmn.DataFromGUI_MainWin.VPE_RotPozIdxStr = "";
 			}
 			else if (which == -2)
 			{
-				DataFromGUI.VPE_RotPozIdxStr = (VPE.ActiveSett.SelectedPozitions).ToString();
+				Cmn.DataFromGUI_MainWin.VPE_RotPozIdxStr = (VPE.ActiveSett.SelectedPozitions).ToString();
 			}
 			else if (which == -1)
 			{
-				DataFromGUI.VPE_RotPozIdxStr = (VPE.ActiveSett.GetLastRotorPozitionsIdx).ToString();
+				Cmn.DataFromGUI_MainWin.VPE_RotPozIdxStr = (VPE.ActiveSett.GetLastRotorPozitionsIdx).ToString();
 			}
 			else
 			{
-				DataFromGUI.VPE_RotPozIdxStr = which.ToString();
+				Cmn.DataFromGUI_MainWin.VPE_RotPozIdxStr = which.ToString();
 			}
 		}
 
 		private void AddRotorPozs()
 		{
-			VPE.ActiveSett.AddPozitionsUsingString(DataFromGUI.VPE_RotPozStr);
+			VPE.ActiveSett.AddPozitionsUsingString(Cmn.DataFromGUI_MainWin.VPE_RotPozStr);
 		}
 		#endregion
 

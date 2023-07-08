@@ -11,7 +11,7 @@ namespace GUI
 {
 	public partial class UC_Rotor : UserControl
 	{
-		private readonly Generators Generator = new(Codepage.Limit, DateTime.Now.Ticks);
+		private readonly Generators Generator = new();
 
 		public ushort SelTable { get; set; }
 
@@ -31,7 +31,7 @@ namespace GUI
 
 		private void B_RandPoz_Click (object sender, RoutedEventArgs e)
 		{
-			Generator.UpdateSeed(DateTime.Now.Ticks);
+			Generator.UpdateSeed();
 			DataFromGUI.PozitionStr = Generator.GenerateNum().ToString();
 		}
 	}

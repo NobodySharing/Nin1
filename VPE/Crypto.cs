@@ -11,8 +11,10 @@ namespace VPE
 	/// <summary>The main class doing all the en/decrypting.</summary>
 	public class Crypto
 	{
+		/// <summary>This is the key.</summary>
 		private readonly Settings Sett;
-		private const int MultithreadingThreshold = 32768; // Threshold for message length. Longer messages will get processed multithreadingly.
+		/// <summary>Threshold for message length. Longer messages will get processed multithreadingly. Given as num of chars per thread.</summary>
+		private readonly int MultithreadingThreshold = 2048 * Environment.ProcessorCount;
 		/// <summary>Set of numbers representing the message. My working memory.</summary>
 		private List<ushort> Message;
 		/// <summary>Initializes a new instance.</summary>
@@ -500,17 +502,11 @@ namespace VPE
 		/// <summary>Adds random chars to the message.</summary>
 		private void AddRandomChars()
 		{
-			BigInteger seed0 = 1;
-			foreach (Table rotor in Sett.Rotors)
-			{
-				seed0 *= rotor.Pozitions[Sett.SelectedPozitions];
-			}
-			seed0 %= (DateTime.MaxValue.Ticks - DateTime.MinValue.Ticks); 
-			long seed1 = DateTime.MinValue.Ticks + (long)seed0;
-			Generators Gen = new (Codepage.Limit, seed1);
+			BigInteger poz = Sett.GetPozitionMagnitude();
+			Generators Gen = new((int)(poz % int.MaxValue));
 			int index = (Sett.RandCharSpcMin + Sett.RandCharSpcMax) % 2; // Index inicialization, where I will add random char.
 			int gap = Sett.RandCharSpcMax - Sett.RandCharSpcMin;
-			BigInteger space = (BigInteger)(Math.Floor(Convert.ToDouble(Codepage.Limit / gap)) % gap + Sett.RandCharSpcMin); // Inicializace mezery. V jádru „náhodný“ výpočet, pak dání do rozsahu a posunutí o minimum.
+			BigInteger space = (BigInteger)(Math.Floor(Convert.ToDouble(Codepage.Limit / gap)) % gap + Sett.RandCharSpcMin); // Gap inicialization.In core calculation of “random” number, then putting in limits and shift by minimum.
 			BigInteger A = Sett.RandCharConstA.ComputeConstant(1), B = Sett.RandCharConstB.ComputeConstant(), M = Sett.RandCharConstM.ComputeConstant(); // I have to precompute the constants here, so I don't compute them every time.
 			while (index < Message.Count)
 			{
