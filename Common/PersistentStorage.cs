@@ -18,14 +18,7 @@ namespace Common
 		{
 			if (ConfigFile.Exists)
 			{
-				if (ConfigFile.Exists)
-				{
-					return;
-				}
-				else
-				{
-					CreateBasicConfig();
-				}
+				return;
 			}
 			else
 			{
@@ -62,7 +55,10 @@ namespace Common
 			if (ConfigFile.Exists)
 			{
 				string[] content = File.ReadAllLines(ConfigFile.FullName);
+				foreach (string line in content)
+				{
 
+				}
 			}
 			return ps;
 		}
@@ -81,7 +77,6 @@ namespace Common
 		#region VPE
 		string PathsToSettLib = "";
 		string PathsToTableLib = "";
-		int ActiveSett = -1;
 		#endregion
 	}
 }
