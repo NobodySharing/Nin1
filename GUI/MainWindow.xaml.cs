@@ -26,7 +26,17 @@ namespace GUI
 		{
 			InitializeComponent();
 			DataContext = Cmn.DataFromGUI_MainWin;
-			
+			Cmn.LoadConfig(ref VPE);
+		}
+
+		private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			Cmn.SaveConfig();
+			Cmn.PS.PathsToSettLib = VPE.SL.PathToThis;
+			Cmn.PS.PathsToTableLib = VPE.TL.PathToThis;
+			VPE.UpdateSettings();
+			VPE.UpdateSettingsLib(Cmn.PS.PathsToSettLib);
+			VPE.UpdateTableLib(Cmn.PS.PathsToTableLib);
 		}
 		#endregion
 

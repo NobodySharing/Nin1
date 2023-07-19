@@ -531,6 +531,8 @@ namespace VPE
 		public List<Table> Swaps { get; private set; } = new();
 		/// <summary>All scramblers.</summary>
 		public List<Table> Scramblers { get; private set; } = new();
+		/// <summary>Path to this instance on disk.</summary>
+		public string PathToThis { get; set; }
 		/// <summary>Creates an empty instance of Table library class.</summary>
 		public TableLibrary ()
 		{
@@ -650,6 +652,8 @@ namespace VPE
 		public List<Settings> Library { get; private set; } = new();
 		/// <summary>Index of the last active settings.</summary>
 		public int LastActive { get; set; }
+		/// <summary>Path to this instance on disk.</summary>
+		public string PathToThis { get; set; }
 		/// <summary>Creates a new empty settings library.</summary>
 		public SettingsLibrary()
 		{

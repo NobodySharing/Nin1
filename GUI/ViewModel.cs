@@ -14,6 +14,8 @@ using Factorizator;
 using NeueDT;
 using DTcalc;
 using Common;
+using System.IO;
+using System.Windows.Shapes;
 
 namespace GUI
 {
@@ -27,9 +29,28 @@ namespace GUI
 		internal C_MainWin DataFromGUI_MainWin = new();
 		#endregion
 		#region Public methods
-		public void LoadConfig()
+		public void LoadConfig(ref VPE_VM vpe)
 		{
 			PS = PSM.ReadConfig();
+			if (PS.IsDefault)
+			{
+				return;
+			}
+			else
+			{
+				if (File.Exists(PS.PathsToTableLib))
+				{
+					FileHandling.Load(PS.PathsToTableLib, out vpe.TL);
+				}
+				if (File.Exists(PS.PathsToSettLib))
+				{
+					FileHandling.Load(PS.PathsToSettLib, out vpe.SL);
+				}
+			}
+		}
+		public void SaveConfig()
+		{
+			PSM.WriteConfig(PS);
 		}
 		#endregion
 	}
@@ -43,6 +64,7 @@ namespace GUI
 		public Settings ActiveSett;
 		public Crypto C;
 		public int SelectedPozs = 0;
+		public string PathToIndividualSetts = Invalid_File;
 		#endregion
 		#region Classes for binding
 		internal C_VPE_Sett DataFromGUI_Sett = new();
@@ -446,13 +468,20 @@ namespace GUI
 				return;
 			}
 			FileHandling.Load(path, out Settings s);
+			PathToIndividualSetts = path;
 			AddSettsToLib(s);
 			UpdateSettingsSelector();
 		}
 
 		public void UpdateSettings()
 		{
-
+			if (PathToIndividualSetts == Invalid_File)
+			{
+				return;
+			}
+			FileInfo fi = new(PathToIndividualSetts);
+			fi.Delete();
+			FileHandling.Save(ActiveSett, PathToIndividualSetts);
 		}
 
 		public void SaveSettingsLib()
@@ -476,6 +505,7 @@ namespace GUI
 				return;
 			}
 			FileHandling.Load(path, out SettingsLibrary sl);
+			sl.PathToThis = path;
 			foreach (Settings s in sl.Library)
 			{
 				AddSettsToLib(s);
@@ -484,7 +514,21 @@ namespace GUI
 
 		public void UpdateSettingsLib()
 		{
-
+			if (SL.PathToThis == null)
+			{
+				return;
+			}
+			if (SL.PathToThis == "")
+			{
+				return;
+			}
+			if (SL.PathToThis == Invalid_File)
+			{
+				return;
+			}
+			FileInfo fi = new(SL.PathToThis);
+			fi.Delete();
+			FileHandling.Save(SL, SL.PathToThis);
 		}
 
 		public void SaveTableLib()
@@ -508,6 +552,7 @@ namespace GUI
 				return;
 			}
 			FileHandling.Load(path, out TableLibrary tl);
+			TL.PathToThis = path;
 			TL.Reflectors.AddRange(tl.Reflectors);
 			TL.Swaps.AddRange(tl.Swaps);
 			TL.Rotors.AddRange(tl.Rotors);
@@ -516,14 +561,28 @@ namespace GUI
 
 		public void UpdateTableLib()
 		{
-
+			if (TL.PathToThis == null)
+			{
+				return;
+			}
+			if (TL.PathToThis == "")
+			{
+				return;
+			}
+			if (TL.PathToThis == Invalid_File)
+			{
+				return;
+			}
+			FileInfo fi = new(TL.PathToThis);
+			fi.Delete();
+			FileHandling.Save(TL, TL.PathToThis);
 		}
 		#endregion
 
 		#region Private methods
-		/// <summary>Zobrazí dialog otevření souboru a vrátí cestu k němu.</summary>
+		/// <summary>Shows file open dialog and returns a path to selected file.</summary>
 		/// <param name="ext">Extension.</param>
-		/// <returns>Cesta k souboru.</returns>
+		/// <returns>Path to a file or invalid marker.</returns>
 		private static string OpenFile(string ext)
 		{
 			OpenFileDialog OFD = new()
@@ -540,9 +599,9 @@ namespace GUI
 			}
 			return Invalid_File;
 		}
-		/// <summary>Zobrazí dialog uložení souboru a vrátí cestu k němu.</summary>
+		/// <summary>Shows file save dialog and returns a path to selected file.</summary>
 		/// <param name="ext">Extension.</param>
-		/// <returns>Cesta k souboru.</returns>
+		/// <returns>Path to a file or invalid marker.</returns>
 		private static string SaveFile(string ext)
 		{
 			SaveFileDialog SFD = new()
