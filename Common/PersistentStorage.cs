@@ -23,7 +23,7 @@ namespace Common
 
 		public PersistentStorageManager()
 		{
-			ConfigFile = new(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + MyDirName + "\\" + ConfigFileName);
+			ConfigFile = new(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\" + MyDirName + "\\" + ConfigFileName);
 			CheckOrCreateMyConfig();
 		}
 		/// <summary></summary>
@@ -35,7 +35,8 @@ namespace Common
 			}
 			else
 			{
-				ConfigFile.Create();
+				Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\" + MyDirName);
+				ConfigFile.Create().Close();
 				CreateBasicConfig();
 			}
 		}

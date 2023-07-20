@@ -346,7 +346,7 @@ namespace VPE
 			{
 				return -1;
 			}
-			for (int i = Rotors.Count, j = 0; i > -1; i--, j++)
+			for (int i = Rotors.Count - 1, j = 0; i > -1; i--, j++)
 			{
 				result += Rotors[i].Pozitions[pozIdx] * BigInteger.Pow(Codepage.Limit, j);
 			}

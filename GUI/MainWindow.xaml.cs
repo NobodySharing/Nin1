@@ -32,11 +32,12 @@ namespace GUI
 		private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 			Cmn.SaveConfig();
+			Cmn.PS.IsDefault = false;
 			Cmn.PS.PathsToSettLib = VPE.SL.PathToThis;
 			Cmn.PS.PathsToTableLib = VPE.TL.PathToThis;
 			VPE.UpdateSettings();
-			VPE.UpdateSettingsLib(Cmn.PS.PathsToSettLib);
-			VPE.UpdateTableLib(Cmn.PS.PathsToTableLib);
+			VPE.UpdateSettingsLib();
+			VPE.UpdateTableLib();
 		}
 		#endregion
 
