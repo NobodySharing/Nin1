@@ -27,17 +27,18 @@ namespace GUI
 			InitializeComponent();
 			DataContext = Cmn.DataFromGUI_MainWin;
 			Cmn.LoadConfig(ref VPE);
+			DisplayRotorPozs(-1);
 		}
 
 		private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
-			Cmn.SaveConfig();
-			Cmn.PS.IsDefault = false;
-			Cmn.PS.PathsToSettLib = VPE.SL.PathToThis;
-			Cmn.PS.PathsToTableLib = VPE.TL.PathToThis;
 			VPE.UpdateSettings();
 			VPE.UpdateSettingsLib();
 			VPE.UpdateTableLib();
+			Cmn.PS.IsDefault = false;
+			Cmn.PS.PathsToSettLib = VPE.SL.PathToThis;
+			Cmn.PS.PathsToTableLib = VPE.TL.PathToThis;
+			Cmn.SaveConfig();
 		}
 		#endregion
 

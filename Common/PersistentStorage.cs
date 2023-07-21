@@ -12,10 +12,10 @@ namespace Common
 		private const string HeaderF = "[Factorizator]\r\n";
 		private const string HeaderPG = "[Password generator]\r\n";
 		private const string HeaderMD = "[Map downloader]\r\n";
-		private const string LineIsDefault = "\tIs default=";
-		private const string LineShowTab = "\tDefault tab=";
-		private const string LineAutoloadTableLib = "\tAutoload Table Library=";
-		private const string LineAutoloadSettingsLib = "\tAutoload Settings Library=";
+		private const string LineIsDefault = "Is default";
+		private const string LineShowTab = "Default tab";
+		private const string LineAutoloadTableLib = "Autoload Table Library";
+		private const string LineAutoloadSettingsLib = "Autoload Settings Library";
 		#endregion
 		private const string MyDirName = "Nin1";
 		private const string ConfigFileName = "Config.txt";
@@ -45,11 +45,11 @@ namespace Common
 		{
 			System.Text.StringBuilder sb = new();
 			sb.Append(HeaderCommon);
-			sb.Append(LineIsDefault + "true\r\n");
-			sb.Append(LineShowTab + "0\r\n");
+			sb.Append("\t" + LineIsDefault + "=true\r\n");
+			sb.Append("\t" + LineShowTab + "=0\r\n");
 			sb.Append(HeaderVPE);
-			sb.Append(LineAutoloadTableLib + "\r\n");
-			sb.Append(LineAutoloadSettingsLib + "\r\n");
+			sb.Append("\t" + LineAutoloadTableLib + "=\r\n");
+			sb.Append("\t" + LineAutoloadSettingsLib + "=\r\n");
 			sb.Append(HeaderNDT);
 			sb.Append("\t\r\n");
 			sb.Append(HeaderDTC);
@@ -59,7 +59,7 @@ namespace Common
 			sb.Append(HeaderPG);
 			sb.Append("\t\r\n");
 			sb.Append(HeaderMD);
-			sb.Append("\t\r\n");
+			sb.Append("\t");
 			File.WriteAllText(ConfigFile.FullName, sb.ToString());
 		}
 		
@@ -117,6 +117,7 @@ namespace Common
 			System.Text.StringBuilder sb = new();
 			sb.Append(HeaderCommon);
 			sb.Append(LineIsDefault + (ps.IsDefault ? "true" : "false") + "\r\n");
+			sb.Append(LineShowTab + "0\r\n");
 			sb.Append(HeaderVPE);
 			sb.Append(LineAutoloadTableLib + ps.PathsToTableLib + "\r\n");
 			sb.Append(LineAutoloadSettingsLib + ps.PathsToSettLib + "\r\n");
@@ -129,7 +130,7 @@ namespace Common
 			sb.Append(HeaderPG);
 			sb.Append("\t\r\n");
 			sb.Append(HeaderMD);
-			sb.Append("\t\r\n");
+			sb.Append("\t");
 			File.WriteAllText(ConfigFile.FullName, sb.ToString());
 		}
 	}

@@ -40,13 +40,17 @@ namespace GUI
 			{
 				if (File.Exists(PS.PathsToTableLib))
 				{
-					FileHandling.Load(PS.PathsToTableLib, out vpe.TL);
+					FileHandling.Load(PS.PathsToTableLib, out TableLibrary tl);
+					vpe.TL = tl;
 				}
 				if (File.Exists(PS.PathsToSettLib))
 				{
-					FileHandling.Load(PS.PathsToSettLib, out vpe.SL);
+					FileHandling.Load(PS.PathsToSettLib, out SettingsLibrary sl);
+					vpe.SL = sl;
 				}
 			}
+			vpe.ActiveSett = vpe.SL.Library[vpe.SL.LastActive];
+			vpe.DisplaySettsInGUI();
 		}
 		public void SaveConfig()
 		{
@@ -246,6 +250,7 @@ namespace GUI
 		public void SetUsingSelSettName()
 		{
 			ActiveSett = SL.Library.Find(x => x.Name == DataFromGUI_SettSel.SelectedStr);
+			SL.LastActive = (int)ActiveSett.Idx;
 		}
 
 		public void InitializeRotorSelectors(ushort count)
@@ -505,11 +510,12 @@ namespace GUI
 				return;
 			}
 			FileHandling.Load(path, out SettingsLibrary sl);
-			sl.PathToThis = path;
+			SL.PathToThis = path;
 			foreach (Settings s in sl.Library)
 			{
 				AddSettsToLib(s);
 			}
+			ActiveSett = SL.Library[SL.LastActive];
 		}
 
 		public void UpdateSettingsLib()
