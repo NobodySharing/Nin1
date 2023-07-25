@@ -23,7 +23,7 @@
 				<Grid.RowDefinitions>
 					<RowDefinition Height="22 px"/>
 					<RowDefinition Height="55 px"/>
-					<RowDefinition Height="20 px"/>
+					<RowDefinition Height="22 px"/>
 					<RowDefinition Height="1*"/>
 				</Grid.RowDefinitions>
 				<Menu Grid.Row="0" Grid.ColumnSpan="3" Height="22">
@@ -35,9 +35,17 @@
 					</MenuItem>
 					<MenuItem Header="_Settings">
 						<MenuItem Header="Open settings _composer" Click="MI_VPE_SettingsComp_Click"/>
+						<Separator/>
 						<MenuItem Header="_Generate all settings for current encryption" Click="MI_VPE_QuickSettGen_Click"/>
 						<MenuItem Header="_Open and use settings" Click="MI_VPE_QuickSettOpen_Click"/>
 						<MenuItem Header="_Save currently used settings to a file" Click="MI_VPE_QuickSettSave_Click"/>
+						<Separator/>
+						<MenuItem Header="Save current settings to a file"/>
+						<MenuItem Header="Load settings from a file"/>
+						<MenuItem Header="Save current settings library to a file"/>
+						<MenuItem Header="Load settings library from a file"/>
+						<MenuItem Header="Save current table library to a file"/>
+						<MenuItem Header="Load table library from a file"/>
 					</MenuItem>
 					<MenuItem Header="_Encryption">
 						<MenuItem Header="_Encrypt" Click="MI_VPE_Encrypt_Click"/>
@@ -64,8 +72,31 @@
 					<Button x:Name="B_VPE_UseCustRotPoz" Content="Use" Grid.Column="2" Grid.Row="0" Margin="1" Click="B_VPE_UseCustPozSet_Click"/>
 					<Button x:Name="B_VPE_RemSelRotPoz" Content="Remove" Grid.Column="2" Grid.Row="1" Margin="1" Click="B_VPE_RemSelRotPoz_Click"/>
 				</Grid>
-				<TextBlock Grid.Row="2" Grid.Column="0" Text="Plain text" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-				<TextBlock Grid.Row="2" Grid.Column="2" Text="Encrypted text" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+				<Grid Grid.Row="2" Grid.Column="0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="1*"/>
+						<ColumnDefinition Width="150px"/>
+						<ColumnDefinition Width="1*"/>
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="1*"/>
+					</Grid.RowDefinitions>
+					<TextBlock Grid.Row="0" Grid.Column="1" Text="Plain text" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+					<Button Grid.Row="0" Grid.Column="2" MaxHeight="21" MaxWidth="100" Content="Encrypt" Click="B_VPE_Encrypt"/>
+				</Grid>
+				<Grid Grid.Row="2" Grid.Column="2">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="1*"/>
+						<ColumnDefinition Width="150px"/>
+						<ColumnDefinition Width="1*"/>
+					</Grid.ColumnDefinitions>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="1*"/>
+					</Grid.RowDefinitions>
+					<Button Grid.Row="0" Grid.Column="0" MaxHeight="21" MaxWidth="100" Content="Decrypt" Click="B_VPE_Decrypt"/>
+					<TextBlock Grid.Row="0" Grid.Column="1" Text="Encrypted text" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+					<CheckBox Grid.Row="0" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Content="Numeric representation" IsChecked="{Binding Path=VPE_NumericRepres, Mode=TwoWay}" Click="VPE_ChB_NumericRepres_Click"/>
+				</Grid>
 				<TextBox x:Name="TB_VPE_Left" Grid.Column="0" Grid.Row="4" Margin="2" Text="{Binding Path=VPE_PlainStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" FontFamily="Lucida Sans Unicode" FontSize="14"/>
 				<TextBox x:Name="TB_VPE_Right" Grid.Column="2" Grid.Row="4" Margin="2" Text="{Binding Path=VPE_EncrypStr, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" AcceptsReturn="True" AcceptsTab="True" FontFamily="Lucida Sans Unicode" FontSize="14"/>
 			</Grid>

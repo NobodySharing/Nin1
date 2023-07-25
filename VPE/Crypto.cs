@@ -24,12 +24,13 @@ namespace VPE
 			Sett = S;
 		}
 		/// <summary>Encrypts text.</summary>
-		/// <param name="Text">Text to encrypt.</param>
+		/// <param name="text">Text to encrypt.</param>
+		/// <param name="numOut">Output the text as numeric representation?</param>
 		/// <returns>Encrypted text.</returns>
-		public string Encypt(string Text)
+		public string Encypt(string text, bool numOut)
 		{
 			Sett.DuplicateAndSetToActivePozitions(Sett.SelectedPozitions);
-			ConvertToNums(Text);
+			ConvertToNums(text);
 			ScrambleCharTable(0, true);
 			Differentiate();
 			AddRandomChars();
@@ -42,15 +43,31 @@ namespace VPE
 			Differentiate();
 			SwitchCharPoz(1);
 			ScrambleCharTable(1, true);
-			return ConvertToString();
+			Sett.PrunePozitions();
+			if(numOut)
+			{
+				return ConvertToNumString();
+			}
+			else
+			{
+				return ConvertToString();
+			}
 		}
 		/// <summary>Decrypts text.</summary>
-		/// <param name="Text">Text to decrypt.</param>
+		/// <param name="text">Text to decrypt.</param>
+		/// <param name="numIn">Is the text numeric representation?</param>
 		/// <returns>Decrypted text.</returns>
-		public string Decypt(string Text)
+		public string Decypt(string text, bool numIn)
 		{
 			Sett.DuplicateAndSetToActivePozitions(Sett.SelectedPozitions);
-			ConvertToNums(Text);
+			if (numIn)
+			{
+				ConvertFromNumString(text);
+			}
+			else
+			{
+				ConvertToNums(text);
+			}
 			ScrambleCharTable(1, false);
 			UnSwitchCharPoz(1);
 			Undifferentiate();
@@ -63,6 +80,7 @@ namespace VPE
 			RemoveRandomChars();
 			Undifferentiate();
 			ScrambleCharTable(0, false);
+			Sett.PrunePozitions();
 			return ConvertToString();
 		}
 		/// <summary>Does simple char switch, designed for randomization of the char table without changing it.</summary>
@@ -194,61 +212,46 @@ namespace VPE
 			}
 		}
 		/// <summary>Converts text message to set of numbers using the codepage.</summary>
-		/// <param name="Text">Text message.</param>
-		private void ConvertToNums(string Text)
+		/// <param name="text">Text message.</param>
+		private void ConvertToNums(string text)
 		{
-			Message = new(Text.Length);
-			for (int i = 0; i < Text.Length; i++)
-			{
-				char Ch = Text[i];
-				char N = i == (Text.Length - 1)? '\0' : Text[i + 1];
-				if (Ch == '\r')
-				{
-					if ((N == '\n') || (N == '\0'))
-					{
-						Message.Add((ushort)Array.IndexOf(Codepage.CharSet, "\r\n"));
-						i++;
-						continue;
-					}
-					else
-					{
-						Message.Add((ushort)Array.IndexOf(Codepage.CharSet, "\r\n"));
-						continue;
-					}
-				}
-				else if (Ch == '\n')
-				{
-					Message.Add((ushort)Array.IndexOf(Codepage.CharSet, "\r\n"));
-					continue;
-				}
-				int index = Array.IndexOf(Codepage.CharSet, Convert.ToString(Ch));
-				if (index >= 0)
-				{
-					Message.Add((ushort)index);
-				}
-				else
-				{
-					continue;
-				}
-			}
+			Message = Codepage.ConvertToNums(text);
 		}
 		/// <summary>Converts set of numbers to text message using the codepage.</summary>
 		/// <returns>Text message.</returns>
 		private string ConvertToString()
 		{
-			StringBuilder SB = new();
-			foreach (ushort Num in Message)
+			return Codepage.ConvertToString(Message);
+		}
+		/// <summary>Converts the message to string containing the chars as numbers.</summary>
+		/// <returns>Chars as numbers.</returns>
+		private string ConvertToNumString()
+		{
+			StringBuilder sb = new();
+			sb.Append(Message[0]);
+			for (int i = 1; i < Message.Count; i++)
 			{
-				if (Num < Codepage.Limit)
+				sb.Append(", ");
+				sb.Append(Message[i]);
+			}
+			return sb.ToString();
+		}
+		/// <summary>Converts the message from string containing numerical representation of that message to numbers.</summary>
+		/// <param name="text">Comma separated char numbers.</param>
+		private void ConvertFromNumString(string text)
+		{
+			string[] chars = text.Split(',');
+			Message = new(chars.Length);
+			foreach(string ch in chars)
+			{
+				if(ushort.TryParse(ch.Trim(), out ushort num))
 				{
-					SB.Append(Codepage.CharSet[Num]);
-				}
-				else
-				{
-					SB.Append('✳');
+					if (num >= 0 && num < Codepage.Limit)
+					{
+						Message.Add(num);
+					}
 				}
 			}
-			return SB.ToString();
 		}
 		/// <summary>Multithreaded version of passing chars through all tables of all kinds.</summary>
 		/// <param name="message">Part of the message.</param>

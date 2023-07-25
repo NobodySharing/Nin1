@@ -352,6 +352,37 @@ namespace VPE
 			}
 			return result;
 		}
+		/// <summary>Removes duplicates (relative to selected) in pozition sets.</summary>
+		public void PrunePozitions()
+		{
+			int toRemove = -1;
+			for (int i = 0; i <= GetLastRotorPozitionsIdx; i++)
+			{
+				if (i == SelectedPozitions)
+				{
+					continue;
+				}
+				for (int j = 0; j < Rotors.Count; j++)
+				{
+					if (Rotors[j].Pozitions[i] == Rotors[j].Pozitions[SelectedPozitions])
+					{
+						toRemove = i;
+					}
+					else
+					{
+						toRemove = -1;
+						break;
+					}
+				}
+			}
+			if (toRemove >= 0)
+			{
+				foreach (Table rotor in Rotors)
+				{
+					rotor.Pozitions.RemoveAt(toRemove);
+				}
+			}
+		}
 		/// <summary>Translates special pozition set number to actual one.</summary>
 		/// <param name="which">Pozition set number to translate.</param>
 		/// <returns>-3 if error, otherwise non-negative number of pozition set.</returns>

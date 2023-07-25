@@ -29,6 +29,8 @@ namespace GUI
 		internal C_MainWin DataFromGUI_MainWin = new();
 		#endregion
 		#region Public methods
+		/// <summary>Loads config from a file. Needs reference to VMs, for working with them.</summary>
+		/// <param name="vpe">VPE's VM.</param>
 		public void LoadConfig(ref VPE_VM vpe)
 		{
 			PS = PSM.ReadConfig();
@@ -138,11 +140,11 @@ namespace GUI
 			UpdateSettingsSelector();
 			DataFromGUI_SettSel.SelectedStr = ActiveSett.Name;
 		}
-		/// <summary></summary>
-		/// <param name="MinFrom"></param>
-		/// <param name="MinTo"></param>
-		/// <param name="MaxFrom"></param>
-		/// <param name="MaxTo"></param>
+		/// <summary>Generates min and max length of space between random chars.</summary>
+		/// <param name="MinFrom">Lower bound of minumum, including.</param>
+		/// <param name="MinTo">Upper bound of minumum, excluding.</param>
+		/// <param name="MaxFrom">Lower bound of maximum, including.</param>
+		/// <param name="MaxTo">Upper bound of maximum, excluding.</param>
 		public void GenerateSpaceMinMax(ushort MinFrom = 2, ushort MinTo = 8, ushort MaxFrom = 10, ushort MaxTo = 20)
 		{
 			ushort[] space = Generator.GenerateSpaceMinMax(MinFrom, MinTo, MaxFrom, MaxTo);
@@ -202,7 +204,8 @@ namespace GUI
 			ActiveSett.SwitchConstC = CopyPDCDataFromGUI(DataFromGUI_Sett.SwitchC);
 			ActiveSett.SwitchConstD = CopyPDCDataFromGUI(DataFromGUI_Sett.SwitchD);
 		}
-
+		/// <summary>Displays provided/active settings in GUI, the settings composer window.</summary>
+		/// <param name="s">Whish settings? Null for active.</param>
 		public void DisplaySettsInGUI(Settings s = null)
 		{
 			s ??= ActiveSett;
@@ -225,16 +228,26 @@ namespace GUI
 			return Generator.GenerateNum();
 		}
 
-		public string Encrypt(string inText)
+		public string Encrypt(string inText, bool numOut)
 		{
 			C = new(ActiveSett);
-			return C.Encypt(inText);
+			return C.Encypt(inText, numOut);
 		}
 
-		public string Decrypt(string inText)
+		public string Decrypt(string inText, bool numIn)
 		{
 			C = new(ActiveSett);
-			return C.Decypt(inText);
+			return C.Decypt(inText, numIn);
+		}
+
+		public static string ConvertToNumRepres(string message)
+		{
+			return Codepage.ConvertToNumeric(message);
+		}
+
+		public static string ConvertFromNumRepres(string message)
+		{
+			return Codepage.ConvertFromNumeric(message);
 		}
 
 		public static string OpenMsgFile()

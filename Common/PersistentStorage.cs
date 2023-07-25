@@ -116,11 +116,11 @@ namespace Common
 		{
 			System.Text.StringBuilder sb = new();
 			sb.Append(HeaderCommon);
-			sb.Append(LineIsDefault + (ps.IsDefault ? "true" : "false") + "\r\n");
-			sb.Append(LineShowTab + "0\r\n");
+			sb.Append("\t" + LineIsDefault + "=" + (ps.IsDefault ? "true" : "false") + "\r\n");
+			sb.Append("\t" + LineShowTab + "=" + "0\r\n"); // 0 is just placeholder.
 			sb.Append(HeaderVPE);
-			sb.Append(LineAutoloadTableLib + ps.PathsToTableLib + "\r\n");
-			sb.Append(LineAutoloadSettingsLib + ps.PathsToSettLib + "\r\n");
+			sb.Append("\t" + LineAutoloadTableLib + "=" +  ps.PathsToTableLib + "\r\n");
+			sb.Append("\t" + LineAutoloadSettingsLib + "=" + ps.PathsToSettLib + "\r\n");
 			sb.Append(HeaderNDT);
 			sb.Append("\t\r\n");
 			sb.Append(HeaderDTC);

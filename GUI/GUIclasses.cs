@@ -16,6 +16,7 @@ namespace GUI
 		private string VPE_EncrypStrV;
 		private string VPE_RotPozStrV;
 		private string VPE_RotPozIdxStrV;
+		private bool VPE_NumericRepresV;
 		public string VPE_PlainStr
 		{
 			get
@@ -73,6 +74,21 @@ namespace GUI
 				{
 					VPE_RotPozIdxStrV = value;
 					OnPropertyChanged("VPE_RotPozIdxStr");
+				}
+			}
+		}
+		public bool VPE_NumericRepres
+		{
+			get
+			{
+				return VPE_NumericRepresV;
+			}
+			set
+			{
+				if (VPE_NumericRepresV != value)
+				{
+					VPE_NumericRepresV = value;
+					OnPropertyChanged("VPE_NumericRepres");
 				}
 			}
 		}

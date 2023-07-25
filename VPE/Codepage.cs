@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace VPE
 {
@@ -586,6 +587,100 @@ namespace VPE
 			"\r\n", // New line. Done like this by design.
 		};
 		private static readonly ushort LimitV = Convert.ToUInt16(CharSet.Length);
+		/// <summary>Converts text message to set of numbers using the codepage.</summary>
+		/// <param name="text">Text message.</param>
+		/// <returns>Numbers representing a message.</returns>
+		public static List<ushort> ConvertToNums(string text)
+		{
+			List<ushort> result = new(text.Length);
+			for (int i = 0; i < text.Length; i++)
+			{
+				char Ch = text[i];
+				char N = i == (text.Length - 1) ? '\0' : text[i + 1];
+				if (Ch == '\r')
+				{
+					if ((N == '\n') || (N == '\0'))
+					{
+						result.Add((ushort)Array.IndexOf(CharSet, "\r\n"));
+						i++;
+						continue;
+					}
+					else
+					{
+						result.Add((ushort)Array.IndexOf(CharSet, "\r\n"));
+						continue;
+					}
+				}
+				else if (Ch == '\n')
+				{
+					result.Add((ushort)Array.IndexOf(CharSet, "\r\n"));
+					continue;
+				}
+				int index = Array.IndexOf(CharSet, Convert.ToString(Ch));
+				if (index >= 0)
+				{
+					result.Add((ushort)index);
+				}
+				else
+				{
+					continue;
+				}
+			}
+			return result;
+		}
+		/// <summary>Converts set of numbers to text message using the codepage.</summary>
+		/// <param name="nums">Numbers representing a message.</param>
+		/// <returns>Text message.</returns>
+		public static string ConvertToString(List<ushort> nums)
+		{
+			StringBuilder result = new();
+			foreach (ushort num in nums)
+			{
+				if (num < Limit)
+				{
+					result.Append(CharSet[num]);
+				}
+				else
+				{
+					result.Append('✳'); // Placeholder for unknown char.
+				}
+			}
+			return result.ToString();
+		}
+		/// <summary>Converts the message to string containing the chars as their numerical representation.</summary>
+		/// <param name="message">Meesage.</param>
+		/// <returns>Comma separated chars as numbers.</returns>
+		public static string ConvertToNumeric(string message)
+		{
+			StringBuilder sb = new();
+			List<ushort> nums = ConvertToNums(message);
+			sb.Append(nums[0]);
+			for (int i = 1; i < nums.Count; i++)
+			{
+				sb.Append(", ");
+				sb.Append(nums[i]);
+			}
+			return sb.ToString();
+		}
+		/// <summary>Converts the string containing the chars as their numerical representation to the message as string.</summary>
+		/// <param name="message">Comma separated chars as numbers.</param>
+		/// <returns>Meesage.</returns>
+		public static string ConvertFromNumeric(string message)
+		{
+			string[] chars = message.Split(',');
+			StringBuilder sb = new();
+			foreach (string ch in chars)
+			{
+				if (ushort.TryParse(ch.Trim(), out ushort num))
+				{
+					if (num >= 0 && num < Limit)
+					{
+						sb.Append(CharSet[num]);
+					}
+				}
+			}
+			return sb.ToString();
+		}
 		/// <summary>Gets the number of chars in the codepage. Currently 576.</summary>
 		public static ushort Limit
 		{
