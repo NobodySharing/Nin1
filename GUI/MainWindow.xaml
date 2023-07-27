@@ -40,12 +40,16 @@
 						<MenuItem Header="_Open and use settings" Click="MI_VPE_QuickSettOpen_Click"/>
 						<MenuItem Header="_Save currently used settings to a file" Click="MI_VPE_QuickSettSave_Click"/>
 						<Separator/>
-						<MenuItem Header="Save current settings to a file"/>
-						<MenuItem Header="Load settings from a file"/>
-						<MenuItem Header="Save current settings library to a file"/>
-						<MenuItem Header="Load settings library from a file"/>
-						<MenuItem Header="Save current table library to a file"/>
-						<MenuItem Header="Load table library from a file"/>
+						<MenuItem Header="Save current settings to a file" Click="MI_VPE_SaveSett_Click"/>
+						<MenuItem Header="Load settings from a file" Click="MI_VPE_LoadSett_Click"/>
+						<MenuItem Header="Save current settings library to a file" Click="MI_VPE_SaveSettLib_Click"/>
+						<MenuItem Header="Load settings library from a file" Click="MI_VPE_LoadSettLib_Click"/>
+						<MenuItem Header="Save current table library to a file" Click="MI_VPE_SaveTableLib_Click"/>
+						<MenuItem Header="Load table library from a file" Click="MI_VPE_LoadTableLib_Click"/>
+						<Separator/>
+						<MenuItem Header="Use settings">
+							
+						</MenuItem>
 					</MenuItem>
 					<MenuItem Header="_Encryption">
 						<MenuItem Header="_Encrypt" Click="MI_VPE_Encrypt_Click"/>
@@ -63,7 +67,7 @@
 						<RowDefinition Height="1*"/>
 					</Grid.RowDefinitions>
 					<TextBlock Text="Rotor pozitions:" Grid.Row="0" Grid.Column="0" VerticalAlignment="Center" Margin="2"/>
-					<DockPanel Grid.Row="1" Grid.Column="0" >
+					<DockPanel Grid.Row="1" Grid.Column="0">
 						<Button Name="B_VPE_RotPozMinus" Content="–" Padding="4, 2, 4, 4" Margin="2, 2, 1, 2" Click="B_VPE_RotPozMinus_Click"/>
 						<Button Name="B_VPE_RotPozPlus" Content="+" Padding="4, 2, 4, 4" Margin="1, 2, 1, 2" Click="B_VPE_RotPozPlus_Click"/>
 						<TextBox x:Name="TB_VPE_RotPozIdx" Margin="1, 2, 2, 2" FontFamily="Bahnschrift" FontSize="16" Text="{Binding Path=VPE_RotPozIdxStr, Mode=TwoWay}"/>

@@ -27,7 +27,7 @@ namespace GUI
 			InitializeComponent();
 			DataContext = Cmn.DataFromGUI_MainWin;
 			Cmn.LoadConfig(ref VPE);
-			if (!Cmn.PS.IsDefault)
+			if (!Cmn.PS.IsDefault && VPE.ActiveSett is not null)
 			{
 				DisplayRotorPozs(-1);
 			}
@@ -139,6 +139,42 @@ namespace GUI
 			VPESettWin = new(ref VPE);
 			VPESettWin.Show();
 			VPESettWin.VPESubmitSett += VPESettWin_VPESubmitSett;
+		}
+
+		private void MI_VPE_SaveSett_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.SaveSettings();
+		}
+
+		private void MI_VPE_LoadSett_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.LoadSettings();
+			//VPE.DisplayActiveSettInGUI();
+		}
+
+		private void MI_VPE_SaveSettLib_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.SaveSettingsLib();
+		}
+
+		private void MI_VPE_LoadSettLib_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.LoadSettingsLib();
+			//VPE.UpdateSettingsSelector();
+		}
+
+		private void MI_VPE_SaveTableLib_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.SaveTableLib();
+		}
+
+		private void MI_VPE_LoadTableLib_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.LoadTableLib();
+			//VPE.UpdateRotorSelectors();
+			//VPE.UpdateReflSelector();
+			//VPE.UpdateSwapSelector();
+			//VPE.UpdateScramblerSelectors();
 		}
 
 		private void VPESettWin_VPESubmitSett()

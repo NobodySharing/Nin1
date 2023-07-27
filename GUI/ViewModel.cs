@@ -49,10 +49,10 @@ namespace GUI
 				{
 					FileHandling.Load(PS.PathsToSettLib, out SettingsLibrary sl);
 					vpe.SL = sl;
+					vpe.ActiveSett = vpe.SL.Library[vpe.SL.LastActive];
+					vpe.DisplaySettsInGUI();
 				}
 			}
-			vpe.ActiveSett = vpe.SL.Library[vpe.SL.LastActive];
-			vpe.DisplaySettsInGUI();
 		}
 		public void SaveConfig()
 		{
