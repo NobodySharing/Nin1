@@ -30,6 +30,7 @@ namespace GUI
 			if (!Cmn.PS.IsDefault && VPE.ActiveSett is not null)
 			{
 				DisplayRotorPozs(-1);
+				VPE.UpdateSettingsSelector();
 			}
 		}
 

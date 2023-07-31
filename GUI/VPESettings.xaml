@@ -259,6 +259,7 @@
 					<Button x:Name="B_LoadSettLib" Content="Load settings library from a file" Click="B_LoadSettLib_Click" Margin="2"/>
 					<Button x:Name="B_SaveTableLib" Content="Save current table library to a file" Margin="2" Click="B_SaveTableLib_Click"/>
 					<Button x:Name="B_LoadTableLib" Content="Load table library from a file" Click="B_LoadTableLib_Click" Margin="2"/>
+					<Button x:Name="B_RemoveActive" Content="Remove these settings" Click="B_RemoveActive_Click" Margin="2"/>
 				</StackPanel>
 			</GroupBox>
 			<GroupBox Grid.Row="1" Header="Generators">

@@ -209,6 +209,11 @@ namespace GUI
 		{
 			VPE.RenameSelSett();
 		}
+
+		private void B_RemoveActive_Click(object sender, RoutedEventArgs e)
+		{
+			VPE.RemoveSelSett();
+		}
 		#endregion
 		#region Private utility methods
 		private void DisplayActiveSettInGUI()
@@ -339,8 +344,8 @@ namespace GUI
 				}
 			}
 		}
-		#endregion
 
+		#endregion
 
 		public virtual void OnSubmitVPESett()
 		{

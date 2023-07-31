@@ -465,6 +465,30 @@ namespace GUI
 			UpdateSettingsSelector();
 		}
 
+		public void RemoveSelSett()
+		{
+			if(SL.Library.Count > 0)
+			{
+				if (ActiveSett is not null)
+				{
+					int removed = (int)ActiveSett.Idx;
+					SL.Library.RemoveAt(removed);
+					if (SL.Library.Count > 0)
+					{
+						if (SL.Library.Count - 1 >= removed)
+						{
+							ActiveSett = SL.Library[removed];
+						}
+						else
+						{
+							ActiveSett = SL.Library[removed - 1];
+						}
+					}
+					UpdateSettingsSelector();
+				}
+			}
+		}
+
 		public void SaveSettings()
 		{
 			FileHandling.Save(ActiveSett, SaveFile(VPES_filter));
