@@ -470,25 +470,26 @@ namespace GUI
 			FileHandling.Save(ActiveSett, SaveFile(VPES_filter));
 		}
 
-		public void LoadSettings()
+		public bool LoadSettings()
 		{
 			string path = OpenFile(VPES_filter);
 			if (path == null)
 			{
-				return;
+				return false;
 			}
 			if (path == "")
 			{
-				return;
+				return false;
 			}
 			if (path == Invalid_File)
 			{
-				return;
+				return false;
 			}
 			FileHandling.Load(path, out Settings s);
 			PathToIndividualSetts = path;
 			AddSettsToLib(s);
 			UpdateSettingsSelector();
+			return true;
 		}
 
 		public void UpdateSettings()
@@ -507,20 +508,20 @@ namespace GUI
 			FileHandling.Save(SL, SaveFile(VPESL_filter));
 		}
 
-		public void LoadSettingsLib()
+		public bool LoadSettingsLib()
 		{
 			string path = OpenFile(VPESL_filter);
 			if (path == null)
 			{
-				return;
+				return false;
 			}
 			if (path == "")
 			{
-				return;
+				return false;
 			}
 			if (path == Invalid_File)
 			{
-				return;
+				return false;
 			}
 			FileHandling.Load(path, out SettingsLibrary sl);
 			SL.PathToThis = path;
@@ -529,6 +530,7 @@ namespace GUI
 				AddSettsToLib(s);
 			}
 			ActiveSett = SL.Library[SL.LastActive];
+			return true;
 		}
 
 		public void UpdateSettingsLib()
@@ -555,20 +557,20 @@ namespace GUI
 			FileHandling.Save(TL, SaveFile(VPETL_filter));
 		}
 
-		public void LoadTableLib()
+		public bool LoadTableLib()
 		{
 			string path = OpenFile(VPETL_filter);
 			if (path == null)
 			{
-				return;
+				return false;
 			}
 			if (path == "")
 			{
-				return;
+				return false;
 			}
 			if (path == Invalid_File)
 			{
-				return;
+				return false;
 			}
 			FileHandling.Load(path, out TableLibrary tl);
 			TL.PathToThis = path;
@@ -576,6 +578,7 @@ namespace GUI
 			TL.Swaps.AddRange(tl.Swaps);
 			TL.Rotors.AddRange(tl.Rotors);
 			TL.Scramblers.AddRange(tl.Scramblers);
+			return true;
 		}
 
 		public void UpdateTableLib()

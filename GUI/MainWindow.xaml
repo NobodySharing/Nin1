@@ -47,8 +47,8 @@
 						<MenuItem Header="Save current table library to a file" Click="MI_VPE_SaveTableLib_Click"/>
 						<MenuItem Header="Load table library from a file" Click="MI_VPE_LoadTableLib_Click"/>
 						<Separator/>
-						<MenuItem Header="Use settings">
-							
+						<MenuItem Header="Use settings" x:Name="MI_VPE_Setts">
+							<!--Automatically generated content-->
 						</MenuItem>
 					</MenuItem>
 					<MenuItem Header="_Encryption">

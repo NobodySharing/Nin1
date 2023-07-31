@@ -124,8 +124,11 @@ namespace GUI
 
 		private void B_LoadSett_Click(object sender, RoutedEventArgs e)
 		{
-			VPE.LoadSettings();
-			DisplayActiveSettInGUI();
+			bool success = VPE.LoadSettings();
+			if (success)
+			{
+				DisplayActiveSettInGUI();
+			}
 		}
 
 		private void B_SaveSettLib_Click(object sender, RoutedEventArgs e)
@@ -135,8 +138,11 @@ namespace GUI
 
 		private void B_LoadSettLib_Click(object sender, RoutedEventArgs e)
 		{
-			VPE.LoadSettingsLib();
-			VPE.UpdateSettingsSelector();
+			bool success = VPE.LoadSettingsLib();
+			if (success)
+			{
+				VPE.UpdateSettingsSelector();
+			}
 		}
 
 		private void B_SaveTableLib_Click(object sender, RoutedEventArgs e)
@@ -146,11 +152,14 @@ namespace GUI
 
 		private void B_LoadTableLib_Click(object sender, RoutedEventArgs e)
 		{
-			VPE.LoadTableLib();
-			VPE.UpdateRotorSelectors();
-			VPE.UpdateReflSelector();
-			VPE.UpdateSwapSelector();
-			VPE.UpdateScramblerSelectors();
+			bool success = VPE.LoadTableLib();
+			if (success)
+			{
+				VPE.UpdateRotorSelectors();
+				VPE.UpdateReflSelector();
+				VPE.UpdateSwapSelector();
+				VPE.UpdateScramblerSelectors();
+			}
 		}
 
 		private void B_GenerateConstShift_Click(object sender, RoutedEventArgs e)

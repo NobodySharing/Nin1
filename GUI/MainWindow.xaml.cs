@@ -132,8 +132,15 @@ namespace GUI
 
 		private void MI_VPE_QuickSettSave_Click(object sender, RoutedEventArgs e) => VPE.SaveSettings();
 
-		private void MI_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e) => VPE.LoadSettings();
-		
+		private void MI_VPE_QuickSettOpen_Click(object sender, RoutedEventArgs e)
+		{
+			bool success = VPE.LoadSettings();
+			if (success)
+			{
+				// ToDo: Update stuff!
+			}
+		}
+
 		private void MI_VPE_SettingsComp_Click(object sender, RoutedEventArgs e)
 		{
 			VPESettWin = new(ref VPE);
@@ -148,8 +155,11 @@ namespace GUI
 
 		private void MI_VPE_LoadSett_Click(object sender, RoutedEventArgs e)
 		{
-			VPE.LoadSettings();
-			//VPE.DisplayActiveSettInGUI();
+			bool success = VPE.LoadSettings();
+			if (success)
+			{
+				// ToDo: Update stuff!
+			}
 		}
 
 		private void MI_VPE_SaveSettLib_Click(object sender, RoutedEventArgs e)
@@ -159,8 +169,11 @@ namespace GUI
 
 		private void MI_VPE_LoadSettLib_Click(object sender, RoutedEventArgs e)
 		{
-			VPE.LoadSettingsLib();
-			//VPE.UpdateSettingsSelector();
+			bool success = VPE.LoadSettingsLib();
+			if (success)
+			{
+				VPE.UpdateSettingsSelector();
+			}
 		}
 
 		private void MI_VPE_SaveTableLib_Click(object sender, RoutedEventArgs e)
@@ -170,11 +183,14 @@ namespace GUI
 
 		private void MI_VPE_LoadTableLib_Click(object sender, RoutedEventArgs e)
 		{
-			VPE.LoadTableLib();
-			//VPE.UpdateRotorSelectors();
-			//VPE.UpdateReflSelector();
-			//VPE.UpdateSwapSelector();
-			//VPE.UpdateScramblerSelectors();
+			bool success = VPE.LoadTableLib();
+			if (success)
+			{
+				VPE.UpdateRotorSelectors();
+				VPE.UpdateReflSelector();
+				VPE.UpdateSwapSelector();
+				VPE.UpdateScramblerSelectors();
+			}
 		}
 
 		private void VPESettWin_VPESubmitSett()
@@ -230,6 +246,7 @@ namespace GUI
 			if (VPE.ActiveSett.GetLastRotorPozitionsIdx > 0)
 			{
 				VPE.ActiveSett.RemovePozitions(VPE.SelectedPozs);
+
 			}
 		}
 

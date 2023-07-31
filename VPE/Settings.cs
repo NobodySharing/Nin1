@@ -381,6 +381,7 @@ namespace VPE
 				{
 					rotor.Pozitions.RemoveAt(toRemove);
 				}
+				SelectedPozitions--;
 			}
 		}
 		/// <summary>Translates special pozition set number to actual one.</summary>
