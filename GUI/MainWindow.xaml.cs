@@ -170,7 +170,12 @@ namespace GUI
 
 		private void MI_VPE_LoadSettLib_Click(object sender, RoutedEventArgs e)
 		{
+			bool isRenumberingneeded = VPE.SL.Library.Count > 0; // If I load another lib from the disk but I already have something in memory, I know I'll merge them and they'll have to be renumbered.
 			bool success = VPE.LoadSettingsLib();
+			if (isRenumberingneeded)
+			{
+				VPE.SL.ReIndexSetts();
+			}
 			if (success)
 			{
 				VPE.UpdateSettingsSelector();

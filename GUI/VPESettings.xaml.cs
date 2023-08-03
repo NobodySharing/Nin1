@@ -101,9 +101,11 @@ namespace GUI
 		{
 			if (SP_Swaps.Children.Count < SwapsMax)
 			{
+				VPE.AddSwapDataForGUI();
 				SP_Swaps.Children.Add(ConstructCBSwap());
 				B_Swaps_Add.IsEnabled = SP_Swaps.Children.Count < SwapsMax;
 			}
+			B_Swaps_Remove.IsEnabled = SP_Swaps.Children.Count > 0;
 		}
 
 		private void B_Swaps_Remove_Click(object sender, RoutedEventArgs e)
@@ -114,7 +116,7 @@ namespace GUI
 				VPE.DataFromGUI_Swaps.RemoveAt(SP_Swaps.Children.Count);
 				B_Swaps_Remove.IsEnabled = SP_Swaps.Children.Count > 0;
 			}
-			B_Swaps_Add.IsEnabled = SP_Swaps.Children.Count > 0;
+			B_Swaps_Add.IsEnabled = SP_Swaps.Children.Count < SwapsMax;
 		}
 
 		private void B_SaveSett_Click(object sender, RoutedEventArgs e)
@@ -138,7 +140,12 @@ namespace GUI
 
 		private void B_LoadSettLib_Click(object sender, RoutedEventArgs e)
 		{
+			bool isRenumberingneeded = VPE.SL.Library.Count > 0; // If I load another lib from the disk but I already have something in memory, I know I'll merge them and they'll have to be renumbered.
 			bool success = VPE.LoadSettingsLib();
+			if (isRenumberingneeded)
+			{
+				VPE.SL.ReIndexSetts();
+			}
 			if (success)
 			{
 				VPE.UpdateSettingsSelector();

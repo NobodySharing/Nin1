@@ -356,6 +356,15 @@ namespace GUI
 			DataFromGUI_OutScr.SelectedStr = ActiveSett.OutputScrambler.Idx.ToString();
 		}
 
+		public void AddSwapDataForGUI()
+		{
+			C_VPE_ComboBox toAdd = new()
+			{
+				ItemsStrs = DataFromGUI_Swaps[0].ItemsStrs,
+			};
+			DataFromGUI_Swaps.Add(toAdd);
+		}
+
 		public void UpdateRotorSelectors()
 		{
 			List<string> rotorNums = new();
@@ -485,6 +494,7 @@ namespace GUI
 						}
 					}
 					UpdateSettingsSelector();
+					DisplaySettsInGUI();
 				}
 			}
 		}
@@ -512,6 +522,7 @@ namespace GUI
 			FileHandling.Load(path, out Settings s);
 			PathToIndividualSetts = path;
 			AddSettsToLib(s);
+			SL.ReIndexSetts();
 			UpdateSettingsSelector();
 			return true;
 		}
@@ -675,15 +686,18 @@ namespace GUI
 			TL.Scramblers.Add(ActiveSett.OutputScrambler);
 			DataFromGUI_SettSel.ItemsStrs.Add(ActiveSett.Name);
 		}
-		/// <summary>Adds supplied settings to library.</summary>
+		/// <summary>Adds supplied settings to library (if it isn't there already).</summary>
 		private void AddSettsToLib(Settings s)
 		{
-			SL.Library.Add(s);
-			TL.Reflectors.Add(s.Reflector);
-			TL.Rotors.AddRange(s.Rotors);
-			TL.Swaps.AddRange(s.Swaps);
-			TL.Scramblers.Add(s.InputScrambler);
-			TL.Scramblers.Add(s.OutputScrambler);
+			if (!SL.Library.Contains(s))
+			{
+				SL.Library.Add(s);
+				TL.Reflectors.Add(s.Reflector);
+				TL.Rotors.AddRange(s.Rotors);
+				TL.Swaps.AddRange(s.Swaps);
+				TL.Scramblers.Add(s.InputScrambler);
+				TL.Scramblers.Add(s.OutputScrambler);
+			}
 		}
 
 		private static PrimeDefinedConstant CopyPDCDataFromGUI(ObservableCollection<C_PDC> gui)
