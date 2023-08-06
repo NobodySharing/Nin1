@@ -130,7 +130,7 @@ namespace Common
 			sb.Append(HeaderPG);
 			sb.Append("\t\r\n");
 			sb.Append(HeaderMD);
-			sb.Append("\t");
+			sb.Append('\t');
 			File.WriteAllText(ConfigFile.FullName, sb.ToString());
 		}
 	}

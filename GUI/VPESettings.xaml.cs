@@ -203,7 +203,7 @@ namespace GUI
 
 		private void B_SaveChang_Click(object sender, RoutedEventArgs e)
 		{
-			VPE.UpdateActiveSettsFromGUI();
+			VPE.ChangeActiveSettsFromGUI();
 			VPE.UpdateSettingsSelector();
 		}
 

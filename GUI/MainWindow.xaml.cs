@@ -30,7 +30,6 @@ namespace GUI
 			if (!Cmn.PS.IsDefault && VPE.ActiveSett is not null)
 			{
 				DisplayRotorPozs(-1);
-				VPE.UpdateSettingsSelector();
 			}
 		}
 
@@ -83,6 +82,7 @@ namespace GUI
 				_ = MessageBox.Show(messageBoxText, caption, button, icon, MessageBoxResult.OK);
 			}
 		}
+		
 		private void MI_VPE_Encrypt_Click(object sender, RoutedEventArgs e)
 		{
 			if (VPE.ActiveSett is not null)
@@ -170,9 +170,9 @@ namespace GUI
 
 		private void MI_VPE_LoadSettLib_Click(object sender, RoutedEventArgs e)
 		{
-			bool isRenumberingneeded = VPE.SL.Library.Count > 0; // If I load another lib from the disk but I already have something in memory, I know I'll merge them and they'll have to be renumbered.
+			bool isRenumberingNeeded = VPE.SL.Library.Count > 0; // If I load another lib from the disk but I already have something in memory, I know I'll merge them and they'll have to be renumbered.
 			bool success = VPE.LoadSettingsLib();
-			if (isRenumberingneeded)
+			if (isRenumberingNeeded)
 			{
 				VPE.SL.ReIndexSetts();
 			}
@@ -252,7 +252,6 @@ namespace GUI
 			if (VPE.ActiveSett.GetLastRotorPozitionsIdx > 0)
 			{
 				VPE.ActiveSett.RemovePozitions(VPE.SelectedPozs);
-
 			}
 		}
 
@@ -287,20 +286,18 @@ namespace GUI
 			else if (which == -2)
 			{
 				Cmn.DataFromGUI_MainWin.VPE_RotPozIdxStr = (VPE.ActiveSett.SelectedPozitions).ToString();
+				VPE.SelectedPozs = VPE.ActiveSett.SelectedPozitions;
 			}
 			else if (which == -1)
 			{
 				Cmn.DataFromGUI_MainWin.VPE_RotPozIdxStr = (VPE.ActiveSett.GetLastRotorPozitionsIdx).ToString();
+				VPE.SelectedPozs = VPE.ActiveSett.GetLastRotorPozitionsIdx;
 			}
 			else
 			{
 				Cmn.DataFromGUI_MainWin.VPE_RotPozIdxStr = which.ToString();
+				VPE.SelectedPozs = which;
 			}
-		}
-
-		private void AddRotorPozs()
-		{
-			VPE.ActiveSett.AddPozitionsUsingString(Cmn.DataFromGUI_MainWin.VPE_RotPozStr);
 		}
 		#endregion
 

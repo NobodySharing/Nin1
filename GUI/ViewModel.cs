@@ -33,6 +33,7 @@ namespace GUI
 		/// <param name="vpe">VPE's VM.</param>
 		public void LoadConfig(ref VPE_VM vpe)
 		{
+			bool CreateTL = true;
 			PS = PSM.ReadConfig();
 			if (PS.IsDefault)
 			{
@@ -44,13 +45,19 @@ namespace GUI
 				{
 					FileHandling.Load(PS.PathsToTableLib, out TableLibrary tl);
 					vpe.TL = tl;
+					vpe.TL.PathToThis = PS.PathsToTableLib;
+					CreateTL = false;
 				}
 				if (File.Exists(PS.PathsToSettLib))
 				{
 					FileHandling.Load(PS.PathsToSettLib, out SettingsLibrary sl);
 					vpe.SL = sl;
+					vpe.SL.PathToThis = PS.PathsToSettLib;
 					vpe.ActiveSett = vpe.SL.Library[vpe.SL.LastActive];
-					vpe.DisplaySettsInGUI();
+					if(CreateTL)
+					{
+						vpe.CopyTablesFromSLToTL();
+					}
 				}
 			}
 		}
@@ -151,7 +158,7 @@ namespace GUI
 			DataFromGUI_Sett.RandCharSpcMinStr = space[0].ToString();
 			DataFromGUI_Sett.RandCharSpcMaxStr = space[1].ToString();
 		}
-		/// <summary></summary>
+		/// <summary>Generates A, B, and M constants.</summary>
 		public void GenerateABMConsts()
 		{
 			PrimeDefinedConstant[] consts = Generator.GenerateABM();
@@ -162,7 +169,7 @@ namespace GUI
 			DataFromGUI_Sett.RandCharB = C_VPE_Sett.FillDataGridClass(consts[1]);
 			DataFromGUI_Sett.RandCharM = C_VPE_Sett.FillDataGridClass(consts[2]);
 		}
-		/// <summary></summary>
+		/// <summary>Generates A, B, C and D constants.</summary>
 		public void GenerateABCDConsts()
 		{
 			PrimeDefinedConstant[] consts = Generator.GenerateABCD();
@@ -175,7 +182,15 @@ namespace GUI
 			DataFromGUI_Sett.SwitchC = C_VPE_Sett.FillDataGridClass(consts[2]);
 			DataFromGUI_Sett.SwitchD = C_VPE_Sett.FillDataGridClass(consts[3]);
 		}
+		/// <summary>Simply generates random number in codepage limits, after updating the seed.</summary>
+		/// <returns>Rnadom number.</returns>
+		public ushort GenerateRandNum()
+		{
+			Generator.UpdateSeed();
+			return Generator.GenerateNum();
+		}
 		#endregion
+		#region Updating, displaying and syncing from/to the GUI
 		/// <summary>Sets active settings using what is in GUI.</summary>
 		public void ChangeActiveSettsFromGUI()
 		{
@@ -205,7 +220,7 @@ namespace GUI
 			ActiveSett.SwitchConstD = CopyPDCDataFromGUI(DataFromGUI_Sett.SwitchD);
 		}
 		/// <summary>Displays provided/active settings in GUI, the settings composer window.</summary>
-		/// <param name="s">Whish settings? Null for active.</param>
+		/// <param name="s">Which settings? Null for active.</param>
 		public void DisplaySettsInGUI(Settings s = null)
 		{
 			s ??= ActiveSett;
@@ -215,75 +230,128 @@ namespace GUI
 			SynchronizeReflectorDataForGUI();
 			SynchronizeScramblerDataForGUI();
 		}
-
-		public void UpdateActiveSettsFromGUI()
+		/// <summary>Updates all rotor selectors.</summary>
+		public void UpdateRotorSelectors()
 		{
-			ChangeActiveSettsFromGUI(); // For now.
-			// ToDo: Implement.
-		}
-
-		public ushort GenerateRandNum()
-		{
-			Generator.UpdateSeed();
-			return Generator.GenerateNum();
-		}
-
-		public string Encrypt(string inText, bool numOut)
-		{
-			C = new(ActiveSett);
-			return C.Encypt(inText, numOut);
-		}
-
-		public string Decrypt(string inText, bool numIn)
-		{
-			C = new(ActiveSett);
-			return C.Decypt(inText, numIn);
-		}
-
-		public static string ConvertToNumRepres(string message)
-		{
-			return Codepage.ConvertToNumeric(message);
-		}
-
-		public static string ConvertFromNumRepres(string message)
-		{
-			return Codepage.ConvertFromNumeric(message);
-		}
-
-		public static string OpenMsgFile()
-		{
-			return FileHandling.LoadText(OpenFile(TXT_filter));
-		}
-
-		public static void SaveMsgFile(string text)
-		{
-			FileHandling.SaveText(SaveFile(TXT_filter), text);
-		}
-		/// <summary>Sets the active settings using what was selected in settings selector.</summary>
-		public void SetUsingSelSettName()
-		{
-			ActiveSett = SL.Library.Find(x => x.Name == DataFromGUI_SettSel.SelectedStr);
-			SL.LastActive = (int)ActiveSett.Idx;
-		}
-
-		public void InitializeRotorSelectors(ushort count)
-		{
-			for (ushort i = 0; i < count; i++)
+			List<string> rotorNums = new();
+			if (TL.Rotors.Count > 0)
 			{
-				C_UC_Rotor rotor = new();
-				DataFromGUI_Rotors.Add(rotor);
+				foreach (Table rotor in TL.Rotors)
+				{
+					rotorNums.Add(rotor.Idx.ToString());
+				}
+			}
+			else
+			{
+				foreach (Settings settings in SL.Library)
+				{
+					foreach (Table rotor in settings.Rotors)
+					{
+						rotorNums.Add(rotor.Idx.ToString());
+					}
+				}
+			}
+			foreach (C_UC_Rotor rotorList in DataFromGUI_Rotors)
+			{
+				rotorList.RotorsStrs.Clear();
+				rotorList.RotorsStrs = rotorNums;
 			}
 		}
-
-		public void InitializeSwapSelectors(ushort count)
+		/// <summary>Updates all reflector selectors.</summary>
+		public void UpdateReflSelector()
 		{
-			for (ushort i = 0; i < count; i++)
+			List<string> reflNums = new();
+			if (TL.Reflectors.Count > 0)
 			{
-				C_VPE_ComboBox swap = new();
-				DataFromGUI_Swaps.Add(swap);
+				foreach (Table reflector in TL.Reflectors)
+				{
+					reflNums.Add(reflector.Idx.ToString());
+				}
+			}
+			else
+			{
+				foreach (Settings settings in SL.Library)
+				{
+					reflNums.Add(settings.Reflector.Idx.ToString());
+				}
+			}
+			DataFromGUI_Refl.ItemsStrs.Clear();
+			DataFromGUI_Refl.ItemsStrs = reflNums;
+		}
+		/// <summary>Updates swap selector.</summary>
+		public void UpdateSwapSelector()
+		{
+			List<string> swapsNums = new();
+			if (TL.Swaps.Count > 0)
+			{
+				foreach (Table swaps in TL.Swaps)
+				{
+					swapsNums.Add(swaps.Idx.ToString());
+				}
+			}
+			else
+			{
+				foreach (Settings settings in SL.Library)
+				{
+					foreach (Table swaps in settings.Swaps)
+					{
+						swapsNums.Add(swaps.Idx.ToString());
+					}
+				}
+			}
+			foreach (C_VPE_ComboBox swap in DataFromGUI_Swaps)
+			{
+				swap.ItemsStrs.Clear();
+				swap.ItemsStrs = swapsNums;
 			}
 		}
-
+		/// <summary>Updates all scramblers selectors.</summary>
+		public void UpdateScramblerSelectors()
+		{
+			List<string> scramblersNums = new();
+			foreach (Table scrambler in TL.Scramblers)
+			{
+				scramblersNums.Add(scrambler.Idx.ToString());
+			}
+			if (TL.Reflectors.Count > 0)
+			{
+				foreach (Table scramblers in TL.Scramblers)
+				{
+					scramblersNums.Add(scramblers.Idx.ToString());
+				}
+			}
+			else
+			{
+				foreach (Settings settings in SL.Library)
+				{
+					scramblersNums.Add(settings.InputScrambler.Idx.ToString());
+					scramblersNums.Add(settings.OutputScrambler.Idx.ToString());
+				}
+			}
+			DataFromGUI_InScr.ItemsStrs = scramblersNums;
+			DataFromGUI_OutScr.ItemsStrs = scramblersNums;
+		}
+		/// <summary>Updates settings selector.</summary>
+		public void UpdateSettingsSelector()
+		{
+			List<string> names = new();
+			foreach (Settings s in SL.Library)
+			{
+				names.Add(s.Name);
+			}
+			DataFromGUI_SettSel.ItemsStrs.Clear();
+			DataFromGUI_SettSel.ItemsStrs = names;
+		}
+		/// <summary>Updates every selector.</summary>
+		public void UpdateAll()
+		{
+			UpdateRotorSelectors();
+			UpdateReflSelector();
+			UpdateSwapSelector();
+			UpdateScramblerSelectors();
+			UpdateSettingsSelector();
+		}
+		/// <summary></summary>
 		public void SynchronizeRotorDataForGUI()
 		{
 			List<string> rotors = TableLibrary.GetIDs(TL.Rotors);
@@ -291,14 +359,14 @@ namespace GUI
 			{
 				if (DataFromGUI_Rotors.Count < ActiveSett.Rotors.Count)
 				{
-					while(DataFromGUI_Rotors.Count != ActiveSett.Rotors.Count)
+					while (DataFromGUI_Rotors.Count != ActiveSett.Rotors.Count)
 					{
 						DataFromGUI_Rotors.Add(new());
 					}
 				}
 				else
 				{
-					while(DataFromGUI_Rotors.Count != ActiveSett.Rotors.Count)
+					while (DataFromGUI_Rotors.Count != ActiveSett.Rotors.Count)
 					{
 						DataFromGUI_Rotors.RemoveAt(DataFromGUI_Rotors.Count - 1);
 					}
@@ -312,7 +380,7 @@ namespace GUI
 				DataFromGUI_Rotors[i].SelectedRStr = ActiveSett.Rotors[i].Idx.ToString();
 			}
 		}
-
+		/// <summary></summary>
 		public void SynchronizeSwapDataForGUI()
 		{
 			List<string> swaps = TableLibrary.GetIDs(TL.Swaps);
@@ -339,14 +407,14 @@ namespace GUI
 				DataFromGUI_Swaps[i].SelectedStr = ActiveSett.Swaps[i].Idx.ToString();
 			}
 		}
-
+		/// <summary></summary>
 		public void SynchronizeReflectorDataForGUI()
 		{
 			List<string> refls = TableLibrary.GetIDs(TL.Reflectors);
 			DataFromGUI_Refl.ItemsStrs = refls;
 			DataFromGUI_Refl.SelectedStr = ActiveSett.Reflector.Idx.ToString();
 		}
-
+		/// <summary></summary>
 		public void SynchronizeScramblerDataForGUI()
 		{
 			List<string> scrs = TableLibrary.GetIDs(TL.Scramblers);
@@ -354,6 +422,88 @@ namespace GUI
 			DataFromGUI_InScr.SelectedStr = ActiveSett.InputScrambler.Idx.ToString();
 			DataFromGUI_OutScr.ItemsStrs = scrs;
 			DataFromGUI_OutScr.SelectedStr = ActiveSett.OutputScrambler.Idx.ToString();
+		}
+
+		#endregion
+		#region File operations
+
+		public static string OpenMsgFile()
+		{
+			return FileHandling.LoadText(OpenFile(TXT_filter));
+		}
+
+		public static void SaveMsgFile(string text)
+		{
+			FileHandling.SaveText(SaveFile(TXT_filter), text);
+		}
+		#endregion
+
+		public void CopyTablesFromSLToTL()
+		{
+			foreach (Settings s in SL.Library)
+			{
+				TL.Rotors.AddRange(s.Rotors);
+				TL.Swaps.AddRange(s.Swaps);
+				TL.Reflectors.Add(s.Reflector);
+				TL.Scramblers.Add(s.InputScrambler);
+				TL.Scramblers.Add(s.OutputScrambler);
+			}
+			string[] parts = SL.PathToThis.Split('.');
+			StringBuilder sb = new();
+			for (int i = 0; i < parts.Length - 1; i++)
+			{
+				sb.Append(parts[i]);
+			}
+			sb.Append("\'s Tables");
+			sb.Append(".vpetl");
+			TL.PathToThis = sb.ToString();
+		}
+
+		public string Encrypt(string inText, bool numOut)
+		{
+			C = new(ActiveSett);
+			return C.Encypt(inText, numOut);
+		}
+
+		public string Decrypt(string inText, bool numIn)
+		{
+			C = new(ActiveSett);
+			return C.Decypt(inText, numIn);
+		}
+
+		public static string ConvertToNumRepres(string message)
+		{
+			return Codepage.ConvertToNumeric(message);
+		}
+
+		public static string ConvertFromNumRepres(string message)
+		{
+			return Codepage.ConvertFromNumeric(message);
+		}
+
+		/// <summary>Sets the active settings using what was selected in settings selector.</summary>
+		public void SetUsingSelSettName()
+		{
+			ActiveSett = SL.Library.Find(x => x.Name == DataFromGUI_SettSel.SelectedStr);
+			SL.LastActive = (int)ActiveSett.Idx;
+		}
+
+		public void InitializeRotorSelectors(ushort count)
+		{
+			for (ushort i = 0; i < count; i++)
+			{
+				C_UC_Rotor rotor = new();
+				DataFromGUI_Rotors.Add(rotor);
+			}
+		}
+
+		public void InitializeSwapSelectors(ushort count)
+		{
+			for (ushort i = 0; i < count; i++)
+			{
+				C_VPE_ComboBox swap = new();
+				DataFromGUI_Swaps.Add(swap);
+			}
 		}
 
 		public void AddSwapDataForGUI()
@@ -364,68 +514,7 @@ namespace GUI
 			};
 			DataFromGUI_Swaps.Add(toAdd);
 		}
-
-		public void UpdateRotorSelectors()
-		{
-			List<string> rotorNums = new();
-			foreach (Table rotor in TL.Rotors)
-			{
-				rotorNums.Add(rotor.Idx.ToString());
-			}
-			foreach (C_UC_Rotor rotorList in DataFromGUI_Rotors)
-			{
-				rotorList.RotorsStrs.Clear();
-				rotorList.RotorsStrs = rotorNums;
-			}
-		}
-
-		public void UpdateReflSelector()
-		{
-			List<string> reflNums = new();
-			foreach (Table refl in TL.Reflectors)
-			{
-				reflNums.Add(refl.Idx.ToString());
-			}
-			DataFromGUI_Refl.ItemsStrs.Clear();
-			DataFromGUI_Refl.ItemsStrs = reflNums;
-		}
-
-		public void UpdateSwapSelector()
-		{
-			List<string> swapsNums = new();
-			foreach (Table swap in TL.Swaps)
-			{
-				swapsNums.Add(swap.Idx.ToString());
-			}
-			foreach (C_VPE_ComboBox swap in DataFromGUI_Swaps)
-			{
-				swap.ItemsStrs.Clear();
-				swap.ItemsStrs = swapsNums;
-			}
-		}
-
-		public void UpdateScramblerSelectors()
-		{
-			List<string> scramblersNums = new();
-			foreach (Table scrambler in TL.Scramblers)
-			{
-				scramblersNums.Add(scrambler.Idx.ToString());
-			}
-			DataFromGUI_InScr.ItemsStrs = scramblersNums;
-			DataFromGUI_OutScr.ItemsStrs = scramblersNums;
-		}
-
-		public void UpdateSettingsSelector()
-		{
-			List<string> names = new();
-			foreach (Settings s in SL.Library)
-			{
-				names.Add(s.Name);
-			}
-			DataFromGUI_SettSel.ItemsStrs.Clear();
-			DataFromGUI_SettSel.ItemsStrs = names;
-		}
-
+		
 		public string GetPozsStrings(int idx = -2)
 		{
 			if (ActiveSett is not null)
@@ -570,20 +659,36 @@ namespace GUI
 
 		public void UpdateSettingsLib()
 		{
+			bool createNew = false;
 			if (SL.PathToThis == null)
 			{
-				return;
+				createNew = true;
 			}
 			if (SL.PathToThis == "")
 			{
-				return;
+				createNew = true;
 			}
 			if (SL.PathToThis == Invalid_File)
 			{
-				return;
+				createNew = true;
 			}
-			FileInfo fi = new(SL.PathToThis);
-			fi.Delete();
+			if (createNew)
+			{
+				DateTime now = DateTime.Now;
+				StringBuilder sb = new();
+				sb.Append(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
+				sb.Append("\\Nin1\\Automatically saved at ");
+				sb.Append(now.ToString("u"));
+				sb.Append(',');
+				sb.Append(now.ToString("fff"));
+				sb.Append(".vpesl");
+				SL.PathToThis = sb.ToString().Replace('/', '-').Replace(":", "-");
+			}
+			else
+			{
+				FileInfo fi = new(SL.PathToThis);
+				fi.Delete();
+			}
 			FileHandling.Save(SL, SL.PathToThis);
 		}
 
@@ -618,20 +723,36 @@ namespace GUI
 
 		public void UpdateTableLib()
 		{
+			bool createNew = false;
 			if (TL.PathToThis == null)
 			{
-				return;
+				createNew = true;
 			}
 			if (TL.PathToThis == "")
 			{
-				return;
+				createNew = true;
 			}
 			if (TL.PathToThis == Invalid_File)
 			{
-				return;
+				createNew = true;
 			}
-			FileInfo fi = new(TL.PathToThis);
-			fi.Delete();
+			if (createNew)
+			{
+				string[] parts = SL.PathToThis.Split('.');
+				StringBuilder sb = new();
+				for (int i = 0; i < parts.Length - 1; i++)
+				{
+					sb.Append(parts[i]);
+				}
+				sb.Append("\'s Tables");
+				sb.Append(".vpetl");
+				TL.PathToThis = sb.ToString();
+			}
+			else
+			{
+				FileInfo fi = new(TL.PathToThis);
+				fi.Delete();
+			}
 			FileHandling.Save(TL, TL.PathToThis);
 		}
 		#endregion
