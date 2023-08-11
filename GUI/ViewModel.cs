@@ -33,7 +33,6 @@ namespace GUI
 		/// <param name="vpe">VPE's VM.</param>
 		public void LoadConfig(ref VPE_VM vpe)
 		{
-			bool CreateTL = true;
 			PS = PSM.ReadConfig();
 			if (PS.IsDefault)
 			{
@@ -41,6 +40,7 @@ namespace GUI
 			}
 			else
 			{
+				bool CreateTL = true;
 				if (File.Exists(PS.PathsToTableLib))
 				{
 					FileHandling.Load(PS.PathsToTableLib, out TableLibrary tl);
@@ -219,16 +219,14 @@ namespace GUI
 			ActiveSett.SwitchConstC = CopyPDCDataFromGUI(DataFromGUI_Sett.SwitchC);
 			ActiveSett.SwitchConstD = CopyPDCDataFromGUI(DataFromGUI_Sett.SwitchD);
 		}
-		/// <summary>Displays provided/active settings in GUI, the settings composer window.</summary>
-		/// <param name="s">Which settings? Null for active.</param>
-		public void DisplaySettsInGUI(Settings s = null)
+		/// <summary>Updates every selector.</summary>
+		public void UpdateAll()
 		{
-			s ??= ActiveSett;
-			DataFromGUI_Sett.SetUsingSettings(s);
-			SynchronizeSwapDataForGUI();
-			SynchronizeRotorDataForGUI();
-			SynchronizeReflectorDataForGUI();
-			SynchronizeScramblerDataForGUI();
+			UpdateRotorSelectors();
+			UpdateReflSelector();
+			UpdateSwapSelector();
+			UpdateScramblerSelectors();
+			UpdateSettingsSelector();
 		}
 		/// <summary>Updates all rotor selectors.</summary>
 		public void UpdateRotorSelectors()
@@ -342,16 +340,18 @@ namespace GUI
 			DataFromGUI_SettSel.ItemsStrs.Clear();
 			DataFromGUI_SettSel.ItemsStrs = names;
 		}
-		/// <summary>Updates every selector.</summary>
-		public void UpdateAll()
+		/// <summary>Displays provided/active settings in GUI, the settings composer window.</summary>
+		/// <param name="s">Which settings? Null for active.</param>
+		public void DisplaySettsInGUI(Settings s = null)
 		{
-			UpdateRotorSelectors();
-			UpdateReflSelector();
-			UpdateSwapSelector();
-			UpdateScramblerSelectors();
-			UpdateSettingsSelector();
+			s ??= ActiveSett;
+			DataFromGUI_Sett.SetUsingSettings(s);
+			SynchronizeSwapDataForGUI();
+			SynchronizeRotorDataForGUI();
+			SynchronizeReflectorDataForGUI();
+			SynchronizeScramblerDataForGUI();
 		}
-		/// <summary></summary>
+		/// <summary>Synchronizes the counts of instances of class for binding with rotor selectors.</summary>
 		public void SynchronizeRotorDataForGUI()
 		{
 			List<string> rotors = TableLibrary.GetIDs(TL.Rotors);
@@ -380,7 +380,7 @@ namespace GUI
 				DataFromGUI_Rotors[i].SelectedRStr = ActiveSett.Rotors[i].Idx.ToString();
 			}
 		}
-		/// <summary></summary>
+		/// <summary>Synchronizes the counts of instances of class for binding with swaps selectors.</summary>
 		public void SynchronizeSwapDataForGUI()
 		{
 			List<string> swaps = TableLibrary.GetIDs(TL.Swaps);
@@ -407,14 +407,14 @@ namespace GUI
 				DataFromGUI_Swaps[i].SelectedStr = ActiveSett.Swaps[i].Idx.ToString();
 			}
 		}
-		/// <summary></summary>
+		/// <summary>Synchronizes the counts of instances of class for binding with reflector selector.</summary>
 		public void SynchronizeReflectorDataForGUI()
 		{
 			List<string> refls = TableLibrary.GetIDs(TL.Reflectors);
 			DataFromGUI_Refl.ItemsStrs = refls;
 			DataFromGUI_Refl.SelectedStr = ActiveSett.Reflector.Idx.ToString();
 		}
-		/// <summary></summary>
+		/// <summary>Synchronizes the counts of instances of class for binding with scrambler selectors.</summary>
 		public void SynchronizeScramblerDataForGUI()
 		{
 			List<string> scrs = TableLibrary.GetIDs(TL.Scramblers);
@@ -423,7 +423,6 @@ namespace GUI
 			DataFromGUI_OutScr.ItemsStrs = scrs;
 			DataFromGUI_OutScr.SelectedStr = ActiveSett.OutputScrambler.Idx.ToString();
 		}
-
 		#endregion
 		#region File operations
 
@@ -435,157 +434,6 @@ namespace GUI
 		public static void SaveMsgFile(string text)
 		{
 			FileHandling.SaveText(SaveFile(TXT_filter), text);
-		}
-		#endregion
-
-		public void CopyTablesFromSLToTL()
-		{
-			foreach (Settings s in SL.Library)
-			{
-				TL.Rotors.AddRange(s.Rotors);
-				TL.Swaps.AddRange(s.Swaps);
-				TL.Reflectors.Add(s.Reflector);
-				TL.Scramblers.Add(s.InputScrambler);
-				TL.Scramblers.Add(s.OutputScrambler);
-			}
-			string[] parts = SL.PathToThis.Split('.');
-			StringBuilder sb = new();
-			for (int i = 0; i < parts.Length - 1; i++)
-			{
-				sb.Append(parts[i]);
-			}
-			sb.Append("\'s Tables");
-			sb.Append(".vpetl");
-			TL.PathToThis = sb.ToString();
-		}
-
-		public string Encrypt(string inText, bool numOut)
-		{
-			C = new(ActiveSett);
-			return C.Encypt(inText, numOut);
-		}
-
-		public string Decrypt(string inText, bool numIn)
-		{
-			C = new(ActiveSett);
-			return C.Decypt(inText, numIn);
-		}
-
-		public static string ConvertToNumRepres(string message)
-		{
-			return Codepage.ConvertToNumeric(message);
-		}
-
-		public static string ConvertFromNumRepres(string message)
-		{
-			return Codepage.ConvertFromNumeric(message);
-		}
-
-		/// <summary>Sets the active settings using what was selected in settings selector.</summary>
-		public void SetUsingSelSettName()
-		{
-			ActiveSett = SL.Library.Find(x => x.Name == DataFromGUI_SettSel.SelectedStr);
-			SL.LastActive = (int)ActiveSett.Idx;
-		}
-
-		public void InitializeRotorSelectors(ushort count)
-		{
-			for (ushort i = 0; i < count; i++)
-			{
-				C_UC_Rotor rotor = new();
-				DataFromGUI_Rotors.Add(rotor);
-			}
-		}
-
-		public void InitializeSwapSelectors(ushort count)
-		{
-			for (ushort i = 0; i < count; i++)
-			{
-				C_VPE_ComboBox swap = new();
-				DataFromGUI_Swaps.Add(swap);
-			}
-		}
-
-		public void AddSwapDataForGUI()
-		{
-			C_VPE_ComboBox toAdd = new()
-			{
-				ItemsStrs = DataFromGUI_Swaps[0].ItemsStrs,
-			};
-			DataFromGUI_Swaps.Add(toAdd);
-		}
-		
-		public string GetPozsStrings(int idx = -2)
-		{
-			if (ActiveSett is not null)
-			{
-				return ActiveSett.GetPozitionsString(idx);
-			}
-			else
-			{
-				return "";
-			}
-		}
-
-		public bool AddPozFromString(string pozsStr)
-		{
-			if (pozsStr == null)
-			{
-				return false;
-			}
-			if (pozsStr == "")
-			{
-				return false;
-			}
-			string[] chopped = pozsStr.Split(',');
-			if (chopped.Length != ActiveSett.Rotors.Count)
-			{
-				return false;
-			}
-			List<ushort> pozsNums = new();
-			foreach(string part in chopped)
-			{
-				if (ushort.TryParse(part, out ushort num))
-				{
-					pozsNums.Add(num);
-				}
-				else
-				{
-					return false;
-				}
-			}
-			return ActiveSett.AddPozitions(pozsNums);
-		}
-
-		public void RenameSelSett()
-		{
-			ActiveSett.Name = DataFromGUI_Sett.NameStr;
-			UpdateSettingsSelector();
-		}
-
-		public void RemoveSelSett()
-		{
-			if(SL.Library.Count > 0)
-			{
-				if (ActiveSett is not null)
-				{
-					int removed = (int)ActiveSett.Idx;
-					SL.Library.RemoveAt(removed);
-					if (SL.Library.Count > 0)
-					{
-						if (SL.Library.Count - 1 >= removed)
-						{
-							ActiveSett = SL.Library[removed];
-						}
-						else
-						{
-							ActiveSett = SL.Library[removed - 1];
-						}
-					}
-					UpdateSettingsSelector();
-					DisplaySettsInGUI();
-				}
-			}
 		}
 
 		public void SaveSettings()
@@ -755,6 +603,158 @@ namespace GUI
 			}
 			FileHandling.Save(TL, TL.PathToThis);
 		}
+		#endregion
+
+		public void CopyTablesFromSLToTL()
+		{
+			foreach (Settings s in SL.Library)
+			{
+				TL.Rotors.AddRange(s.Rotors);
+				TL.Swaps.AddRange(s.Swaps);
+				TL.Reflectors.Add(s.Reflector);
+				TL.Scramblers.Add(s.InputScrambler);
+				TL.Scramblers.Add(s.OutputScrambler);
+			}
+			string[] parts = SL.PathToThis.Split('.');
+			StringBuilder sb = new();
+			for (int i = 0; i < parts.Length - 1; i++)
+			{
+				sb.Append(parts[i]);
+			}
+			sb.Append("\'s Tables");
+			sb.Append(".vpetl");
+			TL.PathToThis = sb.ToString();
+		}
+
+		public string Encrypt(string inText, bool numOut)
+		{
+			C = new(ActiveSett);
+			return C.Encypt(inText, numOut);
+		}
+
+		public string Decrypt(string inText, bool numIn)
+		{
+			C = new(ActiveSett);
+			return C.Decypt(inText, numIn);
+		}
+
+		public static string ConvertToNumRepres(string message)
+		{
+			return Codepage.ConvertToNumeric(message);
+		}
+
+		public static string ConvertFromNumRepres(string message)
+		{
+			return Codepage.ConvertFromNumeric(message);
+		}
+
+		/// <summary>Sets the active settings using what was selected in settings selector.</summary>
+		public void SetUsingSelSettName()
+		{
+			ActiveSett = SL.Library.Find(x => x.Name == DataFromGUI_SettSel.SelectedStr);
+			SL.LastActive = (int)ActiveSett.Idx;
+		}
+
+		public void InitializeRotorSelectors(ushort count)
+		{
+			for (ushort i = 0; i < count; i++)
+			{
+				C_UC_Rotor rotor = new();
+				DataFromGUI_Rotors.Add(rotor);
+			}
+		}
+
+		public void InitializeSwapSelectors(ushort count)
+		{
+			for (ushort i = 0; i < count; i++)
+			{
+				C_VPE_ComboBox swap = new();
+				DataFromGUI_Swaps.Add(swap);
+			}
+		}
+
+		public void AddSwapDataForGUI()
+		{
+			C_VPE_ComboBox toAdd = new()
+			{
+				ItemsStrs = DataFromGUI_Swaps[0].ItemsStrs,
+			};
+			DataFromGUI_Swaps.Add(toAdd);
+		}
+		
+		public string GetPozsStrings(int idx = -2)
+		{
+			if (ActiveSett is not null)
+			{
+				return ActiveSett.GetPozitionsString(idx);
+			}
+			else
+			{
+				return "";
+			}
+		}
+
+		public bool AddPozFromString(string pozsStr)
+		{
+			if (pozsStr == null)
+			{
+				return false;
+			}
+			if (pozsStr == "")
+			{
+				return false;
+			}
+			string[] chopped = pozsStr.Split(',');
+			if (chopped.Length != ActiveSett.Rotors.Count)
+			{
+				return false;
+			}
+			List<ushort> pozsNums = new();
+			foreach(string part in chopped)
+			{
+				if (ushort.TryParse(part, out ushort num))
+				{
+					pozsNums.Add(num);
+				}
+				else
+				{
+					return false;
+				}
+			}
+			return ActiveSett.AddPozitions(pozsNums);
+		}
+
+		public void RenameSelSett()
+		{
+			ActiveSett.Name = DataFromGUI_Sett.NameStr;
+			UpdateSettingsSelector();
+		}
+
+		public void RemoveSelSett()
+		{
+			if(SL.Library.Count > 0)
+			{
+				if (ActiveSett is not null)
+				{
+					int removed = (int)ActiveSett.Idx;
+					SL.Library.RemoveAt(removed);
+					if (SL.Library.Count > 0)
+					{
+						if (SL.Library.Count - 1 >= removed)
+						{
+							ActiveSett = SL.Library[removed];
+						}
+						else
+						{
+							ActiveSett = SL.Library[removed - 1];
+						}
+					}
+					UpdateSettingsSelector();
+					DisplaySettsInGUI();
+				}
+			}
+		}
+
 		#endregion
 
 		#region Private methods

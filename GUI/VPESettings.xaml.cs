@@ -26,21 +26,8 @@ namespace GUI
 		{
 			InitializeComponent ();
 			VPE = VModel;
-			DataContext = VPE.DataFromGUI_Sett;
-			CB_SettLib.DataContext = VPE.DataFromGUI_SettSel;
-			CB_Reflector.DataContext = VPE.DataFromGUI_Refl;
-			CB_InScr.DataContext = VPE.DataFromGUI_InScr;
-			CB_OutScr.DataContext = VPE.DataFromGUI_OutScr;
-			
-			if (VPE.ActiveSett is not null)
-			{
-				DisplayActiveSettInGUI();
-			}
-			else
-			{
-				InitialRotorPopulation(10);
-				InitialSwapsPopulation(5);
-			}
+			SetDataContexts();
+			PopulateWindow();
 		}
 		#region GUI events
 		private void B_Submit_Click (object sender, RoutedEventArgs e)
@@ -352,11 +339,45 @@ namespace GUI
 			}
 		}
 
-		#endregion
+		private void SetDataContexts()
+		{
+			DataContext = VPE.DataFromGUI_Sett;
+			CB_SettLib.DataContext = VPE.DataFromGUI_SettSel;
+			CB_Reflector.DataContext = VPE.DataFromGUI_Refl;
+			CB_InScr.DataContext = VPE.DataFromGUI_InScr;
+			CB_OutScr.DataContext = VPE.DataFromGUI_OutScr;
+		}
 
+		private void PopulateWindow()
+		{
+			if (VPE.ActiveSett is not null)
+			{
+				
+			}
+			else
+			{
+				InitialRotorPopulation(10);
+				InitialSwapsPopulation(5);
+			}
+
+
+			VPE.UpdateAll();
+			if (VPE.ActiveSett is not null)
+			{
+				DisplayActiveSettInGUI();
+			}
+			else
+			{
+				InitialRotorPopulation(10);
+				InitialSwapsPopulation(5);
+			}
+		}
+		#endregion
+		#region Custom events
 		public virtual void OnSubmitVPESett()
 		{
 			VPESubmitSett?.Invoke();
 		}
+		#endregion
 	}
 }
