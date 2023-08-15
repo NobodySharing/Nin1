@@ -113,8 +113,7 @@ namespace GUI
 
 		private void B_LoadSett_Click(object sender, RoutedEventArgs e)
 		{
-			bool success = VPE.LoadSettings();
-			if (success)
+			if (VPE.LoadSettings())
 			{
 				DisplayActiveSettInGUI();
 			}
@@ -213,10 +212,10 @@ namespace GUI
 		private void DisplayActiveSettInGUI()
 		{
 			VPE.DisplaySettsInGUI(VPE.ActiveSett);
-			SynchronizeRotorCount();
-			SynchronizeSwapCount();
+			SynchronizeRotorCountAndData();
+			SynchronizeSwapCountAndData();
 		}
-		
+
 		private void InitialRotorPopulation(ushort count)
 		{
 			VPE.InitializeRotorSelectors(count);
@@ -262,7 +261,7 @@ namespace GUI
 			return swap;
 		}
 
-		private void SynchronizeRotorCount()
+		private void SynchronizeRotorCountAndData()
 		{
 			if (VPE.ActiveSett.Rotors.Count != SP_Rotors.Children.Count)
 			{
@@ -304,7 +303,7 @@ namespace GUI
 			}
 		}
 
-		private void SynchronizeSwapCount()
+		private void SynchronizeSwapCountAndData()
 		{
 			if (VPE.ActiveSett.Swaps.Count != SP_Swaps.Children.Count)
 			{
@@ -352,24 +351,13 @@ namespace GUI
 		{
 			if (VPE.ActiveSett is not null)
 			{
-				
-			}
-			else
-			{
-				InitialRotorPopulation(10);
-				InitialSwapsPopulation(5);
-			}
-
-
-			VPE.UpdateAll();
-			if (VPE.ActiveSett is not null)
-			{
 				DisplayActiveSettInGUI();
 			}
 			else
 			{
-				InitialRotorPopulation(10);
-				InitialSwapsPopulation(5);
+				InitialRotorPopulation(20);
+				InitialSwapsPopulation(10);
+				VPE.UpdateAll();
 			}
 		}
 		#endregion

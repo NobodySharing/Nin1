@@ -586,7 +586,7 @@ namespace GUI
 		/// <param name="s">Settings to use.</param>
 		public void	SetUsingSettings(Settings s)
 		{
-			if(s == null)
+			if (s == null)
 			{
 				return;
 			}

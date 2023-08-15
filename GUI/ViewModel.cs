@@ -345,7 +345,16 @@ namespace GUI
 		public void DisplaySettsInGUI(Settings s = null)
 		{
 			s ??= ActiveSett;
+			if (s == null)
+			{
+				return;
+			}
 			DataFromGUI_Sett.SetUsingSettings(s);
+			SynchronizeAllDataForGUI();
+		}
+		/// <summary>Synchronizes binding data for all selectors.</summary>
+		public void SynchronizeAllDataForGUI()
+		{
 			SynchronizeSwapDataForGUI();
 			SynchronizeRotorDataForGUI();
 			SynchronizeReflectorDataForGUI();
