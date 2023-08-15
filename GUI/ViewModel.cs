@@ -16,6 +16,7 @@ using DTcalc;
 using Common;
 using System.IO;
 using System.Windows.Shapes;
+using System.Globalization;
 
 namespace GUI
 {
