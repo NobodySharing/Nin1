@@ -33,7 +33,7 @@ namespace VPE
 			List<Table> result = new ();
 			for (int i = 0; i < tableCount; i++)
 			{
-				result.Add(new Table (set, ref pozition, limit));
+				result.Add(new Table(set, ref pozition, limit));
 			}
 			return result;
 		}
@@ -594,6 +594,9 @@ namespace VPE
 			tableCount = BitConverter.ToInt32(file, pozition);
 			pozition += 4;
 			Swaps.AddRange(TablesFromBytes(file, ref pozition, tableCount, lim));
+			tableCount = BitConverter.ToInt32(file, pozition);
+			pozition += 4;
+			Scramblers.AddRange(TablesFromBytes(file, ref pozition, tableCount, lim));
 		}
 		/// <summary>Converts this instance to byte array.</summary>
 		/// <returns>Byte array representing this instance.</returns>

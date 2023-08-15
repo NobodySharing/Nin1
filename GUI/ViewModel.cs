@@ -657,7 +657,6 @@ namespace GUI
 		{
 			return Codepage.ConvertFromNumeric(message);
 		}
-
 		/// <summary>Sets the active settings using what was selected in settings selector.</summary>
 		public void SetUsingSelSettName()
 		{
