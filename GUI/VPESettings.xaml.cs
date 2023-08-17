@@ -352,6 +352,7 @@ namespace GUI
 			if (VPE.ActiveSett is not null)
 			{
 				DisplayActiveSettInGUI();
+				VPE.UpdateSettingsSelector();
 			}
 			else
 			{

@@ -340,6 +340,7 @@ namespace GUI
 			}
 			DataFromGUI_SettSel.ItemsStrs.Clear();
 			DataFromGUI_SettSel.ItemsStrs = names;
+			DataFromGUI_SettSel.SelectedStr = ActiveSett?.Name;
 		}
 		/// <summary>Displays provided/active settings in GUI, the settings composer window.</summary>
 		/// <param name="s">Which settings? Null for active.</param>
