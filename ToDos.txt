@@ -1,0 +1,5 @@
+0: Ofunkčnit všechny data gridy.
+1: Scrollbar k rotorům.
+2: Customizable codepage.
+3: Dokončit bit packery a použít je pro tabulky (ukládání).
+4: Zpráva v binárním formátu.

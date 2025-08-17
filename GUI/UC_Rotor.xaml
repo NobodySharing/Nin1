@@ -1,0 +1,25 @@
+﻿<UserControl x:Class="GUI.UC_Rotor"
+			 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+			 xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+			 xmlns:local="clr-namespace:GUI" d:DataContext="{d:DesignInstance Type=local:C_UC_Rotor}"
+			 mc:Ignorable="d" 
+			 d:DesignHeight="25" d:DesignWidth="160">
+	<UserControl.Resources>
+		<local:C_UC_Rotor x:Key="DataFromGUI"/>
+	</UserControl.Resources>
+	<UserControl.DataContext>
+		<Binding Source="{StaticResource DataFromGUI}"/>
+	</UserControl.DataContext>
+	<Grid Background="#F7F7F7">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="3*"/>
+			<ColumnDefinition Width="2*"/>
+			<ColumnDefinition Width="3*"/>
+		</Grid.ColumnDefinitions>
+		<ComboBox x:Name="CB_TableSel" Grid.Column="0" Margin="2, 2, 1, 2" ItemsSource="{Binding Path=RotorsStrs, Mode = OneWay}" SelectedItem="{Binding Path=SelectedRStr, Mode=TwoWay}"/>
+		<TextBox x:Name="TB_Poz" Grid.Column="1" Margin="1, 2, 1, 2" Text="{Binding Path=PozitionStr, Mode=TwoWay}"/>
+		<Button x:Name="B_Rand_Shift" Content="Random" Click="B_RandPoz_Click" Grid.Column="2" Margin="1, 2, 2, 2"/>
+	</Grid>
+</UserControl>
