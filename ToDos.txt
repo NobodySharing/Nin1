@@ -1,5 +1,11 @@
-0: Ofunkčnit všechny data gridy.
+0: Ofunkčnit všechny data gridy a dát je na vlastní tab v okně nastavení.
 1: Scrollbar k rotorům.
-2: Customizable codepage.
+2: Customizable codepage jako součástí klíče.
 3: Dokončit bit packery a použít je pro tabulky (ukládání).
-4: Zpráva v binárním formátu.
+4: Přidávání náhodných znaků: optimalizovat, nevkládat je rovnou do listu, ale složit nový list.
+5: Affine modulation: přidat generátory čísel.
+6: Rotorový notche: implementovat.
+7: Implementovat posouvání rotorů o „náhodný“ počet.
+8: Multithreading: GUI a logika do vlastních vláken.
+9: Validace vstupu: ukázat uživateli neplatné znaky cedulkou a červeně v textu.
+10: Persistent storage: pomocí JSONu.
